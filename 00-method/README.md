@@ -12,10 +12,10 @@
 | [`01-evaluation-framework.md`](01-evaluation-framework.md) | Единый чек-лист для разбора любого claim'а. Рабочая точка входа. |
 | [`02-epistemology.md`](02-epistemology.md) | Теория познания: что значит «знать», источники знания, проблема индукции, Поппер/Кун, байесовский подход, фаллибилизм. Фундамент. |
 | [`03-scientific-method-and-reasoning.md`](03-scientific-method-and-reasoning.md) | Научный метод, фальсифицируемость, причинность, бремя доказательства, байесовское мышление. |
-| `04-evidence-hierarchy.md` | Иерархия доказательств: от анекдота до мета-анализа. *(в работе)* |
-| `05-critical-thinking-and-fallacies.md` | Логические ошибки, когнитивные искажения, как устроена дезинформация. *(в работе)* |
-| `06-statistics-for-claim-checking.md` | Минимум статистики: p-value, риски, базовая частота, обманы с цифрами. *(в работе)* |
-| `07-finding-primary-sources.md` | Как дойти от поста до первоисточника: PubMed, DOI, препринты, хищнические журналы. *(в работе)* |
+| [`04-evidence-hierarchy.md`](04-evidence-hierarchy.md) | Иерархия доказательств: от анекдота до мета-анализа. Что каждый уровень может и не может показать. |
+| [`05-critical-thinking-and-fallacies.md`](05-critical-thinking-and-fallacies.md) | Логические ошибки, когнитивные искажения, шаблон дезинформации, риторические приёмы. |
+| [`06-statistics-for-claim-checking.md`](06-statistics-for-claim-checking.md) | Минимум статистики: p-value, риски, базовая частота, обманы с цифрами. |
+| [`07-finding-primary-sources.md`](07-finding-primary-sources.md) | Как дойти от поста до первоисточника: PubMed, DOI, препринты, хищнические журналы, чтение статьи. |
 
 ## Рядом — ядро репы
 
