@@ -25,7 +25,7 @@ Alternative-medicine and "detox" protocols circulating on social media and in co
 
 ## Alternative cancer therapy claims
 
-Separate cluster (source: `sources/Cancer_саммари.pdf`). Same rule — catalogued as claims **under evaluation**, not guidance. Extra caution flag below.
+Separate cluster (source: `sources/cancer-sammari.pdf`). Same rule — catalogued as claims **under evaluation**, not guidance. Extra caution flag below.
 
 > **Danger flag:** several of these are promoted as *replacements* for oncology, and some are directly toxic — MMS/chlorine dioxide (industrial bleach), laetrile (releases cyanide), megadose baking soda, prolonged fasting "instead of" treatment. Documented here to be evaluated and understood, **never** to be followed. The most harmful claim in this whole folder is the framing "do this *instead* of real cancer treatment."
 

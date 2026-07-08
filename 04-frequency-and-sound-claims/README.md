@@ -1,6 +1,6 @@
 # 04 — Frequency & Sound Claims
 
-Claims that specific audio frequencies affect the body, DNA, emotions, or consciousness. Sources are mostly Instagram accounts (5dwaves, getsoundrx, spooky2rife, imzephyy, etc.). Evaluated via [`../00-method`](../00-method/); raw summary in [`sources/frequencies_summary.md`](sources/frequencies_summary.md).
+Claims that specific audio frequencies affect the body, DNA, emotions, or consciousness. Sources are mostly Instagram accounts (5dwaves, getsoundrx, spooky2rife, imzephyy, etc.). Evaluated via [`../00-method`](../00-method/); raw summary in [`sources/frequencies-summary.md`](sources/frequencies-summary.md).
 
 ## Claims index
 

@@ -1,6 +1,6 @@
 # 03 — Vaccine & Public-Health Claims
 
-Claims about vaccines, autism, and public health, mostly from social media (source: `sources/Аутизм_саммари.pdf`). Evaluated via [`../00-method`](../00-method/). This folder is a **strong test of the method**: real peer-reviewed studies sit right next to false claims, and the whole skill is telling apart what the real research actually shows from what it's *claimed* to show.
+Claims about vaccines, autism, and public health, mostly from social media (source: `sources/autizm-sammari.pdf`). Evaluated via [`../00-method`](../00-method/). This folder is a **strong test of the method**: real peer-reviewed studies sit right next to false claims, and the whole skill is telling apart what the real research actually shows from what it's *claimed* to show.
 
 ## Claims index
 

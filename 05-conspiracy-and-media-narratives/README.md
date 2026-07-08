@@ -1,6 +1,6 @@
 # 05 — Conspiracy & Media Narratives
 
-Cultural / media conspiracy claims from social media (source: `sources/Истина__1.pdf`). Evaluated via [`../00-method`](../00-method/). Note: not everything in the source is an empirical claim — some items are testimony or news, and those are handled differently (see below).
+Cultural / media conspiracy claims from social media (source: `sources/istina-1.pdf`). Evaluated via [`../00-method`](../00-method/). Note: not everything in the source is an empirical claim — some items are testimony or news, and those are handled differently (see below).
 
 ## Claims index
 
