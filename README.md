@@ -24,6 +24,8 @@ So every claim gets the *same* treatment, regardless of how it feels: state it p
 - **[`04-frequency-and-sound-claims`](04-frequency-and-sound-claims/)** — solfeggio frequencies, brainwave entrainment, "organ frequencies", consciousness maps.
 - **[`05-conspiracy-and-media-narratives`](05-conspiracy-and-media-narratives/)** — cultural / media conspiracy claims (industry "rituals", calendar theories, etc.).
 - **[`06-document-investigations`](06-document-investigations/)** — primary-source document releases (e.g. Epstein files): reading what the records actually contain vs. what is claimed about them.
+- **[`07-conspiracy-catalog`](07-conspiracy-catalog/)** — a register of every conspiracy claim I intend to examine, graded up front: `documented` / `mixed` / `unsupported` / `unfalsifiable` / `not-empirical`. Proven corporate cover-ups sit in the same table as flat-earth — deliberately, because only the method separates them, not intuition.
+- **[`research-agenda.md`](research-agenda.md)** — the eight areas I actually dig into, and why.
 
 ## Repository map
 
@@ -36,6 +38,8 @@ So every claim gets the *same* treatment, regardless of how it feels: state it p
 | [`04-frequency-and-sound-claims`](04-frequency-and-sound-claims/) | Sound / frequency / consciousness claims under evaluation + sources |
 | [`05-conspiracy-and-media-narratives`](05-conspiracy-and-media-narratives/) | Cultural / media conspiracy narratives under evaluation + sources |
 | [`06-document-investigations`](06-document-investigations/) | Primary-document reading and fact-vs-claim separation |
+| [`07-conspiracy-catalog`](07-conspiracy-catalog/) | Register / backlog of conspiracy claims: 80 topics, graded and prioritised for examination |
+| [`research-agenda.md`](research-agenda.md) | My eight areas of interest and the order I work through them |
 
 ## Data & privacy note
 
@@ -45,7 +49,7 @@ Some source material describes protocols involving prescription drugs and toxic 
 
 ## О репозитории (RU)
 
-**Верстак критического мышления.** Репа существует ради одного: тренировать оценку утверждений так, как это делает независимый исследователь — взять claim, свести к проверяемому ядру, дойти до первоисточника, взвесить по реальным доказательствам и прийти к выводу, который можно защитить. Ничему здесь не верю по умолчанию: наличие материала означает «разбираю», а не «согласен». Позиция явная — **независимый научный исследователь**. Ядро — [`00-method`](00-method/) (как думать) и [`01-how-science-fails`](01-how-science-fails/) (пределы и сбои самой науки как фундамент скепсиса ко всему).
+**Верстак критического мышления.** Репа существует ради одного: тренировать оценку утверждений так, как это делает независимый исследователь — взять claim, свести к проверяемому ядру, дойти до первоисточника, взвесить по реальным доказательствам и прийти к выводу, который можно защитить. Ничему здесь не верю по умолчанию: наличие материала означает «разбираю», а не «согласен». Позиция явная — **независимый научный исследователь**. Ядро — [`00-method`](00-method/) (как думать) и [`01-how-science-fails`](01-how-science-fails/) (пределы и сбои самой науки как фундамент скепсиса ко всему). Сферы интереса и очередь разбора — [`research-agenda.md`](research-agenda.md); полный реестр конспирологических теорий с предварительными метками — [`07-conspiracy-catalog`](07-conspiracy-catalog/).
 
 ---
 
