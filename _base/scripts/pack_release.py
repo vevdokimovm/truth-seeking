@@ -40,7 +40,15 @@ OUT_DIR = Path.home() / "Downloads"
 NAME = REPO.name
 
 JUNK_NAMES = {".DS_Store", "Thumbs.db"}
-JUNK_DIRS = {".git", "__MACOSX", "__pycache__", ".ipynb_checkpoints", ".pytest_cache"}
+# 🔴 `node_modules`/`dist`/`.venv` (найдено 27.08.2026, первый JS-проект внутри
+# репы — `family/web/`): упаковщик не читает `.gitignore`, и без явного списка
+# зависимости npm (тысячи файлов, сотни МБ) уехали бы в архив целиком — то же,
+# что `.git`/`__pycache__` уже решают для других экосистем. Правило то же:
+# сборочный/зависимостный мусор не публикуется, исходники — да.
+JUNK_DIRS = {
+    ".git", "__MACOSX", "__pycache__", ".ipynb_checkpoints", ".pytest_cache",
+    "node_modules", "dist", "build", ".venv", "venv", ".next", ".turbo",
+}
 
 
 def collect():

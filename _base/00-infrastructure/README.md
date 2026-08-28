@@ -44,7 +44,7 @@
 | `20-knowledge-capture-protocol.md` | Автофиксация знаний по 7 триггерам (T1–T7): что Claude обобщает сам |
 | `21-revision-protocol.md` | Ревизия ВСЕГО в репе (доки/reports/контент/scripts): живое vs замороженное, оси |
 | `22-merge-protocol.md` | Слияние/форк разошедшихся линий между аккаунтами (консолидация, не переписывание) |
-| `23-session-continuity.md` | Чекпоинт-дисциплина и работа на нескольких аккаунтах (V/J/M/S) |
+| `23-session-continuity.md` | Чекпоинт-дисциплина и работа на нескольких аккаунтах (V/J/M/S/A) |
 | `24-changelog-protocol.md` | Подробный `CHANGELOG`: полная append-only история всего сделанного |
 | `25-versioning-and-releases.md` | Версии/теги/GitHub Releases + автопуш одной командой (`templates/publish.sh`) |
 | `26-claude-modes-cowork-vs-project.md` | Поверхности Claude: Chat / Project / Cowork / Code — что где делать |

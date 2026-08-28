@@ -39,3 +39,4 @@
 2026-08-27T10:28:09	base-repo	batch	v3.59.2: KIM article figures + user survey charts (271 image frames total)
 2026-08-27T10:38:51	base-repo	batch	v3.59.3: bron-kerbosch + hw3 panorama photos (277 image frames total)
 2026-08-27T10:47:37	base-repo	batch	v3.59.4: science/dota-dossier/edu-base image series (292 frames total)
+2026-08-27T11:25:30	base-repo	batch	v3.60.0: sync_base_local.py fix + _base во всех приватных репах + panel_probe.py в служебках tokens/handoff

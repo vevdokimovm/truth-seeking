@@ -12,10 +12,10 @@
 
 | Поле | Значение |
 |---|---|
-| **Версия карты** | 3.5.0 |
-| **Актуальность** | 2026-08-26 |
+| **Версия карты** | 3.6.0 |
+| **Актуальность** | 2026-08-27 |
 | **Проверена целиком** | 2026-08-16 |
-| **Репозиториев** | 61 заведено · 0 запланировано |
+| **Репозиториев** | 63 заведено · 0 запланировано |
 | **Сопровождение** | полуавтоматическое — `deploy.sh` регистрирует новые репы заглушкой |
 | **История изменений** | [`repos-map-CHANGELOG.md`](./repos-map-CHANGELOG.md) |
 
@@ -35,7 +35,7 @@
 |---|---|---|---|
 | **infra** | инфраструктура системы, тематики нет | вечно | 2 |
 | **core** | зона жизни, на века | вечно, не мерджится никуда | 14 |
-| **satellite** | самостоятельный домен, вынесен ради удобства | отдельно неопределённо долго | 24 |
+| **satellite** | самостоятельный домен, вынесен ради удобства | отдельно неопределённо долго | 26 |
 | **temp** | часть core-репы, вынесенная из-за объёма | **вернётся** в родителя | 6 |
 | **product** | работающий продукт | своя жизнь, релизы | 11 |
 
@@ -49,7 +49,7 @@
 
 **🏛️ Ядро — зоны жизни** (14) — [`it-base`](#it-base) · [`edu-base`](#edu-base) · [`academic-portfolio`](#academic-portfolio) · [`health-vault`](#health-vault) · [`legal-knowledge-base`](#legal-knowledge-base) · [`christ-walk`](#christ-walk) · [`self-map`](#self-map) · [`truth-seeking`](#truth-seeking) · [`family`](#family) · [`misc-vault`](#misc-vault) · [`research-craft`](#research-craft) · [`money`](#money) · [`productivity`](#productivity) · [`career`](#career)
 
-**🛰️ Спутники — самостоятельные домены** (24) — [`dota-dossier`](#dota-dossier) · [`chess`](#chess) · [`csgo`](#csgo) · [`sport`](#sport) · [`nutrition`](#nutrition) · [`style`](#style) · [`acting`](#acting) · [`rhetoric`](#rhetoric) · [`linguistics`](#linguistics) · [`sales`](#sales) · [`spycraft`](#spycraft) · [`politics`](#politics) · [`war`](#war) · [`security-forces`](#security-forces) · [`cybersecurity`](#cybersecurity) · [`science`](#science) · [`art`](#art) · [`philosophy`](#philosophy) · [`history`](#history) · [`nationality`](#nationality) · [`speed-reading`](#speed-reading) · [`visual-style`](#visual-style) · [`ai-relay`](#ai-relay) · [`business`](#business)
+**🛰️ Спутники — самостоятельные домены** (26) — [`dota-dossier`](#dota-dossier) · [`chess`](#chess) · [`csgo`](#csgo) · [`sport`](#sport) · [`nutrition`](#nutrition) · [`style`](#style) · [`acting`](#acting) · [`rhetoric`](#rhetoric) · [`linguistics`](#linguistics) · [`sales`](#sales) · [`spycraft`](#spycraft) · [`politics`](#politics) · [`war`](#war) · [`security-forces`](#security-forces) · [`cybersecurity`](#cybersecurity) · [`science`](#science) · [`art`](#art) · [`philosophy`](#philosophy) · [`history`](#history) · [`nationality`](#nationality) · [`speed-reading`](#speed-reading) · [`visual-style`](#visual-style) · [`ai-relay`](#ai-relay) · [`business`](#business) · [`quick-answers`](#quick-answers) · [`independent-expert`](#independent-expert)
 
 **⏳ Временные — вернутся в родителя** (6) — [`algorithms`](#algorithms) · [`ml-base`](#ml-base) · [`mathematics`](#mathematics) · [`physics`](#physics) · [`chemistry`](#chemistry) · [`biology`](#biology)
 
@@ -324,6 +324,24 @@ Claude не обрабатывает звук и видео напрямую. Р
 Заведена 26.08.2026 по прямому запросу владельца («хочу развиваться как бизнесмен»).
 Граница с `career`: наёмная карьерная стратегия → `career`, ведение собственного дела →
 сюда. Граница с `money`: личные финансы → `money`, финансы бизнеса → сюда.
+
+---
+
+## 💬 `quick-answers`
+
+**Быстрые ответы: черновик-чат без campaign-дисциплины остальной системы**
+
+Задал вопрос — получил ответ — если стоит запомнить, осело строкой в `01-log/`. Не база знаний и не проект — история вопрос-ответ без обязательного метода/классификации/ревизии, намеренное исключение из ревизионной дисциплины системы (см. `MANIFEST.md` §4 самой репы).
+
+Заведена 27.08.2026 по прямому запросу владельца («мне быстрые ответы нужны чтобы я в ней работал как в рандомном чате черновике без логов особых просто история может быть что было»). Граница со всеми тематическими репами: вопрос с предметной нагрузкой, требующий накопления/метода → тематическая репа (`00-infrastructure/87-file-to-repo-routing.md` §6); сюда — только то, чему пока нет или не нужно места.
+
+## 🧭 `independent-expert`
+
+**Независимый эксперт: история реальных разборов, не метод**
+
+Что принесли на разбор, что ответил эксперт без оглядки на консенсус, чем кончилось — случай за случаем в `01-cases/`. Метод роли (как эксперт мыслит) живёт отдельно, в `base-repo/03-role-kit/roles/independent-expert/`; здесь только фактура применения.
+
+Заведена 27.08.2026 по прямому запросу владельца (роль независимого эксперта уже обсуждалась ранее именно как репа, не роль-в-разговоре). Граница с `03-role-kit/roles/independent-expert/`: принципы/метод → role-kit, реальные случаи разбора → сюда. Граница с `quick-answers`: вопрос без экспертной рамки → `quick-answers`, разбор, требующий независимого экспертного взгляда → сюда.
 
 ---
 

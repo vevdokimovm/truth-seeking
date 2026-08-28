@@ -38,7 +38,7 @@
 2. Возьми `templates/REPO_README_TEMPLATE.md` → заполни под конкретную репу →
    положи как корневой `README.md`. Возьми `templates/gitignore.template` → `.gitignore`.
 3. Возьми `00-infrastructure/03-watchlog-template.md` → скопируй в `WATCHLOG.md`,
-   впиши текущее состояние репы (аккаунты V/J/M/S уже прописаны). Возьми
+   впиши текущее состояние репы (аккаунты V/J/M/S/A уже прописаны). Возьми
    `templates/CHANGELOG_TEMPLATE.md` → `CHANGELOG.md` — подробная append-only летопись
    (`24-changelog-protocol.md`). Журнал + changelog — разные инструменты (снимок «где мы» vs история).
    Если у репы есть направление на несколько этапов — возьми `templates/ROADMAP_TEMPLATE.md` →

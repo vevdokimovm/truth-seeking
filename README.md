@@ -54,3 +54,20 @@ Some source material describes protocols involving prescription drugs and toxic 
 ---
 
 **Contact:** vevdokimovm@gmail.com · GitHub: [@vevdokimovm](https://github.com/vevdokimovm)
+
+## Структура
+
+<!-- STRUCTURE:AUTO:START -->
+| Папка | Файлов | Что внутри |
+|---|---|---|
+| `00-infrastructure/` | 1 | TODO — заполнить вручную |
+| `00-method/` | 11 | TODO — заполнить вручную |
+| `01-how-science-fails/` | 4 | TODO — заполнить вручную |
+| `02-health-and-medical-claims/` | 4 | TODO — заполнить вручную |
+| `03-vaccine-and-public-health-claims/` | 3 | TODO — заполнить вручную |
+| `04-frequency-and-sound-claims/` | 2 | TODO — заполнить вручную |
+| `05-conspiracy-and-media-narratives/` | 3 | TODO — заполнить вручную |
+| `06-document-investigations/` | 1 | TODO — заполнить вручную |
+| `07-conspiracy-catalog/` | 17 | TODO — заполнить вручную |
+| `reports/` | 2 | TODO — заполнить вручную |
+<!-- STRUCTURE:AUTO:END -->

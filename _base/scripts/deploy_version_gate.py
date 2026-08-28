@@ -51,9 +51,15 @@ KNOWN_COPIES = (
 )
 
 # История не переписывается: в журналах и отчётах старые номера версий законны.
+# 🔴 Найдено 27.08.2026: список защищал только один runs/-каталог из нескольких
+# одного класса — `07-media-to-text-lab/runs/` не был в списке и ловился гейтом
+# как дрейф за упоминание версии deploy.sh на момент того захода. Тот же паттерн,
+# что 87-file-to-repo-routing.md §4 п.3 — правка одного места без grep по остальным.
 FROZEN_PREFIXES = (
     "reports/",
     "05-infra-synthesis-lab/runs/",
+    "06-autonomous-mode-kit/runs/",
+    "07-media-to-text-lab/runs/",
     "templates/_archive/",
     "templates/deploy-CHANGELOG.md",
     "CHANGELOG.md",
