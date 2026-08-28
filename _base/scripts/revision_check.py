@@ -28,6 +28,7 @@ Allowlist ссылок (по одной на строку, относитель�
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -131,6 +132,23 @@ def check_links(root: Path, files: list[Path], allowlist: set[str]) -> tuple[lis
             candidate = (path.parent / target).resolve()
             if not candidate.exists():
                 broken.append(f"{rel}: битая ссылка -> {raw}")
+                continue
+            # PIT-076: APFS (macOS, единственная платформа разработки этой системы)
+            # регистронезависима — `exists()` молча резолвит `GLOSSARY.md` в лежащий
+            # рядом `glossary.md`. На регистрочувствительной ФС (Linux CI) та же
+            # ссылка битая, и результат один и тот же гейт даёт РАЗНЫЙ на двух
+            # платформах. Сверяем точное имя конечного компонента через listdir —
+            # это не зависит от того, чувствительна ли ФС, на которой запущен гейт.
+            # Потолок: проверяется только последний компонент пути, не все
+            # промежуточные каталоги.
+            try:
+                real_names = {p.name for p in candidate.parent.iterdir()}
+            except OSError:
+                real_names = set()
+            if real_names and candidate.name not in real_names:
+                broken.append(
+                    f"{rel}: ссылка -> {raw} совпадает только БЕЗ УЧЁТА РЕГИСТРА "
+                    f"(PIT-076) — битая на регистрочувствительной ФС")
     return broken, checked, frozen_skipped
 
 
@@ -220,6 +238,53 @@ def check_names(root: Path, files: list[Path]) -> list[str]:
     return bad
 
 
+EXEC_BIT_GLOBS = (
+    ".claude/hooks/*.sh",
+    ".githooks/*",
+    "tests/bin/*",
+)
+
+
+def check_exec_bits(root: Path) -> list[str]:
+    """Исполняемые стабы/хуки теряют бит `+x` при раунд-трипе через архив/синк (PIT-151).
+
+    Найдено 27.08.2026: `tests/bin/gh` (заглушка `gh` для тестового стенда) лежал
+    с правами `-rw-r--r--`. Шелл при резолюции `PATH` **молча пропускает
+    неисполняемый файл** и уходит к следующему совпадению — тесты дёрнули настоящий
+    `/usr/local/bin/gh`, неавторизованный в песочнице, и 130 кейсов упали с
+    правдоподобной, но нерелевантной причиной («code sломан», а не «стенд сломан»).
+    В тот же день с теми же правами нашлись ещё два файла (`protect-base-mirror.sh`,
+    `ritual-gate.sh`) — владелец зафиксировал это как повторяющийся по СИСТЕМЕ класс,
+    не разовую случайность одного файла.
+
+    Проверяется не только `tests/bin/` (где нашли), а весь известный набор мест,
+    где неисполняемый файл ломается ТИХО: хуки Claude Code, git-хуки, тестовые стабы.
+    """
+    problems: list[str] = []
+    for pattern in EXEC_BIT_GLOBS:
+        for p in sorted(root.glob(pattern)):
+            if p.is_file() and not os.access(p, os.X_OK):
+                problems.append(f"{p.relative_to(root)}: нет +x (PIT-151)")
+    return problems
+
+
+def selftest_exec_bits() -> bool:
+    """Канарейка (71 §7в): ловит подсаженный неисполняемый файл, молчит на исполняемом."""
+    import stat
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "tests" / "bin").mkdir(parents=True)
+        bad = root / "tests" / "bin" / "gh"
+        bad.write_text("#!/bin/sh\necho stub\n", encoding="utf-8")
+        bad.chmod(0o644)
+        if not check_exec_bits(root):
+            return False                              # обязан поймать
+        bad.chmod(bad.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        return check_exec_bits(root) == []            # обязан молчать на исполняемом
+
+
 def check_sizes(root: Path, files: list[Path]) -> tuple[list[str], list[str], float]:
     warns: list[str] = []
     fails: list[str] = []
@@ -236,6 +301,101 @@ def check_sizes(root: Path, files: list[Path]) -> tuple[list[str], list[str], fl
         if path.suffix.lower() in ARCHIVE_SUFFIXES:
             warns.append(f"{rel}: архив в дереве («zip — транспорт», 15-gotchas §2)")
     return warns, fails, total / 1024 / 1024
+
+
+REPO_META_DESC_MAX = 220
+
+
+def check_repo_meta_schema(root: Path) -> list[str]:
+    """`.repo-meta` — данные без схемы, значит гниёт без напоминаний (ООП-аналогия
+    27.08.2026: класс есть, `.repo-class`, а проверки инвариантов полей не было).
+
+    Найдено в тот же день: 12 из ~60 `.repo-meta` несли описание на 200-344 символа —
+    «эссе», которое на GitHub-карточке обрезается многоточием посреди предложения.
+    Починено руками один раз; без проверки тот же дрейф вернётся молча через месяц —
+    `08-automation-triggers.md` «Автоматизация отваливается молча», тот же принцип,
+    только про формат поля, а не про запуск скрипта.
+    """
+    if not (root / "repos-map.md").is_file():
+        return []
+
+    problems: list[str] = []
+    for p in sorted(root.parent.iterdir()):
+        if not p.is_dir() or p == root:
+            continue
+        meta = p / ".repo-meta"
+        if not meta.is_file():
+            continue
+        text = meta.read_text(encoding="utf-8", errors="replace")
+        fields: dict[str, str] = {}
+        for line in text.splitlines():
+            if "=" in line:
+                k, _, v = line.partition("=")
+                fields[k.strip()] = v.strip()
+
+        desc = fields.get("description", "")
+        if len(desc) > REPO_META_DESC_MAX:
+            problems.append(
+                f"{p.name}/.repo-meta: description {len(desc)} символов "
+                f"(потолок {REPO_META_DESC_MAX}) — обрежется на GitHub-карточке"
+            )
+
+        priv = fields.get("private")
+        if priv is not None and priv not in ("true", "false"):
+            problems.append(f"{p.name}/.repo-meta: private={priv!r}, должно быть true/false")
+
+        topics = fields.get("topics", "")
+        if topics:
+            for tok in topics.split(","):
+                if tok != tok.strip():
+                    problems.append(
+                        f"{p.name}/.repo-meta: topics содержит пробел вокруг «{tok.strip()}»"
+                    )
+                elif not re.match(r"^[a-z0-9][a-z0-9-]*$", tok):
+                    problems.append(
+                        f"{p.name}/.repo-meta: topic «{tok}» не kebab-case (латиница/цифры/дефис)"
+                    )
+    return problems
+
+
+def check_repos_map_sync(root: Path) -> tuple[list[str], list[str]]:
+    """`repos-map.md` не должна отставать от того, что реально лежит на диске.
+
+    Найдено 27.08.2026: владелец завёл несколько новых реп и они не были описаны
+    в карте — обнаружено не гейтом, а глазами владельца. `deploy.sh` регистрирует
+    репу в карте заглушкой при первом деплое (76-repo-classes.md §4.1), но это не
+    защищает от разрыва между «репа создана локально» и «репа задеплоена» — а именно
+    в этом окне карта отстаёт молча. Проверка здесь — локальная, по `~/repos/`, не по
+    `gh repo list`: ловит разрыв на день раньше, до первого деплоя, и не требует сети.
+    """
+    map_file = root / "repos-map.md"
+    if not map_file.is_file():
+        return ([], [])
+
+    text = map_file.read_text(encoding="utf-8", errors="replace")
+    # Нежадный `[^\n]*?` — у temp-класса в заголовке два backtick-токена
+    # («## `algorithms`  ·  родитель `it-base`»), жадный вариант захватывал
+    # второй (родителя) вместо имени самой репы (найдено 27.08.2026).
+    mapped = set(re.findall(r"^## [^\n]*?`([a-zA-Z0-9._-]+)`", text, re.MULTILINE))
+
+    # Известные постоянные исключения — не заводятся как обычная репа
+    # (88-local-repo-location-standard.md §3): не получают `.repo-class`,
+    # найти их обходом ~/repos/ нельзя, но в карте они законно есть.
+    MAP_STALE_ALLOWLIST = {"finpilot"}
+
+    repos_dir = root.parent
+    on_disk = {root.name}  # база описывает сама себя — не самостоятельное расхождение
+    for p in repos_dir.iterdir():
+        if not p.is_dir() or p.name.startswith("."):
+            continue
+        if p == root:
+            continue
+        if (p / ".repo-class").is_file() or (p / ".repo-id").is_file():
+            on_disk.add(p.name)
+
+    missing = sorted(on_disk - mapped)
+    stale = sorted(mapped - on_disk - MAP_STALE_ALLOWLIST)
+    return (missing, stale)
 
 
 def check_empty_dirs(root: Path) -> list[str]:
@@ -582,7 +742,15 @@ def check_section_dupes(root: Path, files: list[Path]) -> list[str]:
         if path.suffix != ".md":
             continue
         rel = path.relative_to(root)
-        if is_frozen(rel) or rel.as_posix() in SECTION_DUPES_ALLOWLIST:
+        rel_posix = rel.as_posix()
+        # 🔴 Найдено 28.08.2026: в любой репе, кроме base-repo, эти же файлы лежат
+        # под `_base/` (раздача 1-в-1) — путь без префикса в списке не совпадал
+        # с `_base/00-infrastructure/sborka-vse.md`, и исключение работало только
+        # для самой базы. Тот же класс, что PIT-142 (копия видна под другим путём).
+        if is_frozen(rel) or rel_posix in SECTION_DUPES_ALLOWLIST or (
+            rel_posix.startswith("_base/")
+            and rel_posix[len("_base/"):] in SECTION_DUPES_ALLOWLIST
+        ):
             continue
         text = strip_code_fences(path.read_text(encoding="utf-8", errors="replace"))
         seen: dict[tuple[int, str], int] = {}
@@ -976,7 +1144,9 @@ def check_allowlist_rot(root: Path) -> list[str]:
     """
     problems: list[str] = []
     for rel, reason in SECTION_DUPES_ALLOWLIST.items():
-        if not (root / rel).is_file():
+        # 🔴 28.08.2026: вне base-repo эти файлы лежат под `_base/` (раздача 1-в-1) —
+        # тот же случай, что в check_section_dupes чуть выше.
+        if not (root / rel).is_file() and not (root / "_base" / rel).is_file():
             problems.append(f"исключение указывает в пустоту: {rel} ({reason})")
     return problems
 
@@ -1121,6 +1291,19 @@ def main() -> int:
         else:
             print("[OK] Канарейка CJK (нет токен-слипа)")
 
+    if not selftest_exec_bits():
+        failures.append("канарейка exec-bit сломана: не ловит подсаженный неисполняемый файл")
+        print("[FAIL] Канарейка exec-bit: самопроверка не прошла")
+    else:
+        exec_problems = check_exec_bits(root)
+        if exec_problems:
+            failures.extend(exec_problems)
+            print(f"[FAIL] Потерян бит +x на исполняемых стабах/хуках (PIT-151): {len(exec_problems)}")
+            for line in exec_problems:
+                print(f"    · {line}")
+        else:
+            print("[OK] Биты +x на месте (.claude/hooks, .githooks, tests/bin)")
+
     size_warns, size_fails, total_mb = check_sizes(root, files)
     if size_fails:
         failures.extend(size_fails)
@@ -1185,6 +1368,29 @@ def main() -> int:
         else:
             # Чистая проверка печатает числа: «ок» не отличить от «сверил пустоту».
             print(f"[OK] Навигатор полон: {nav_listed} из {nav_total} документов")
+
+    meta_problems = check_repo_meta_schema(root)
+    if meta_problems:
+        failures.extend(meta_problems)
+        print(f"[FAIL] .repo-meta нарушает схему: {len(meta_problems)}")
+        for line in meta_problems:
+            print(f"    · {line}")
+    elif (root / "repos-map.md").is_file():
+        print("[OK] .repo-meta всех реп проходит схему (description/private/topics)")
+
+    map_missing, map_stale = check_repos_map_sync(root)
+    if map_missing:
+        failures.extend(f"нет в repos-map.md: {n}" for n in map_missing)
+        print(f"[FAIL] repos-map.md отстала от диска — не хватает {len(map_missing)}")
+        for line in map_missing:
+            print(f"    · {line}")
+    if map_stale:
+        warnings.extend(f"в repos-map.md, нет на диске: {n}" for n in map_stale)
+        print(f"[WARN] repos-map.md называет репы, которых нет на диске: {len(map_stale)}")
+        for line in map_stale:
+            print(f"    · {line}")
+    if not map_missing and not map_stale and (root / "repos-map.md").is_file():
+        print("[OK] repos-map.md совпадает с ~/repos/ на диске")
 
     empty = check_empty_dirs(root)
     if empty:

@@ -92,9 +92,9 @@ Organization:   gertab95@proton.me's Organization
 Email:          gertab95@proton.me
 ```
 
-В том же кадре в браузере открыт claude.ai под профилем **Michael · Pro**. Отсюда рабочее
-допущение: **`gertab95@proton.me` — почта вахты M (Michael)**, но подтверждения командой
-нет, и в таблицу оно внесено со знаком вопроса.
+В том же кадре в браузере открыт claude.ai под профилем **Michael · Pro** — и
+владелец подтвердил напрямую 27.08.2026: **`gertab95@proton.me` — почта вахты M
+(Michael)**, вопрос закрыт.
 
 📍 Тот же адрес `gertab95@` фигурирует в восстановлении Steam (`misc-vault/00-secrets-index/`)
 как контактная почта — то есть он живой и используется вне Claude.
@@ -103,11 +103,19 @@ Email:          gertab95@proton.me
 |---|---|---|
 | V | `vevdokimovm@gmail.com` | `/status`, снимок 20.08 |
 | J | `vevdokimovm3@proton.me` | профиль «Jesus · Pro» в браузере, снимок 20.08 |
-| **M** | `gertab95@proton.me` **(?)** | `/status` 14.08 + профиль «Michael» в том же кадре |
+| **M** | `gertab95@proton.me` | `/status` 14.08 + профиль «Michael» в том же кадре; **подтверждено владельцем напрямую 27.08.2026** |
 | A | `finpilot.support@proton.me` | `~/.claude.json`, 23.08 |
 | S | `gertab95@gmail.com` | счёт Anthropic + профиль «Sergey · Pro» на том же экране, снимок 18.08 |
 
-**Как подтвердить:** войти вахтой M и набрать `/status` — одна команда закрывает вопрос.
+🔧 **Не обязательно вручную и не только для M.** С 25.08.2026 есть `panel_probe.py`
+(`reports/experiments/token-consumption/`, скилла `/tokens`) — снимает `email` из
+Status-панели без скриншота и вопроса владельцу. Сверить с таблицей выше — и вахта
+известна точно, а не по контексту разговора. Найдено 27.08.2026: вахта весь батч
+писала в `WATCHLOG §0` чужих реп «Вахта: V» по инерции из старого контекста, хотя
+`panel_probe.py` сразу дал `finpilot.support@proton.me` = **A**. Команда:
+```bash
+python3 reports/experiments/token-consumption/panel_probe.py   # секция Status → email
+```
 
 ### 🔴 И седьмая почта — в счёте Anthropic
 
@@ -120,7 +128,7 @@ Email:          gertab95@proton.me
 |---|---|---|---|
 | `vevdokimovm` | ✅ вахта V | — | — |
 | `vevdokimovm3` | — | ✅ вахта J | — |
-| **`gertab95`** | ✅ **счёт Anthropic $20** | ✅ вахта M (?) | ✅ контакт Steam |
+| **`gertab95`** | ✅ **счёт Anthropic $20** | ✅ вахта M | ✅ контакт Steam |
 | `finpilot.support` | — | 🔴 вахта A, заблокирована | — |
 
 > **Один логин на трёх доменах — три разных аккаунта, и различить их можно только

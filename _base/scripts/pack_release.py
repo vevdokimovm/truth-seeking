@@ -14,6 +14,7 @@ import datetime
 import hashlib
 import atexit
 import os
+import re
 import sys
 import time
 import zipfile
@@ -191,6 +192,21 @@ def main():
         print(f"!! нет служебных файлов в корне: {', '.join(missing)}")
         print("   деплойер не упадёт, но поведёт себя иначе — см. канон 43 §3а")
         sys.exit(1)
+
+    # 🔴 PIT-152: WATCHLOG.md правился ПОСЛЕ вызова pack_release.py — архив
+    # зафиксировал §0 ещё со старой версией, деплой поймал рассинхрон только на
+    # публикации и потребовал полной переупаковки. Дешевле поймать здесь, до того
+    # как секунды уйдут на zip: те же два формата строки §0, что revision_check.py
+    # (`**Версия:**`) и легаси base-repo (`текущая точка:`), см. PIT-148.
+    watchlog = REPO / "WATCHLOG.md"
+    if watchlog.is_file():
+        wl_text = watchlog.read_text(encoding="utf-8", errors="replace")
+        wl_found = re.findall(r"\*\*Версия:\*\*\s*v?(\d+\.\d+\.\d+)", wl_text) \
+            or re.findall(r"[Тт]екущая точка:\s*\**v?(\d+\.\d+\.\d+)", wl_text)
+        if wl_found and wl_found[0] != version:
+            print(f"!! WATCHLOG §0 говорит v{wl_found[0]}, а VERSION — {version} (PIT-152)")
+            print("   поправь WATCHLOG.md §0 ДО упаковки — иначе архив зафиксирует старую точку входа")
+            sys.exit(1)
 
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED, allowZip64=True) as zf:
         for p in files:

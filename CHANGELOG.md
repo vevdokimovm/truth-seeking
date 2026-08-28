@@ -1,5 +1,24 @@
 # truth-seeking — CHANGELOG
 
+## [1.1.0] — 2026-08-28 — Разбор «суд признал вакцины биооружием» (MINOR)
+
+Закрывает `ROADMAP.md` П2 и соответствующий пункт `mission-control/BACKLOG.md`.
+Задача не называла конкретное дело — первым шагом было найти, о каком именно
+судебном решении вообще идёт речь (веб-поиск), затем прогнать по чек-листу
+`00-method/01-evaluation-framework.md`.
+
+### Added
+- `03-vaccine-and-public-health-claims/court-ruled-vaccines-bioweapon.md` —
+  разбор трёх смешиваемых источников претензии: реальное дело *Sansone v.
+  DeSantis* (Leon County Circuit Court, Флорида — иск отклонён на всех
+  стадиях, включая апелляцию), нерабочие резолюции окружных отделений
+  Республиканской партии Флориды (не суд, не закон), самоорганизованный
+  «международный трибунал» без юрисдикции. Вывод: unsupported.
+
+### Changed
+- `03-vaccine-and-public-health-claims/README.md` — новая строка в Claims index.
+- `ROADMAP.md` — П2 отмечен `[x]`.
+
 ## [1.0.1] — 2026-08-28 — Уточнение по архетипу «мозг.психология» снято (PATCH)
 
 `ROADMAP.md` П1 — проверено `grep` по `truth-seeking`/`self-map`: готового

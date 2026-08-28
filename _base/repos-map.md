@@ -49,9 +49,12 @@
 
 **🏛️ Ядро — зоны жизни** (14) — [`it-base`](#it-base) · [`edu-base`](#edu-base) · [`academic-portfolio`](#academic-portfolio) · [`health-vault`](#health-vault) · [`legal-knowledge-base`](#legal-knowledge-base) · [`christ-walk`](#christ-walk) · [`self-map`](#self-map) · [`truth-seeking`](#truth-seeking) · [`family`](#family) · [`misc-vault`](#misc-vault) · [`research-craft`](#research-craft) · [`money`](#money) · [`productivity`](#productivity) · [`career`](#career)
 
-**🛰️ Спутники — самостоятельные домены** (26) — [`dota-dossier`](#dota-dossier) · [`chess`](#chess) · [`csgo`](#csgo) · [`sport`](#sport) · [`nutrition`](#nutrition) · [`style`](#style) · [`acting`](#acting) · [`rhetoric`](#rhetoric) · [`linguistics`](#linguistics) · [`sales`](#sales) · [`spycraft`](#spycraft) · [`politics`](#politics) · [`war`](#war) · [`security-forces`](#security-forces) · [`cybersecurity`](#cybersecurity) · [`science`](#science) · [`art`](#art) · [`philosophy`](#philosophy) · [`history`](#history) · [`nationality`](#nationality) · [`speed-reading`](#speed-reading) · [`visual-style`](#visual-style) · [`ai-relay`](#ai-relay) · [`business`](#business) · [`quick-answers`](#quick-answers) · [`independent-expert`](#independent-expert)
+**🛰️ Спутники — самостоятельные домены** (32) — [`dota-dossier`](#dota-dossier) · [`chess`](#chess) · [`csgo`](#csgo) · [`sport`](#sport) · [`nutrition`](#nutrition) · [`style`](#style) · [`acting`](#acting) · [`rhetoric`](#rhetoric) · [`linguistics`](#linguistics) · [`sales`](#sales) · [`spycraft`](#spycraft) · [`politics`](#politics) · [`war`](#war) · [`security-forces`](#security-forces) · [`cybersecurity`](#cybersecurity) · [`science`](#science) · [`art`](#art) · [`philosophy`](#philosophy) · [`history`](#history) · [`nationality`](#nationality) · [`speed-reading`](#speed-reading) · [`visual-style`](#visual-style) · [`ai-relay`](#ai-relay) · [`business`](#business) · [`quick-answers`](#quick-answers) · [`independent-expert`](#independent-expert) · [`algorithms`](#algorithms) · [`ml-base`](#ml-base) · [`mathematics`](#mathematics) · [`physics`](#physics) · [`chemistry`](#chemistry) · [`biology`](#biology)
 
-**⏳ Временные — вернутся в родителя** (6) — [`algorithms`](#algorithms) · [`ml-base`](#ml-base) · [`mathematics`](#mathematics) · [`physics`](#physics) · [`chemistry`](#chemistry) · [`biology`](#biology)
+🔴 **«Временные — вернутся в родителя» закрыто 28.08.2026** — все шесть репов набрали
+реальный контент MVP-волной 27.08.2026 (v1.0.0, кроме `ml-base` v0.6.3) и переведены
+в `.repo-class = satellite`; решение открытого вопроса `mission-control/WATCHLOG.md`
+§2 «algorithms: активировать или расформировать» — **активировать**, факт уже наступил.
 
 **🚀 Продукты** (9) — [`personal-finance-dss`](#personal-finance-dss) · [`finpilot`](#finpilot) · [`portrait-of-taste`](#portrait-of-taste) · [`exam-kit`](#exam-kit) · [`character-a-analysis`](#character-a-analysis) · [`salvation`](#salvation) · [`vk-graph`](#vk-graph) · [`control-panel`](#control-panel) · [`vevdokimovm.github.io`](#vevdokimovmgithubio) · [`vevdokimovm`](#vevdokimovm)
 
@@ -349,41 +352,55 @@ Claude не обрабатывает звук и видео напрямую. Р
 
 > Раздел чужой репы, вынесенный из-за объёма. Родитель указан с первого дня, иначе через год все временные станут вечными.
 
-## 🧮 `algorithms`  ·  родитель `it-base`
+## 🧮 `algorithms`
 
 **Алгоритмы и спортивное программирование**
 
-Codeforces, LeetCode, подготовка к техническим интервью. Раздел `it-base`, вынесенный по объёму. Заведена, но пока пуста — содержимое лежит в `it-base/02-code-archive/algorithms`; решение об активации или расформировании открыто.
+Codeforces, LeetCode, подготовка к техническим интервью. Выделена из `it-base` по
+объёму; активирована — MVP-волной 27.08.2026 доведена до v1.0.0 (15 файлов,
+`.repo-class = satellite`).
 
-## 🤖 `ml-base`  ·  родитель `it-base`
+## 🤖 `ml-base`
 
 **Машинное обучение**
 
-Конспекты, ноутбуки, практика, курсы. Раздел `it-base`, вынесенный по объёму; активирована 13.08.2026 — содержимое перенесено, в исходной папке оставлен указатель.
+Конспекты, ноутбуки, практика, курсы. Выделена из `it-base` по объёму (ADR-006),
+активирована 13.08.2026 — содержимое перенесено, в исходной папке оставлен
+указатель. `.repo-class = satellite` (метаданные сверены 28.08.2026).
 
-## 🧮 `mathematics`  ·  родитель `edu-base`
+## 🧮 `mathematics`
 
 **Математика: школьная, высшая, как наука**
 
-От школьной программы до университетской плюс история и философия дисциплины. Сильная сторона профиля — вычисления 10 из 10, абстрактная логика 9.6, — поэтому цель не «выучить», а закрыть точечные дыры и довести до состояния, в котором предмет объясняется своими словами без учебника.
+От школьной программы до университетской плюс история и философия дисциплины.
+Сильная сторона профиля — вычисления 10 из 10, абстрактная логика 9.6, — поэтому
+цель не «выучить», а закрыть точечные дыры и довести до состояния, в котором
+предмет объясняется своими словами без учебника. Выделена из `edu-base`,
+активирована MVP-волной 27.08.2026 (v1.0.0).
 
-## ⚛️ `physics`  ·  родитель `edu-base`
+## ⚛️ `physics`
 
 **Физика: школьная, высшая, как наука**
 
-Механика, электромагнетизм, термодинамика, квантовая теория и относительность. Акцент на границах применимости: формулу можно посмотреть, а вот где она перестаёт работать — нет.
+Механика, электромагнетизм, термодинамика, квантовая теория и относительность.
+Акцент на границах применимости: формулу можно посмотреть, а вот где она перестаёт
+работать — нет. Выделена из `edu-base`, активирована MVP-волной 27.08.2026 (v1.0.0).
 
-## 🧪 `chemistry`  ·  родитель `edu-base`
+## 🧪 `chemistry`
 
 **Химия: школьная, высшая, как наука**
 
-Общая, органическая, неорганическая химия и биохимия. Биохимия смыкается с личным медицинским проектом, но остаётся теорией: собственные анализы и схемы приёма живут в `health-vault`.
+Общая, органическая, неорганическая химия и биохимия. Биохимия смыкается с личным
+медицинским проектом, но остаётся теорией: собственные анализы и схемы приёма живут
+в `health-vault`. Выделена из `edu-base`, активирована MVP-волной 27.08.2026 (v1.0.0).
 
-## 🧬 `biology`  ·  родитель `edu-base`
+## 🧬 `biology`
 
 **Биология: школьная, высшая, как наука**
 
-Клетка, генетика, физиология, эволюция. Генетика здесь — механизм наследования и экспрессии; разбор собственного генотипа со всеми SNP остаётся в `health-vault`.
+Клетка, генетика, физиология, эволюция. Генетика здесь — механизм наследования и
+экспрессии; разбор собственного генотипа со всеми SNP остаётся в `health-vault`.
+Выделена из `edu-base`, активирована MVP-волной 27.08.2026 (v1.0.0).
 
 ---
 

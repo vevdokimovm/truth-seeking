@@ -31,10 +31,23 @@
 ЗАПУСК:
     close_batch.py --minor --title "..." --body FILE --log "..." --readme "..."
     close_batch.py --version 2.58.0 --title "..." --body-stdin --log "..." --readme "..."
+    close_batch.py --root ../mission-control --minor --title "..." ...
 
     --minor / --patch / --major   как поднять версию (по умолчанию --minor)
+    --root ПУТЬ                   закрыть батч другой репы (по умолчанию — сама база)
     --no-pack                     не собирать архив
     --dry                         показать, что будет сделано
+
+🔴 ОБОБЩЕНО НА `--root` 28.08.2026 (`PIT-153`). До этого скрипт умел закрывать
+только `base-repo` — для остальных 57 реп тот же десятишаговый ритуал делался
+вручную, и это стоило дважды не замеченного дрейфа (README STATUS не обновлялся
+10 батчей подряд, `WATCHLOG` §0 дорастал обратно за потолок). Инструменты
+(`revision_check.py`, `readme_status_gate.py`, `pack_release.py`) всегда
+вызываются из `base-repo/scripts/` (`BASE_SCRIPTS`, self-locating) — REPO это
+только целевая репа, чьи файлы правятся. Формат `WATCHLOG.md` §0/§3 у разных
+реп слегка расходится (есть репы без маркера-дефиса перед «Версия:», с другим
+заголовком §3) — оба паттерна ниже терпимы к обоим вариантам, а не только
+к тому, что исторически сложился в `base-repo`.
 """
 
 from __future__ import annotations
@@ -46,13 +59,18 @@ import sys
 from datetime import date
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
+BASE_SCRIPTS = Path(__file__).resolve().parent
+REPO = BASE_SCRIPTS.parent  # переопределяется в main() по --root
 TODAY = date.today().isoformat()
 
 
 def run(*cmd: str) -> tuple[int, str]:
-    r = subprocess.run(cmd, capture_output=True, text=True, cwd=REPO)
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=BASE_SCRIPTS.parent)
     return r.returncode, (r.stdout + r.stderr)
+
+
+def base_script(name: str) -> str:
+    return str(BASE_SCRIPTS / name)
 
 
 def bump(v: str, kind: str) -> str:
@@ -65,15 +83,28 @@ def bump(v: str, kind: str) -> str:
 
 
 def write_changelog(version: str, title: str, body: str, kind: str, dry: bool) -> None:
+    """Секция вставляется сразу после заголовка `# CHANGELOG...` файла.
+
+    Заголовок не сверяется дословно (`PIT-153`) — у разных реп разный текст
+    («история инфраструктуры» у базы, `mission-control`` у планировщика и т.д.),
+    жёсткая строка работала только для базы. Ищется первая строка `# ` и первая
+    пустая строка после неё — секция вставляется сразу за ней.
+    """
     p = REPO / "CHANGELOG.md"
     tag = {"major": "MAJOR", "patch": "PATCH"}.get(kind, "MINOR")
     section = f"## [{version}] — {TODAY} — {title} ({tag})\n\n{body.rstrip()}\n\n"
-    head = "# CHANGELOG — история инфраструктуры\n\n"
     t = p.read_text(encoding="utf-8")
     if dry:
         print(f"  [dry] CHANGELOG += секция [{version}] ({len(body)} знаков)")
         return
-    p.write_text(t.replace(head, head + section, 1), encoding="utf-8")
+    lines = t.split("\n")
+    if not lines or not lines[0].startswith("# "):
+        sys.exit("🔴 CHANGELOG.md: первая строка не начинается с «# » — формат не распознан")
+    insert_at = 1
+    while insert_at < len(lines) and lines[insert_at].strip() == "":
+        insert_at += 1
+    new_lines = lines[:insert_at] + [""] + section.rstrip("\n").split("\n") + lines[insert_at:]
+    p.write_text("\n".join(new_lines), encoding="utf-8")
 
 
 def write_watchlog(version: str, log_line: str, dry: bool) -> None:
@@ -90,29 +121,49 @@ def write_watchlog(version: str, log_line: str, dry: bool) -> None:
     # `- **Текущая точка: v...**`, которой в этом формате нет — правка молча
     # не находила совпадения, и §0 отставал от VERSION (тот же класс дефекта,
     # что PIT-148 уже чинил один раз в другом месте).
+    # 🔴 PIT-153: не у всех реп строка §0 начинается с «- » (mission-control,
+    # например, не ставит маркер списка) — префикс необязателен, а не жёстко
+    # «- ». Раньше нулевая раздача сюда молча роняла всю функцию для этих реп.
     line_re = re.compile(
-        r"- \*\*Версия:\*\* [\d.]+ · \*\*Дата:\*\* \d{4}-\d{2}-\d{2} · "
+        r"(- )?\*\*Версия:\*\* [\d.]+ · \*\*Дата:\*\* \d{4}-\d{2}-\d{2} · "
         r"\*\*Вахта:\*\* (\S+)([^\n]*)"
     )
     m = line_re.search(t)
     if m:
-        vahta, rest = m.group(1), m.group(2)
+        prefix, vahta, rest = m.group(1) or "", m.group(2), m.group(3)
         rest = re.sub(r"текущая точка: v[\d.]+", f"текущая точка: v{version}", rest)
-        new_line = (f"- **Версия:** {version} · **Дата:** {date.today().isoformat()} "
+        new_line = (f"{prefix}**Версия:** {version} · **Дата:** {date.today().isoformat()} "
                     f"· **Вахта:** {vahta}{rest}")
         t = t[:m.start()] + new_line + t[m.end():]
     else:
         print("  ! строка §0 «Где стоим» не найдена по канону — версия там не обновлена",
               file=sys.stderr)
-    anchor = "## §3. Последние 10 изменений (новое сверху; ровно 10)\n"
-    if anchor not in t:
+    # 🔴 PIT-153: §3 не у всех реп — маркированный список («- **ДАТА** — vX: …»),
+    # как у базы. У `mission-control`, например, это markdown-таблица
+    # («| Версия | Дата | Вахта | Что сделано |»). Форсировать один алгоритм на
+    # оба формата рискованно — вместо этого функция распознаёт формат и либо
+    # правит список сама (как раньше), либо честно пропускает таблицу и просит
+    # вахту дописать строку руками, а не молча портит структуру.
+    anchor_m = re.search(r"^## §3\.[^\n]*\n", t, re.MULTILINE)
+    if not anchor_m:
         print("  ! §3 не найден — журнал не тронут", file=sys.stderr)
         return
+    after_anchor = t[anchor_m.end():].lstrip("\n")
+    if after_anchor.lstrip().startswith("|"):
+        print(f"  ! §3 — таблица, не список: допиши строку `{version}` в неё вручную "
+              f"(лог: «{log_line.strip()}»)", file=sys.stderr)
+        if dry:
+            print(f"  [dry] WATCHLOG §0 → v{version}; §3 — таблица, не тронута")
+        else:
+            p.write_text(t, encoding="utf-8")
+        return
+    anchor = anchor_m.group(0)
     entry = f"- **{TODAY}** — v{version}: {log_line.strip()}\n\n"
-    head, _, tail = t.partition(anchor)
-    t = head + anchor + entry + tail.lstrip("\n")
+    head, tail = t[:anchor_m.end()], t[anchor_m.end():]
+    t = head + entry + tail.lstrip("\n")
     s = t.index(entry)
-    e = t.index("\n## §4.", s)
+    e_m = re.search(r"\n## §\d+\.", t[s:])
+    e = s + e_m.start() if e_m else len(t)
     items = re.split(r"\n(?=- \*\*20)", t[s:e].strip("\n"))
     dropped = max(0, len(items) - 10)
     t = t[:s] + "\n".join(items[:10]) + "\n" + t[e:]
@@ -132,7 +183,7 @@ def write_readme(version: str, line: str, dry: bool) -> None:
     if dry:
         print("  [dry] README: статус и описание были бы проставлены")
         return
-    code, out = run(sys.executable, "scripts/readme_status_gate.py", "--fix")
+    code, out = run(sys.executable, base_script("readme_status_gate.py"), "--root", str(REPO), "--fix")
     p = REPO / "README.md"
     t = p.read_text(encoding="utf-8")
     pat = re.compile(rf"(> \*\*Сейчас:\*\* `v{re.escape(version)}` · {TODAY} · )[^\n]*")
@@ -153,6 +204,7 @@ def main() -> int:
     ap.add_argument("--log", required=True, help="строка для WATCHLOG §3")
     ap.add_argument("--readme", required=True, help="описание для блока статуса README")
     ap.add_argument("--version", help="явная версия; иначе поднимается сама")
+    ap.add_argument("--root", help="путь к репе, чей батч закрывается (по умолчанию — база)")
     g = ap.add_mutually_exclusive_group()
     g.add_argument("--minor", action="store_true")
     g.add_argument("--patch", action="store_true")
@@ -160,6 +212,12 @@ def main() -> int:
     ap.add_argument("--no-pack", action="store_true")
     ap.add_argument("--dry", action="store_true")
     a = ap.parse_args()
+
+    global REPO
+    if a.root:
+        REPO = Path(a.root).expanduser().resolve()
+        if not REPO.is_dir():
+            sys.exit(f"🔴 --root {REPO}: не каталог")
 
     # 🔴 Защита от подстановки shell. `--log "…\`health-vault\`…"` в zsh превращается
     # в подстановку команды: обратные кавычки съедаются вместе с содержимым, и в журнал
@@ -194,7 +252,7 @@ def main() -> int:
 
     # 🔴 ГЕЙТ ПЕРВЫМ. Оптимизация не имеет права начинаться с пропуска проверки.
     print("── гейт до начала ритуала")
-    code, out = run(sys.executable, "scripts/revision_check.py")
+    code, out = run(sys.executable, base_script("revision_check.py"), "--root", str(REPO))
     if code != 0:
         print(out[-1500:])
         sys.exit("🔴 гейт DRIFT — батч не закрывается. Сначала починить.")
@@ -212,13 +270,13 @@ def main() -> int:
     write_readme(new, a.readme, a.dry)
 
     print("── гейт после правок")
-    code, out = run(sys.executable, "scripts/revision_check.py")
+    code, out = run(sys.executable, base_script("revision_check.py"), "--root", str(REPO))
     print("  · " + ("CLEAN" if code == 0 else "🔴 DRIFT:\n" + out[-1200:]))
     if code != 0:
         sys.exit("ритуал оставил репу в DRIFT — разобрать до сборки архива")
 
     if not a.no_pack and not a.dry:
-        code, out = run(sys.executable, "scripts/pack_release.py")
+        code, out = run(sys.executable, base_script("pack_release.py"), str(REPO))
         print("── " + (out.strip().splitlines() or ["архив не собран"])[0])
 
     # 🔴 Напоминание о раздаче — по ПОРОГУ, а не после каждого батча.

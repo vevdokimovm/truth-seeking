@@ -42,8 +42,8 @@ from collections import defaultdict
 from difflib import SequenceMatcher
 from pathlib import Path
 
-BASE = Path.home() / "Documents" / "base-repo"
-BASE_REPO = Path(__file__).resolve().parent.parent
+BASE = Path(__file__).resolve().parent.parent
+BASE_REPO = BASE
 REPOS = BASE_REPO.parent
 BOARD = REPOS / "mission-control" / "BOARD.md"
 
@@ -91,7 +91,10 @@ def collect() -> tuple[dict, dict, dict]:
     per_repo: dict[str, dict[str, list[str]]] = {}
     if REPOS.is_dir():
         for d in sorted(REPOS.iterdir()):
-            if not d.is_dir():
+            if not d.is_dir() or d.resolve() == BASE_REPO.resolve():
+                # base-repo уже учтён отдельной строкой выше (`base`) — иначе
+                # задваивается и в "по репам", и в топ-10 (найдено 28.08.2026,
+                # когда починка устаревшего BASE впервые сделала счётчик рабочим).
                 continue
             found = {f: read_open(d / f) for f in ("ROADMAP.md", "TASKS.md")}
             if any(found.values()) or (d / "ROADMAP.md").is_file():

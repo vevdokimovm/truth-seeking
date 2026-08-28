@@ -40,3 +40,37 @@
 2026-08-27T10:38:51	base-repo	batch	v3.59.3: bron-kerbosch + hw3 panorama photos (277 image frames total)
 2026-08-27T10:47:37	base-repo	batch	v3.59.4: science/dota-dossier/edu-base image series (292 frames total)
 2026-08-27T11:25:30	base-repo	batch	v3.60.0: sync_base_local.py fix + _base во всех приватных репах + panel_probe.py в служебках tokens/handoff
+2026-08-28T01:11:02	base-repo	batch	v3.77.0: tasks_census.py устаревший путь починен
+2026-08-28T01:14:29	base-repo	batch	v3.78.0: research-engine + panel_probe закрыты
+2026-08-28T01:47:48	base-repo	batch	v3.79.0: PIT-124 частично закрыт
+2026-08-28T01:53:18	base-repo	batch	v3.80.0: TASKS.md 5 устаревших версий снято
+2026-08-28T01:58:37	base-repo	batch	v3.81.0: TASKS.md ещё 3 пункта закрыты
+2026-08-28T02:03:18	mission-control	batch	v1.20.0: BOARD.md 2 пункта закрыты
+2026-08-28T02:16:34	mission-control	batch	v1.21.0: BOARD.md — 3 устаревших пункта закрыты (finpilot-mirror ложная тревога, GitHub-версия устарела, три копии репы устарело); WATCHLOG §3 обрезан до 10 записей; DRIFT ревизии (37 fail) занесён в ROADMAP P2.2а как отдельная задача
+2026-08-28T02:24:58	mission-control	batch	v1.22.0: 5 конфликтных служебок разобраны (не требуют резолюции), аудит покрытия честно перепрогнан — 88.3% вместо заявленных 99.7%, заведено в ROADMAP P2.2б
+2026-08-28T02:34:26	mission-control	batch	v1.23.0: мастер-план консолидации 31.07.2026 закрыт по факту (Фазы 3б/1/2/3/4 сделаны, Фаза 5 честно открыта); BOARD.md пункты 4/6/7 закрыты
+2026-08-28T02:46:34	base-repo	batch	v3.82.0: 6 временных реп (algorithms/ml-base/mathematics/physics/chemistry/biology) активированы .repo-class=satellite по факту MVP-контента; repos-map.md актуализирован; орфанный 00-infrastructure/repos-map.md заменён указателем; WATCHLOG §3 перестроен (отставал на ~20 версий)
+2026-08-28T03:05:25	mission-control	batch	v1.25.0: собственный гейт ревизии починен 40→24 fail (PIT-116 §0 сжат 315→46 строк, PIT-094 текущая-точка строка, навигатор 19→21, README STATUS добавлен)
+2026-08-28T03:12:40	mission-control	batch	v1.26.0: INBOX.md разбор — найдена причина (чекбоксы потеряны экспортом Apple Notes), вынесено во владельца TASKS.md
+2026-08-28T03:16:37	mission-control	batch	v1.27.0: BOARD.md mission-control секция — последние два пункта закрыты (algorithms активирована, профильный README проверен на GitHub)
+2026-08-28T03:29:40	base-repo	batch	v3.82.1: 8 устаревших пунктов ROADMAP закрыты по факту диска (PIT-090, Profile README, mission-control копии/README, deploy_version_gate) — через close_batch.py
+2026-08-28T03:38:37	base-repo	batch	v3.82.2: ещё 5 устаревших пунктов ROADMAP закрыты (архитектура API-ключа/workspace устарела, архетип передан в планировщик, per_repo_audit.py постоянный)
+2026-08-28T03:41:25	mission-control	batch	v1.28.0: принят перенос из base-repo — указатель на архетип в INBOX.md
+2026-08-28T03:44:43	base-repo	batch	v3.82.3: test_deploy.sh 295/295 зелёных, номерная коллизия 74 найдена и отмечена
+2026-08-28T03:48:23	base-repo	batch	v3.82.4: 22 кандидата/14 конфликтов per_repo_audit таблица 2 разобраны — ни один не требует резолюции
+2026-08-28T03:51:54	base-repo	batch	v3.82.5: ADR-006/edu-base находка углублена — реальное пересечение с research-craft подтверждено, import/ побочная находка
+2026-08-28T03:56:57	mission-control	batch	v1.29.0: ROADMAP P2.1 FINPILOT — фронт ADR-001 закрыт фактом
+2026-08-28T04:02:04	mission-control	batch	v1.30.0: BOARD.md control-panel — 2 устаревших пункта закрыты (GitHub v0.4.2, все 12 модулей рабочие)
+2026-08-28T04:07:38	truth-seeking	batch	v1.0.1: уточнение по архетипу мозг.психология снято, дубль в mission-control/INBOX.md убран
+2026-08-28T04:10:36	mission-control	batch	v1.31.0: найден и убран дубль архетипа в INBOX.md (уже был в truth-seeking/ROADMAP.md)
+2026-08-28T04:11:43	base-repo	batch	v3.82.6: уточнена запись про перенос архетипа — настоящая задача была в truth-seeking, дубль в INBOX.md убран
+2026-08-28T04:16:48	mission-control	batch	v1.32.0: BOARD.md family/vk-graph — 2 устаревших пункта закрыты
+2026-08-28T04:23:12	vk-graph	batch	v1.2.2: плейсхолдер ROADMAP закрыт по факту — направление уже определено и исполнено
+2026-08-28T04:26:17	mission-control	batch	v1.33.0: BOARD.md синхронизирован с family (2 реальных пункта) и vk-graph (плейсхолдер закрыт)
+2026-08-28T04:30:00	base-repo	batch	v3.82.7: заголовок P1 закрытая кампания исправлен, указатель СЛЕДУЮЩАЯ ЗАДАЧА обновлён
+2026-08-28T04:36:00	mission-control	batch	v1.34.0: BOARD.md algorithms-site/claude-usage — заглушка 9 задач развёрнута реальными пунктами
+2026-08-28T04:41:02	base-repo	batch	v3.82.8: TASKS.md — 3 устаревших пункта закрыты (блокер раздачи базы, резка BOARD.md)
+2026-08-28T04:44:32	base-repo	batch	v3.82.9: TASKS.md — диск/ре-мерж/git-история обновлены свежими фактами
+2026-08-28T04:51:35	mission-control	batch	v1.35.0: TASKS.md — 3 пункта закрыты/уточнены (Claude Code условие, ФИО-находка, iris-recognition частично)
+2026-08-28T04:57:25	mission-control	batch	v1.36.0: собственные гейт-долги починены снова — §0 сжат 28->24 fail, README STATUS обновлён
+2026-08-28T05:16:04	base-repo	batch	v3.83.0: revision_check.py allowlist учитывает _base/ (mission-control 25->17 fail), close_batch.py обобщён на --root

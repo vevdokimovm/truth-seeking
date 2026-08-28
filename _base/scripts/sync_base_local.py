@@ -166,7 +166,28 @@ def main() -> int:
             continue
         old, verdict = sync_one(repo, canon_version, a.check)
         print(f"  {repo.name:<26} {old:<10} {verdict}")
+
+    if a.all and not a.check:
+        _record_liveness(f"канон v{canon_version}, {len(targets)} реп")
     return 0
+
+
+def _record_liveness(summary: str) -> None:
+    """Признак живости (`08-automation-triggers.md`) — не тихая автоматизация."""
+    import datetime
+    import re
+
+    path = BASE_REPO / "reports" / "infra-liveness.md"
+    if not path.is_file():
+        return
+    today = datetime.date.today().isoformat()
+    text = path.read_text(encoding="utf-8")
+    pattern = re.compile(
+        r"(\| `scripts/sync_base_local\.py --all` \| )[^|]+( \| )[^|]+( \|)"
+    )
+    new_text, n = pattern.subn(rf"\g<1>{today}\g<2>{summary}\g<3>", text)
+    if n:
+        path.write_text(new_text, encoding="utf-8")
 
 
 if __name__ == "__main__":

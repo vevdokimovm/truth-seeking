@@ -11,6 +11,7 @@ Claims about vaccines, autism, and public health, mostly from social media (sour
 | Amish children have very low allergy/asthma rates | ReligionForBreakfast, citing JACI 2012, NEJM 2016, JACI 2023 | **True — and this is real peer-reviewed science.** But it's about *farm/microbial exposure* ("hygiene hypothesis" / endotoxin), **not** vaccines and **not** autism. The false move is stapling a real allergy finding onto an unrelated anti-vaccine claim |
 | Texas measles outbreak framing | news aggregator | Outbreak is real; the anti-vax framing inverts cause — low vaccination + delayed response *drove* it |
 | "mRNA tech = the corporation owns you" | old YouTube comments | Conspiracy; no mechanism |
+| A court ruled vaccines are a bioweapon | viral claim, traced to *Sansone v. DeSantis* (Leon County Circuit Court, FL) + Florida county GOP resolutions + a self-organized "tribunal" | **Unsupported** — the actual lawsuit was dismissed at every stage, including appeal; the "resolutions" are non-binding party letters, not court or legislative acts; full write-up: [`court-ruled-vaccines-bioweapon.md`](court-ruled-vaccines-bioweapon.md) |
 
 ## Why this folder matters
 
