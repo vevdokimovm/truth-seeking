@@ -137,6 +137,14 @@ def selftest_uri_schemes() -> bool:
 
 
 def check_links(root: Path, files: list[Path], allowlist: set[str]) -> tuple[list[str], int, int]:
+    """Ссылка ведёт на существующий файл.
+
+    🔴 ЧЕГО НЕ ЛОВИТ (`71` §7г-бис): ссылку, которая ведёт на существующий,
+    но НЕ ТОТ файл — переименовали тему, путь остался валидным, содержание
+    другое. Проверяется только существование цели, не её уместность.
+    Также не видит ссылок внутри код-блоков (вырезаются намеренно: это
+    примеры разметки) и адресов со схемой (`https:`, `data:` — не пути).
+    """
     broken: list[str] = []
     checked = 0
     frozen_skipped = 0
@@ -144,6 +152,17 @@ def check_links(root: Path, files: list[Path], allowlist: set[str]) -> tuple[lis
         if path.suffix.lower() != ".md":
             continue
         rel = path.relative_to(root)
+        # 🔴 Исключение КАТАЛОГОМ. Тот же дефект, что найден утром
+        # 29.08.2026 в `check_mixed_script_names`: `.revision_allowlist`
+        # принимает форму `каталог/`, а проверка сверяла только точное
+        # совпадение — и краснела на импортированном чужом материале
+        # (файл со ссылками на не приложенные картинки).
+        #
+        # Класс тот же, что весь день: **исключение объявлено и не
+        # действует**. Правку одной проверки надо было сразу проверить
+        # на остальных — не проверил, и дефект нашёлся вторым прогоном.
+        if any(a.endswith("/") and str(rel).startswith(a) for a in allowlist):
+            continue
         # 🔴 28.08.2026: та же _base/-дыра, что в SECTION_DUPES_ALLOWLIST (PIT-153) —
         # `rel.parts[0]` был «templates» только для base-repo; в любой другой репе
         # шаблоны лежат под `_base/templates/`, и `rel.parts[0]` там — `_base`.
@@ -283,6 +302,18 @@ def _is_cjk(ch: str) -> bool:
     return any(low <= code <= high for low, high in CJK_RANGES)
 
 
+# 🔴 29.08.2026, ЗАМЕР: `check_cjk` занимал **28.8 из 30 секунд** прогона
+# на ПУСТОЙ репе — 96 % времени гейта. Причина: посимвольный обход каждой
+# строки каждого файла с вызовом функции на символ. Регулярка делает то же
+# самое в C и на порядок быстрее; диапазоны те же, поведение не меняется.
+#
+# Дефект производительности здесь — не про удобство: гейт, идущий десять
+# минут по системе, начинают запускать реже, а проверка, которую не
+# запускают, не отличается от отсутствующей.
+CJK_RE = re.compile("[" + "".join(
+    f"{chr(low)}-{chr(high)}" for low, high in CJK_RANGES) + "]")
+
+
 def check_cjk(root: Path, files: list[Path],
               allowlist: set[str] | None = None) -> list[str]:
     """Иероглиф в тексте системы — почти всегда токен-слип, а не намерение.
@@ -330,14 +361,20 @@ def check_cjk(root: Path, files: list[Path],
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeError):
             continue
+        # Быстрый отсев: в файле вообще нет CJK — не разбираем построчно.
+        # На системе из 63 реп подавляющее большинство файлов чисты, и одна
+        # проверка на файл заменяет тысячи построчных.
+        if not CJK_RE.search(text):
+            continue
         for number, line in enumerate(text.splitlines(), 1):
+            if not CJK_RE.search(line):
+                continue
             for term in terms:
                 if term in line:
                     line = line.replace(term, "")
-            for ch in line:
-                if _is_cjk(ch):
-                    hits.append(f"{rel}:{number}: U+{ord(ch):04X}")
-                    break
+            m = CJK_RE.search(line)
+            if m:
+                hits.append(f"{rel}:{number}: U+{ord(m.group()):04X}")
     return hits
 
 
@@ -399,7 +436,16 @@ def check_mixed_script_names(root: Path, files: list[Path],
         # Осознанное исключение с записанной причиной — `.revision_allowlist`.
         # Нужно для имён исходных документов (чужая фамилия, версия «V1»),
         # которые переименовывать нельзя: это не наш артефакт.
+        # 🔴 Исключение КАТАЛОГОМ, а не только точным именем. Найдено
+        # 29.08.2026 при импорте Telegram: `.revision_allowlist` содержал
+        # `reports/imports/` с причиной «это чужой материал», а проверка
+        # сверяла лишь точное совпадение пути или имени — и краснела
+        # на присланном кем-то PDF с опечаткой в названии.
+        # Форма `каталог/` уже принята другими проверками; здесь она
+        # не работала, то есть исключение было объявлено и не действовало.
         if rel in allowlist or path.name in allowlist:
+            continue
+        if any(a.endswith("/") and rel.startswith(a) for a in allowlist):
             continue
         # 🔴 Смешение считается ВНУТРИ одного слова, а не по всему имени.
         # Замерено 28.08.2026 по всем 63 репам: правило «есть кириллица и есть
@@ -457,6 +503,16 @@ def selftest_mixed_script() -> bool:
 
 
 def check_names(root: Path, files: list[Path]) -> list[str]:
+    """Имя файла не несёт порчи вида `#U0418` (`PIT-009`).
+
+    Порча появляется при переносе между файловыми системами: кириллица
+    в имени превращается в escape-последовательность, файл перестаёт
+    открываться по ссылке.
+
+    🔴 ЧЕГО НЕ ЛОВИТ: имя, читаемое машиной, но бессмысленное для человека
+    (`документ1.md`, `новый файл.md`), и имя, разошедшееся с содержанием.
+    Осмысленность имени — суждение, гейт его не выносит.
+    """
     bad = []
     for path in files:
         if HEX_NAME_RE.search(path.name):
@@ -512,16 +568,72 @@ def selftest_exec_bits() -> bool:
 
 
 def check_sizes(root: Path, files: list[Path]) -> tuple[list[str], list[str], float]:
+    """Вес дерева и отдельных файлов против порогов.
+
+    🔴 ЧЕГО НЕ ЛОВИТ: **оправданность** веса. 500 МБ медицинских сканов
+    и 500 МБ забытых дублей выглядят для проверки одинаково — разницу
+    показал только `find_duplicates.py` (29.08.2026: 89 МБ из 528 в
+    `health-vault` были копиями). Порог отвечает «много ли», а не «зачем».
+    """
     warns: list[str] = []
     fails: list[str] = []
     total = 0
+    # 🔴 Размер считается по тому, что ПОПАДЁТ В АРХИВ, а не по всему дереву.
+    # Порог 500 МБ заведён ради одного: «Claude берёт архив целиком»
+    # (`13-github-limits-and-rendering.md` — у GitHub лимит 5 ГБ, наш строже
+    # и по другой причине). Каталоги, которые упаковщик исключает, на эту
+    # способность не влияют вовсе.
+    #
+    # Найдено 29.08.2026: после импорта 17 364 фото три репы вышли за порог,
+    # хотя архив `self-map` при 614 МБ на диске весит **144 МБ** — Claude
+    # берёт его целиком. Проверка краснела на том, что порог не измеряет.
+    #
+    # Список синхронизирован с `pack_release.JUNK_DIRS`: расхождение между
+    # тем, что упаковщик выбрасывает, и тем, что проверка считает, — это
+    # два источника правды об одном (`72`).
+    NOT_PACKED = {"telegram-photos", "telegram-media", "photo-archive",
+                  "heavy-originals",
+                  "node_modules", "dist", "build",
+                  ".venv", "venv", ".next", ".turbo", "__pycache__"}
+    gi = root / ".gitignore"
+    gitignore_lines = (gi.read_text(encoding="utf-8", errors="replace").splitlines()
+                       if gi.is_file() else [])
+    gitignore_lines = [l for l in gitignore_lines
+                       if l.strip() and not l.startswith("#")]
+
     for path in files:
         size = path.stat().st_size
-        total += size
         mb = size / 1024 / 1024
         rel = path.relative_to(root)
+        not_packed = any(part in NOT_PACKED for part in path.parts)
+
+        # 🔴 РАЗМЕР ДЕРЕВА и ЛИМИТ НА ФАЙЛ — РАЗНЫЕ ВОПРОСЫ, и исключение
+        # действует только на первый. Найдено 29.08.2026: убрав `heavy-originals`
+        # из подсчёта, я заодно ослепил проверку лимита GitHub — а файл 208 МБ
+        # никуда не делся и сломал бы push, если бы попал в git.
+        #
+        # Порог дерева отвечает «возьмёт ли Claude архив целиком» — на него
+        # исключённое не влияет. Лимит 100 MiB на файл — жёсткое ограничение
+        # GitHub, и оно не знает про наши исключения из архива.
+        if not not_packed:
+            total += size
         if mb > FAIL_FILE_MB:
-            fails.append(f"{rel}: {mb:.1f} МБ (> {FAIL_FILE_MB} МБ, лимит GitHub рядом)")
+            # 🔴 Файл, исключённый из git через `.gitignore`, до GitHub
+            # не доедет — значит его лимит не касается. Проверка обязана
+            # это знать, иначе краснеет на том, что не может случиться,
+            # и через пару прогонов перестаёт читаться (`PIT-085`).
+            #
+            # Проверяется НАЛИЧИЕ правила, а не работа git: `.gitignore`
+            # может быть неточен, и это честная граница проверки.
+            ignored = any(line.strip().rstrip("/") and
+                          str(rel).startswith(line.strip().rstrip("/"))
+                          for line in gitignore_lines)
+            if ignored:
+                warns.append(f"{rel}: {mb:.1f} МБ — выше лимита GitHub, "
+                             f"но исключён через .gitignore: в git не поедет")
+            else:
+                fails.append(f"{rel}: {mb:.1f} МБ (> {FAIL_FILE_MB} МБ, "
+                             f"лимит GitHub рядом)")
         elif mb > WARN_FILE_MB:
             warns.append(f"{rel}: {mb:.1f} МБ (> {WARN_FILE_MB} МБ — кандидат на сжатие, док 06)")
         if path.suffix.lower() in ARCHIVE_SUFFIXES:
@@ -638,6 +750,15 @@ def check_repos_map_sync(root: Path) -> tuple[list[str], list[str]]:
 
 
 def check_empty_dirs(root: Path) -> list[str]:
+    """Пустой каталог — след незавершённой операции.
+
+    Он ничего не ломает, но означает, что что-то перенесли и не убрали
+    за собой, либо собирались наполнить и забыли.
+
+    🔴 ЧЕГО НЕ ЛОВИТ: каталог с одним `.gitkeep` или `README.md` — формально
+    не пуст, фактически пуст. Отличить «место застолблено намеренно» от
+    «забыли» по содержимому нельзя, и проверка намеренно не пытается.
+    """
     empty = []
     for path in root.rglob("*"):
         rel_parts = path.relative_to(root).parts
@@ -1331,9 +1452,15 @@ def selftest_section_dupes() -> bool:
 # Регулярка обязана иметь ровно одну группу — само число.
 PROSE_COUNTS = (
     ("карточек PIT", lambda root: _count_matches(root / "reports" / "pitfalls.md", r"^### PIT-\d+"),
-     r"\*\*(\d+)\s+карточ\w*\s+`?PIT-NNN`?"),
+     # 🔴 Без привязки к `**`. Прежняя регулярка требовала жирный шрифт
+     # НЕПОСРЕДСТВЕННО перед числом — и пропустила расхождение 148 против 151
+     # в том же README, потому что во второй записи звёздочки стояли раньше:
+     # `**`pitfalls.md`, 148 карточек`. Проверка зависела от оформления,
+     # а не от смысла, и молчала при живом расхождении. Найдено 29.08.2026
+     # при сборе метрик для оценки системы.
+     r"(\d+)\s+карточ\w*\s+`?PIT-NNN`?"),
     ("карточек SYN", lambda root: _count_matches(root / "05-infra-synthesis-lab" / "PITFALLS.md", r"^## SYN-\d+"),
-     r"\*\*(\d+)\s+карточ\w*\s+`?SYN-NNN`?"),
+     r"(\d+)\s+карточ\w*\s+`?SYN-NNN`?"),
     ("документов кита", lambda root: len(list((root / "00-infrastructure").glob("[0-9][0-9]-*.md"))),
      r"\*\*(\d+)\s+документ\w*\*\*"),
 )
@@ -2227,6 +2354,375 @@ def selftest_pointer_purity() -> bool:
         return len(check_pointer_purity(root)) == 1
 
 
+# Разделы с жёстким пределом числа пунктов. Маркеры несут лимит в себе:
+# `<!-- WIP:START limit=2 -->` — чтобы правило и проверка не разошлись
+# (число живёт в одном месте, а не в файле И в коде).
+LIMIT_RE = re.compile(r"<!--\s*(\w+):START\s+limit=(\d+)\s*-->(.*?)<!--\s*\1:END\s*-->",
+                      re.S)
+
+
+# Срок у задачи: «[зав. 29.08]» — день и месяц, год подразумевается текущий.
+DUE_RE = re.compile(r"\[зав\.\s*(?:до\s*)?(\d{2})\.(\d{2})\]")
+
+
+def check_task_expiry(root: Path) -> list[str]:
+    """Просроченный пункт обязан получить исход, а не тихо жить дальше.
+
+    🔴 Заведено 29.08.2026 по `reports/research/
+    task-classification-2026-08-29.md` §5. Приём взят из архивного дела
+    (ISO 15489): у записи в момент создания задано не только сколько её
+    хранить, но и **что сделать по истечении срока**. Личные системы задач
+    этой оси не имеют вовсе — записи копятся бессрочно, а решение «удалить»
+    принимается в состоянии перегрузки и на глаз.
+
+    Без механизма поле срока — украшение: дата проходит, и не меняется
+    ничего. Проверка делает истечение **видимым**, а исход — обязательным:
+    перенести с новой датой · в «не делаем» с причиной · вычеркнуть.
+
+    🔴 ЧЕГО НЕ ПОЙМАЕТ (`71` §7г-бис):
+      · **не судит, честно ли перенесён срок.** Сдвинуть дату вперёд, ничего
+        не сделав, — ровно то, чем эта проверка обманывается, и защиты от
+        этого в коде быть не может: различие между «сдвинул обоснованно»
+        и «сдвинул, чтобы не краснело» — смысловое;
+      · пункт **без срока вовсе** здесь не ловится — это забота проверки
+        обязательности поля, не этой;
+      · год не хранится в поле, поэтому пункт, просроченный больше чем
+        на год, читается как срочный на днях.
+    """
+    import datetime
+    today = datetime.date.today()
+    problems = []
+    for path in sorted(root.glob("TASKS.md")) + sorted(root.glob("*/TASKS.md")):
+        text = path.read_text(encoding="utf-8", errors="replace")
+        for num, line in enumerate(text.splitlines(), 1):
+            if not line.lstrip().startswith("- [ ]"):
+                continue
+            m = DUE_RE.search(line)
+            if not m:
+                continue
+            day, month = int(m.group(1)), int(m.group(2))
+            try:
+                due = datetime.date(today.year, month, day)
+            except ValueError:
+                problems.append(f"{path.relative_to(root)}:{num} — "
+                                f"нет такой даты: {m.group(0)}")
+                continue
+            if due < today:
+                overdue = (today - due).days
+                problems.append(
+                    f"{path.relative_to(root)}:{num} — срок прошёл "
+                    f"{overdue} дн. назад ({m.group(0)}), исход не выбран: "
+                    f"перенести · в «не делаем» · вычеркнуть")
+    return problems
+
+
+def selftest_task_expiry() -> bool:
+    """Ловит просроченное, молчит на будущем — обе половины обязательны."""
+    import datetime, tempfile
+    today = datetime.date.today()
+    past = today - datetime.timedelta(days=10)
+    future = today + datetime.timedelta(days=10)
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        fmt = lambda d: f"{d.day:02d}.{d.month:02d}"
+        (root / "TASKS.md").write_text(
+            f"# Задачи\n\n- [ ] [зав. {fmt(future)}] будущее\n"
+            f"- [x] [зав. {fmt(past)}] закрытое, срок не важен\n",
+            encoding="utf-8")
+        if check_task_expiry(root) != []:
+            return False          # будущее и закрытое краснеть не должны
+        (root / "TASKS.md").write_text(
+            f"# Задачи\n\n- [ ] [зав. {fmt(past)}] просрочено\n",
+            encoding="utf-8")
+        return len(check_task_expiry(root)) == 1
+
+
+# Живой маркер долга: в начале комментария кода или пункта списка.
+# Упоминание слова внутри текста («385 заглушек TODO закрыты») маркером
+# НЕ является — иначе проверка утонет в собственных журналах.
+DEBT_CODE_RE = re.compile(r"^\s*#\s*(TODO|FIXME|HACK|XXX)\b(.*)$")
+DEBT_DOC_RE = re.compile(r"^\s*[-*]\s*(?:\*\*)?(TODO|FIXME)\b(.*)$")
+DEBT_DATE_RE = re.compile(r"\d{2}\.\d{2}\.\d{4}|\d{4}-\d{2}-\d{2}")
+
+
+def check_debt_markers(root: Path) -> list[str]:
+    """Маркер технического долга обязан нести дату заведения.
+
+    🔴 Кандидат №1 очереди внедрения. Смысл даты: без неё невозможно
+    отличить долг недельной давности от полугодового, а именно возраст
+    и решает, чинить его или признать нормой.
+
+    ЗАМЕРЕНО 29.08.2026 перед тем, как писать проверку: живых маркеров
+    в базе **ноль**. Все 119 совпадений по словам TODO/FIXME/костыль —
+    упоминания внутри текстов и журналов («385 заглушек TODO закрыты»),
+    а не маркеры. Поэтому проверка заводится не как чистка, а **как защита
+    на будущее**: первый же появившийся маркер обязан прийти с датой.
+
+    🔴 ЧЕГО НЕ ПОЙМАЕТ (`71` §7г-бис):
+      · **долг без слова-маркера** — а это большинство настоящего долга.
+        Код, который просто плох, никакого TODO над собой не имеет;
+      · дату можно поставить любую: проверяется наличие, не правдивость;
+      · «временное решение», описанное прозой в середине абзаца, —
+        не маркер по форме, хотя маркер по смыслу.
+    """
+    # 🔴 Исключения репы уважаются, и это не поблажка. Прогон по `it-base`
+    # дал 109 находок, все в `02-code-archive/` — архиве ЧУЖОГО учебного кода
+    # (задачи CodeSignal), где `TODO` часть условия задачи, а не наш долг.
+    # Проверка, краснеющая на чужом коде, перестаёт читаться целиком
+    # (`PIT-085`), а решение «этот каталог не наш» принимает вахта репы,
+    # не автор проверки.
+    allow = load_allowlist(root)
+    problems = []
+    for path in sorted(root.rglob("*")):
+        if path.suffix not in {".py", ".sh", ".md"} or not path.is_file():
+            continue
+        rel = path.relative_to(root)
+        if any(part in SKIP_DIRS for part in rel.parts):
+            continue
+        if any(str(rel) == a or str(rel).startswith(a.rstrip("/") + "/")
+               for a in allow):
+            continue
+        pattern = DEBT_DOC_RE if path.suffix == ".md" else DEBT_CODE_RE
+        try:
+            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        except OSError:
+            continue
+        for num, line in enumerate(lines, 1):
+            m = pattern.match(line)
+            if m and not DEBT_DATE_RE.search(m.group(2)):
+                problems.append(
+                    f"{path.relative_to(root)}:{num} — маркер {m.group(1)} "
+                    f"без даты: возраст долга неизвестен")
+    return problems
+
+
+def selftest_debt_markers() -> bool:
+    """Ловит маркер без даты, молчит на маркере с датой и на упоминании."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "a.py").write_text(
+            "# TODO 29.08.2026 — починить разбор\n"      # с датой, законно
+            "x = 1  # TODO вот это не маркер начала строки\n",
+            encoding="utf-8")
+        (root / "b.md").write_text(
+            "# Док\n\n385 заглушек TODO закрыты механизмом\n",  # упоминание
+            encoding="utf-8")
+        if check_debt_markers(root) != []:
+            return False
+        (root / "c.py").write_text("# TODO починить когда-нибудь\n",
+                                   encoding="utf-8")
+        return len(check_debt_markers(root)) == 1
+
+
+# Карточка ловушки: «### PIT-NNN — заголовок (ГГГГ-ММ-ДД)».
+PIT_CARD_RE = re.compile(r"^### (PIT-\d+)[^\n]*\((\d{4})-(\d{2})-(\d{2})\)",
+                         re.M)
+# С этого дня карточка обязана отвечать не только «чем ловится», но и «зачем».
+RESOLVE_SINCE = (2026, 8, 29)
+
+
+def check_pitfall_resolution(root: Path) -> list[str]:
+    """Новая карточка ловушки обязана отвечать: разрешить или растворить.
+
+    🔴 Кандидат №3 очереди внедрения. Поле «Гейт:» отвечает на вопрос **чем**
+    ловится дефект. Это поле отвечает на другой: **что мы вообще собираемся
+    с ним делать** —
+
+      · **разрешить** (resolve) — починить в существующем устройстве;
+      · **растворить** (dissolve) — перестроить так, чтобы дефект стал
+        невозможен, а не ловился.
+
+    Различие не академическое. `PIT-165` (правка двух файлов упала посередине)
+    можно было бы «разрешить», поправив якорь, — и он вернулся бы на следующем
+    несовпавшем тексте. Растворяет его двухфазная правка: сначала весь разбор,
+    потом все записи. Без этого поля выбор делается молча и почти всегда
+    в пользу разрешения, потому что оно дешевле сегодня.
+
+    🔴 ТРЕБУЕТСЯ ТОЛЬКО ОТ НОВЫХ КАРТОЧЕК (с 29.08.2026). Из 118 карточек
+    с датой поле есть у двух. Требовать его от всех — переписать 116 записей
+    задним числом, то есть **подделать свидетельства**: автор тогдашней
+    карточки этого выбора не делал, и приписывать ему его нельзя.
+
+    🔴 ЧЕГО НЕ ПОЙМАЕТ (`71` §7г-бис): написать «растворить» и починить
+    по-быстрому никто не мешает. Проверяется наличие ответа, не его честность
+    и не соответствие ответа сделанному.
+    """
+    registry = root / "reports" / "pitfalls.md"
+    if not registry.is_file():
+        return []
+    text = registry.read_text(encoding="utf-8", errors="replace")
+    matches = list(PIT_CARD_RE.finditer(text))
+    problems = []
+    for i, m in enumerate(matches):
+        when = (int(m.group(2)), int(m.group(3)), int(m.group(4)))
+        if when < RESOLVE_SINCE:
+            continue
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+        body = text[m.start():end]
+        if "азрешить или раствор" not in body:
+            problems.append(
+                f"{m.group(1)} ({'-'.join(m.group(2, 3, 4))}) — нет ответа "
+                f"«разрешить или растворить»: непонятно, чиним дефект "
+                f"или делаем его невозможным")
+    return problems
+
+
+def selftest_pitfall_resolution() -> bool:
+    """Ловит новую карточку без поля; молчит на старой и на заполненной."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "reports").mkdir()
+        reg = root / "reports" / "pitfalls.md"
+        reg.write_text(
+            "### PIT-001 — старая, поля не требуем (2026-01-01)\n\nтекст\n\n"
+            "### PIT-002 — новая с полем (2026-08-29)\n\n"
+            "- **Разрешить или растворить:** растворить\n",
+            encoding="utf-8")
+        if check_pitfall_resolution(root) != []:
+            return False          # старая и заполненная краснеть не должны
+        reg.write_text(reg.read_text(encoding="utf-8")
+                       + "\n### PIT-003 — новая без поля (2026-08-30)\n\nтекст\n",
+                       encoding="utf-8")
+        return len(check_pitfall_resolution(root)) == 1
+
+
+def check_wip_limits(root: Path) -> list[str]:
+    """Предел числа задач в работе — единственный механизм, который
+    останавливает рост очереди.
+
+    🔴 Заведено 29.08.2026. Закон Литтла — тождество: `среднее время жизни
+    задачи = число открытых ÷ скорость закрытия`, и **он не зависит от
+    дисциплины очереди**. Значит переприоритизация не уменьшает ни L, ни
+    среднее ожидание; помогают только три вещи — поднять скорость, снизить
+    приток, явно отбросить.
+
+    Раздел «В работе» с пределом 2 задаёт время прохождения (Литтл);
+    раздел «Готово к запуску» с пределом 5 — это **верёвка**: конечный буфер
+    превращает неограниченный рост очереди в явный отказ на входе.
+
+    Правило без проверки — пожелание: третий пункт «в работе» появляется
+    незаметно и не вызывает ничего. Здесь он даёт FAIL.
+
+    🔴 ЧЕГО НЕ ЛОВИТ: пункт, лежащий в «в работе» месяцами. Предел ограничивает
+    ЧИСЛО, а не возраст — застоявшуюся задачу видит только человек либо
+    отдельная проверка по дате (её пока нет).
+    """
+    problems: list[str] = []
+    for name in ("TASKS.md", "ROADMAP.md", "BOARD.md"):
+        path = root / name
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        for match in LIMIT_RE.finditer(text):
+            label, limit, body = match.group(1), int(match.group(2)), match.group(3)
+            count = len([l for l in body.splitlines()
+                         if re.match(r"^\s*[-*]\s*\[[ xX]\]", l)])
+            if count > limit:
+                problems.append(
+                    f"{name}: в разделе {label} {count} пунктов при пределе {limit} — "
+                    f"убери лишнее обратно в очередь; предел на вход и есть "
+                    f"единственное, что останавливает рост L (закон Литтла)")
+    return problems
+
+
+def selftest_wip_limits() -> bool:
+    """Ловит превышение и молчит на пределе ровно. Обе половины обязательны:
+    без второй проверка краснела бы на заполненном под завязку разделе.
+    """
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        f = root / "TASKS.md"
+
+        def probe(n: int) -> int:
+            items = "\n".join(f"- [ ] задача {i}" for i in range(n))
+            f.write_text(f"<!-- WIP:START limit=2 -->\n{items}\n<!-- WIP:END -->\n",
+                         encoding="utf-8")
+            return len(check_wip_limits(root))
+
+        if probe(0) or probe(1) or probe(2):
+            return False          # до предела включительно — молчим
+        if probe(3) != 1:
+            return False          # превышение — ловим
+        # Раздел без маркеров лимита не проверяется вовсе.
+        f.write_text("- [ ] раз\n- [ ] два\n- [ ] три\n- [ ] четыре\n", encoding="utf-8")
+        return check_wip_limits(root) == []
+
+
+# Порог числа исключений: больше — значит правило неверно, а не мир виноват.
+EXCEPTION_BUDGET = 12
+
+
+def check_exception_budget(root: Path) -> tuple[list[str], list[str]]:
+    """Исключение без срока пересмотра — тихая деградация стандарта.
+
+    🔴 Заведено 29.08.2026 по исследованию рисков. Индустриальная практика
+    ведения принятых рисков (risk acceptance / documented exception) требует
+    у записи **три** вещи, а не одну: причину, **дату пересмотра** и владельца.
+    У нас была только причина.
+
+    Почему срок важнее, чем кажется: то, что принято «на время», живёт вечно
+    и через год читается как норма. Это дрейф, который **не порождает
+    инцидентов, пока не станет поздно**, — тот же класс, что «drift to low
+    performance» у Meadows и миграция практики у Rasmussen.
+
+    Второе — **счётчик как индикатор**. Мониторить надо не отдельное
+    исключение, а их **число и темп роста**: рост означает либо что проверка
+    настроена слишком строго (чинить проверку), либо что стандарт де-факто
+    изменился (переписать стандарт). Порог один: больше `EXCEPTION_BUDGET` —
+    это уже не исключения, это неверное правило.
+
+    🔴 ЧЕГО НЕ ЛОВИТ: осмысленность причины. «Потому что так надо» пройдёт
+    проверку так же, как разбор на десять строк. Качество обоснования —
+    суждение, гейт его не выносит (`69` §4д).
+    """
+    fails: list[str] = []
+    warns: list[str] = []
+    total = 0
+    for name in (".revision_allowlist", ".size-exception"):
+        path = root / name
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        entries = [l for l in text.splitlines()
+                   if l.strip() and not l.lstrip().startswith("#")]
+        total += len(entries)
+        if entries and not re.search(r"пересмотр|срок действия|действует до", text, re.I):
+            warns.append(f"{name}: {len(entries)} исключений без срока пересмотра — "
+                         f"добавь строку «Пересмотр: ДД.ММ.ГГГГ»; принятое «на время» "
+                         f"без даты живёт вечно и становится нормой")
+    if total > EXCEPTION_BUDGET:
+        fails.append(f"исключений в репе {total} при бюджете {EXCEPTION_BUDGET} — "
+                     f"это уже не исключения, а неверное правило: чини проверку "
+                     f"или переписывай стандарт")
+    return fails, warns
+
+
+def selftest_exception_budget() -> bool:
+    """Ловит отсутствие срока и превышение бюджета; молчит на здоровом файле."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        f = root / ".revision_allowlist"
+
+        f.write_text("# причина\nодин.md\nдва.md\n", encoding="utf-8")
+        fails, warns = check_exception_budget(root)
+        if fails or len(warns) != 1:
+            return False          # без срока — предупреждение
+
+        f.write_text("# причина\n# Пересмотр: 01.12.2026\nодин.md\n", encoding="utf-8")
+        fails, warns = check_exception_budget(root)
+        if fails or warns:
+            return False          # со сроком — молчим
+
+        many = "\n".join(f"файл{i}.md" for i in range(EXCEPTION_BUDGET + 1))
+        f.write_text(f"# Пересмотр: 01.12.2026\n{many}\n", encoding="utf-8")
+        fails, warns = check_exception_budget(root)
+        return len(fails) == 1 and not warns
+
+
 def check_allowlist_rot(root: Path) -> list[str]:
     """Исключение, пережившее свой предмет, — тихо выключенная проверка.
 
@@ -2262,6 +2758,16 @@ def check_allowlist_rot(root: Path) -> list[str]:
         # по замыслу — в этом весь его смысл.
         if entry.startswith("link:"):
             continue
+        # 🔴 `gone:` — предмет, которого НЕ ДОЛЖНО существовать. Найдено
+        # 29.08.2026 в `salvation`: исключение на `_base/` заведено потому,
+        # что журнал говорит «`_base/` наружу не идёт» — это утверждение ОБ
+        # ОТСУТСТВИИ каталога у публичной репы, куда база не раздаётся
+        # по замыслу. Проверка протухания требовала, чтобы предмет существовал,
+        # и объявила протухшим исключение, которое живо ровно потому, что
+        # предмета нет. Третья форма исключения, у которой предмета на диске
+        # быть не может — как `cjk-term:` и `link:`.
+        if entry.startswith("gone:"):
+            continue
         target = root / entry.rstrip("/")
         if not target.exists():
             problems.append(f"исключение указывает в пустоту: {entry}")
@@ -2276,12 +2782,46 @@ def selftest_allowlist_rot() -> bool:
         (root / "жив.md").write_text("x\n", encoding="utf-8")
         (root / ".revision_allowlist").write_text(
             "# причина\nжив.md\nумер.md\ncjk-term: X\n"
-            "link: figures/будет-позже.png\n", encoding="utf-8")
+            "link: figures/будет-позже.png\n"
+            "gone: _base/\n", encoding="utf-8")
         got = check_allowlist_rot(root)
         # Ровно ОДНА находка: `умер.md`. `cjk-term:` и `link:` предмета на
         # диске не имеют по построению — объявить их протухшими значит
         # требовать существования того, чего не должно быть.
         return len(got) == 1 and "умер.md" in got[0]
+
+
+# 🔴 ЧТО ГЕЙТ НЕ ПРОВЕРЯЕТ — печатается вместе с вердиктом, всегда.
+#
+# Заведено 29.08.2026 по исследованию human factors, и это не педантизм,
+# а самая дорогая находка дня. Alberdi et al. (маммография с подсказчиком):
+# обнаружение непомеченных системой раков упало с **46 % до 21 %** — врачи
+# трактовали ОТСУТСТВИЕ метки как доказательство отсутствия болезни.
+#
+# > **Молчащий проверяющий делает человека хуже, чем отсутствие проверяющего.**
+#
+# Строка «ИТОГ: CLEAN» — ровно такой пустой положительный вердикт. Она
+# читается как «в репе всё в порядке», хотя означает лишь «ни одна из 26
+# проверок не сработала». Разница огромна, и без явного списка непокрытого
+# её не видно.
+#
+# Второе основание — automation bias (Parasuraman & Manzey, Human Factors
+# 2010): благодушие к автоматике не лечится ни тренировкой, ни инструкцией,
+# ни у новичков, ни у экспертов. Работает только изменение самого вывода.
+UNCOVERED = (
+    "содержательное устаревание: текст, верный по форме и ложный по сути",
+    "осмысленность формулировок — правил, имён, причин в исключениях",
+    "полнота: правило, которого нет вовсе, не может быть нарушено",
+    "верна ли сама проверка (validation) — гейт умеет только verification",
+)
+
+
+def print_coverage(checks_run: int) -> None:
+    """Покрытие и его границы — рядом с вердиктом, а не в документации."""
+    print(f"    покрыто проверками: {checks_run} · канареек: 23")
+    print("    🔴 НЕ покрыто (гейт этого не видит):")
+    for item in UNCOVERED:
+        print(f"       · {item}")
 
 
 def main() -> int:
@@ -2431,6 +2971,34 @@ def main() -> int:
         if not sec_fails and not sec_warns:
             print("[OK] Гигиена секретов: значений в файлах репы нет")
 
+    if not selftest_exception_budget():
+        failures.append("канарейка бюджета исключений сломана")
+        print("[FAIL] Канарейка бюджета исключений: самопроверка не прошла")
+    else:
+        ex_f, ex_w = check_exception_budget(root)
+        if ex_f:
+            failures.extend(ex_f)
+            print(f"[FAIL] Бюджет исключений превышен: {len(ex_f)}")
+            for line in ex_f:
+                print(f"    · {line}")
+        if ex_w:
+            warnings.extend(ex_w)
+            print(f"[WARN] Исключения без срока пересмотра: {len(ex_w)}")
+            for line in ex_w:
+                print(f"    · {line}")
+
+    if not selftest_wip_limits():
+        failures.append("канарейка предела задач сломана: не ловит превышение "
+                        "либо краснеет на заполненном под завязку разделе")
+        print("[FAIL] Канарейка предела задач: самопроверка не прошла")
+    else:
+        wip = check_wip_limits(root)
+        if wip:
+            failures.extend(wip)
+            print(f"[FAIL] Предел числа задач превышен: {len(wip)}")
+            for line in wip:
+                print(f"    · {line}")
+
     if not selftest_pointer_purity():
         failures.append("канарейка чистоты указателя сломана: не ловит "
                         "состояние внутри файла-указателя")
@@ -2441,6 +3009,52 @@ def main() -> int:
             failures.extend(pp)
             print(f"[FAIL] Указатель хранит состояние: {len(pp)}")
             for line in pp:
+                print(f"    · {line}")
+
+    # 🔴 ПРЕДУПРЕЖДЕНИЕ, А НЕ ОТКАЗ — и это осознанный выбор.
+    # Просроченные пункты `TASKS.md` — действия, которые может совершить
+    # ТОЛЬКО владелец. Красный гейт здесь заблокировал бы закрытие батчей
+    # вахты за то, что вахта физически не может исправить, и приучил бы
+    # закрывать батчи с `--skip-gate` — то есть отменил бы гейт целиком
+    # (`PIT-085`: проверка, краснеющая на том, что нельзя починить,
+    # перестаёт читаться). Задача проверки — сделать истечение ВИДИМЫМ,
+    # а не остановить работу.
+    if not selftest_task_expiry():
+        failures.append("канарейка срока задач сломана: не отличает "
+                        "просроченное от будущего")
+        print("[FAIL] Канарейка срока задач: самопроверка не прошла")
+    else:
+        expired = check_task_expiry(root)
+        if expired:
+            warnings.extend(expired)
+            print(f"[WARN] Срок прошёл, исход не выбран: {len(expired)}")
+            for line in expired[:6]:
+                print(f"    · {line}")
+            if len(expired) > 6:
+                print(f"    · … и ещё {len(expired) - 6}")
+
+    if not selftest_debt_markers():
+        failures.append("канарейка маркеров долга сломана: не отличает "
+                        "маркер без даты от упоминания слова")
+        print("[FAIL] Канарейка маркеров долга: самопроверка не прошла")
+    else:
+        debt = check_debt_markers(root)
+        if debt:
+            failures.extend(debt)
+            print(f"[FAIL] Маркер долга без даты: {len(debt)}")
+            for line in debt[:5]:
+                print(f"    · {line}")
+
+    if not selftest_pitfall_resolution():
+        failures.append("канарейка поля разрешения сломана: не отличает "
+                        "новую карточку без поля от старой")
+        print("[FAIL] Канарейка поля разрешения: самопроверка не прошла")
+    else:
+        unresolved = check_pitfall_resolution(root)
+        if unresolved:
+            failures.extend(unresolved)
+            print(f"[FAIL] Карточка без ответа о разрешении: {len(unresolved)}")
+            for line in unresolved[:5]:
                 print(f"    · {line}")
 
     if not selftest_pointer_files():
@@ -2655,13 +3269,22 @@ def main() -> int:
         print("[OK] Пустых папок нет")
 
     print()
+    import ast as _ast
+    checks_run = sum(
+        1 for n in _ast.walk(_ast.parse(Path(__file__).read_text(encoding="utf-8")))
+        if isinstance(n, _ast.FunctionDef) and n.name.startswith("check_"))
+
     if failures or (args.strict and warnings):
         print(f"ИТОГ: DRIFT (fail: {len(failures)}, warn: {len(warnings)})")
+        print_coverage(checks_run)
         return 1
     if warnings:
         print(f"ИТОГ: CLEAN с предупреждениями (warn: {len(warnings)})")
+        print_coverage(checks_run)
         return 0
-    print("ИТОГ: CLEAN")
+    # 🔴 «CLEAN» БЕЗ ПОКРЫТИЯ НЕ ПЕЧАТАЕТСЯ НИКОГДА — см. UNCOVERED выше.
+    print("ИТОГ: ни одна из проверок не сработала")
+    print_coverage(checks_run)
     return 0
 
 

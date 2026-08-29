@@ -1,7 +1,7 @@
 # truth-seeking — Vasilii Evdokimov
 
 <!-- STATUS -->
-> **Сейчас:** `v1.3.1` · 2026-08-28 · Чек-лист оценки одной статьи
+> **Сейчас:** `v1.3.2` · 2026-08-29 · README приведён к стандарту 98
 > Открытое — [`ROADMAP.md`](ROADMAP.md) · где стоим — [`WATCHLOG.md`](WATCHLOG.md) §0.
 <!-- /STATUS -->
 
@@ -10,6 +10,17 @@
 The stance is deliberate and explicit: **independent scientific researcher.** Not a believer collecting confirmations, not a cynic collecting dismissals — someone applying a consistent method to whatever comes in, and following the evidence wherever it lands.
 
 > Working notes are in Russian; source material is mixed (RU / EN).
+
+## Что это и зачем
+
+Верстак критического мышления: метод проверки утверждений (найти источник, оценить
+доказательства, проверить механизм, назвать красные флаги, сформировать позицию
+с уровнем уверенности), применённый к конкретным темам — псевдонаука, конспирология,
+медицинские и вакцинные claims. Позиция намеренно нейтральная: «независимый
+исследователь», не сборщик подтверждений и не циник. Включение темы значит
+«под проверкой», никогда не «одобрено».
+
+_Перенесено из [`MANIFEST.md`](MANIFEST.md) §1 — единственного места, где это написано человеком._
 
 ## The point of this repo
 
@@ -56,23 +67,51 @@ Some source material describes protocols involving prescription drugs and toxic 
 
 **Верстак критического мышления.** Репа существует ради одного: тренировать оценку утверждений так, как это делает независимый исследователь — взять claim, свести к проверяемому ядру, дойти до первоисточника, взвесить по реальным доказательствам и прийти к выводу, который можно защитить. Ничему здесь не верю по умолчанию: наличие материала означает «разбираю», а не «согласен». Позиция явная — **независимый научный исследователь**. Ядро — [`00-method`](00-method/) (как думать) и [`01-how-science-fails`](01-how-science-fails/) (пределы и сбои самой науки как фундамент скепсиса ко всему). Сферы интереса и очередь разбора — [`research-agenda.md`](research-agenda.md); полный реестр конспирологических теорий с предварительными метками — [`07-conspiracy-catalog`](07-conspiracy-catalog/).
 
----
+## С чего начать
 
-**Contact:** vevdokimovm@gmail.com · GitHub: [@vevdokimovm](https://github.com/vevdokimovm)
+1. **[`MANIFEST.md`](MANIFEST.md)** — что это, границы, состояние ревизии
+2. **[`00-infrastructure/`](00-infrastructure/)** — 00-infrastructure — как устроена и ведётся эта репа
+3. **[`ROADMAP.md`](ROADMAP.md)** — что открыто
+
+## Что здесь можно узнать
+
+- **00-infrastructure/** — 00-infrastructure — как устроена и ведётся эта репа
+- **00-method/** — 00 — Философия: зачем эта репа
+- **01-how-science-fails/** — 01 — Намеренный обман: купленная наука и прямой фрод
+- **02-health-and-medical-claims/** — 02 — Health & Medical Claims
+- **03-vaccine-and-public-health-claims/** — 03 — Vaccine & Public-Health Claims
+- **04-frequency-and-sound-claims/** — 04 — Frequency & Sound Claims
+- **05-conspiracy-and-media-narratives/** — 05 — Conspiracy & Media Narratives
+- **06-document-investigations/** — 06 — Document Investigations
+
+_Собрано из заголовков самих документов — это и есть вопросы, на которые они отвечают._
+
+## Границы — чего здесь НЕТ
+
+- Включение темы значит «под проверкой», никогда не «одобрено».
+
+_Перенесено из [`MANIFEST.md`](MANIFEST.md) §1._
 
 ## Структура
 
 <!-- STRUCTURE:AUTO:START -->
-| Папка | Файлов | Что внутри |
+| Папка | Файлов | Что внутри по существу |
 |---|---|---|
-| `00-infrastructure/` | 1 | как устроена и ведётся эта репа |
-| `00-method/` | 12 | инструментарий исследователя |
-| `01-how-science-fails/` | 4 | Как ломается наука |
-| `02-health-and-medical-claims/` | 4 | Health & Medical Claims |
-| `03-vaccine-and-public-health-claims/` | 4 | Vaccine & Public-Health Claims |
-| `04-frequency-and-sound-claims/` | 2 | Frequency & Sound Claims |
-| `05-conspiracy-and-media-narratives/` | 3 | Conspiracy & Media Narratives |
-| `06-document-investigations/` | 1 | Document Investigations |
-| `07-conspiracy-catalog/` | 17 | Каталог конспирологических теорий |
-| `reports/` | 2 | 1 заметка, 1 таблица CSV |
+| [`00-infrastructure/`](00-infrastructure/) | 1 | 00-infrastructure — как устроена и ведётся эта репа |
+| [`00-method/`](00-method/) | 12 | инструментарий: философия, эпистемология, научный метод, иерархия доказательств, поиск первоисточников, статистика для проверки заявлений, логика и аргументы, ловушки мышления |
+| [`01-how-science-fails/`](01-how-science-fails/) | 4 | намеренный обман, системные изъяны, физика как пример ошибок науки |
+| [`02-health-and-medical-claims/`](02-health-and-medical-claims/) | 4 | медицинские заявления, источник — выжимка про рак |
+| [`03-vaccine-and-public-health-claims/`](03-vaccine-and-public-health-claims/) | 4 | вакцины и общественное здоровье, выжимка про аутизм |
+| [`04-frequency-and-sound-claims/`](04-frequency-and-sound-claims/) | 2 | заявления про частоты и звук |
+| [`05-conspiracy-and-media-narratives/`](05-conspiracy-and-media-narratives/) | 3 | конспирология и медиа-нарративы, выжимка `istina-1` |
+| [`06-document-investigations/`](06-document-investigations/) | 1 | расследования документов |
+| [`07-conspiracy-catalog/`](07-conspiracy-catalog/) | 17 | каталог конкретных теорий по 9 темам (космология, происхождение, медицина, ковид, еда, тайные общества, Голливуд, история, контроль/будущее) + карточка-шаблон claim |
+| [`reports/`](reports/) | 2 | Ревизия репы — 26.08.2026 |
+
+_Столбец «что внутри» собран из `MANIFEST.md` §3, где он есть, иначе из заголовков самих файлов. Ничего не сочинено: где описания нет — так и написано._
 <!-- STRUCTURE:AUTO:END -->
+
+---
+
+**Contact:** vevdokimovm@gmail.com · GitHub: [@vevdokimovm](https://github.com/vevdokimovm)
+

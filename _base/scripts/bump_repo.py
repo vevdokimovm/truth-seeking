@@ -40,8 +40,11 @@ import sys
 from datetime import date
 from pathlib import Path
 
-BASE_REPO = Path(__file__).resolve().parent.parent
-REPOS = BASE_REPO.parent
+# Корень определяется общим модулем: скрипт может быть запущен и из базы,
+# и из копии кита в репе-наследнике (`_base/scripts/`). См. `_roots.py`.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _roots import resolve_roots  # noqa: E402
+BASE_REPO, REPOS, FROM_KIT = resolve_roots(__file__)
 TODAY = date.today().isoformat()
 
 # Как читает версию сам deploy.sh — сверяемся ровно этим выражением, а не похожим.
