@@ -1,5 +1,10 @@
 # truth-seeking — Vasilii Evdokimov
 
+<!-- STATUS -->
+> **Сейчас:** `v1.3.1` · 2026-08-28 · Чек-лист оценки одной статьи
+> Открытое — [`ROADMAP.md`](ROADMAP.md) · где стоим — [`WATCHLOG.md`](WATCHLOG.md) §0.
+<!-- /STATUS -->
+
 **A critical-thinking workbench.** This repository exists for one purpose: to practice evaluating claims the way an independent researcher would — take a claim, strip it to its testable core, trace it to its primary source, weigh it against real evidence, and reach a conclusion I can defend. Nothing here is believed by default. **Inclusion means "under examination", never "endorsed."**
 
 The stance is deliberate and explicit: **independent scientific researcher.** Not a believer collecting confirmations, not a cynic collecting dismissals — someone applying a consistent method to whatever comes in, and following the evidence wherever it lands.
@@ -60,14 +65,14 @@ Some source material describes protocols involving prescription drugs and toxic 
 <!-- STRUCTURE:AUTO:START -->
 | Папка | Файлов | Что внутри |
 |---|---|---|
-| `00-infrastructure/` | 1 | TODO — заполнить вручную |
-| `00-method/` | 11 | TODO — заполнить вручную |
-| `01-how-science-fails/` | 4 | TODO — заполнить вручную |
-| `02-health-and-medical-claims/` | 4 | TODO — заполнить вручную |
-| `03-vaccine-and-public-health-claims/` | 3 | TODO — заполнить вручную |
-| `04-frequency-and-sound-claims/` | 2 | TODO — заполнить вручную |
-| `05-conspiracy-and-media-narratives/` | 3 | TODO — заполнить вручную |
-| `06-document-investigations/` | 1 | TODO — заполнить вручную |
-| `07-conspiracy-catalog/` | 17 | TODO — заполнить вручную |
-| `reports/` | 2 | TODO — заполнить вручную |
+| `00-infrastructure/` | 1 | как устроена и ведётся эта репа |
+| `00-method/` | 12 | инструментарий исследователя |
+| `01-how-science-fails/` | 4 | Как ломается наука |
+| `02-health-and-medical-claims/` | 4 | Health & Medical Claims |
+| `03-vaccine-and-public-health-claims/` | 4 | Vaccine & Public-Health Claims |
+| `04-frequency-and-sound-claims/` | 2 | Frequency & Sound Claims |
+| `05-conspiracy-and-media-narratives/` | 3 | Conspiracy & Media Narratives |
+| `06-document-investigations/` | 1 | Document Investigations |
+| `07-conspiracy-catalog/` | 17 | Каталог конспирологических теорий |
+| `reports/` | 2 | 1 заметка, 1 таблица CSV |
 <!-- STRUCTURE:AUTO:END -->

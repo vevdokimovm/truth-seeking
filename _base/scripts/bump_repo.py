@@ -48,6 +48,46 @@ TODAY = date.today().isoformat()
 WL_VERSION = re.compile(r"\*\*Версия:\*\*\s*([0-9][0-9.]*)")
 
 
+
+def current_watch() -> str:
+    """Буква вахты — из `~/.claude.json`, а НЕ константой.
+
+    🔴 Найдено 28.08.2026: здесь стояло литеральное «V». Это и был **корень
+    `PIT-156`** — правило «проверяй вахту перед записью» физически не могло
+    помочь, потому что писала не вахта, а скрипт, и он писал V всегда.
+    Один прогон `--all` разложил неверную букву по 45 репам.
+
+    Тот же класс, что `PIT-160`: массовый инструмент умножает свой неверный
+    допуск на охват. И та же развилка «правило против механизма»: сколько ни
+    напоминай себе проверять, источник числа не в памяти агента.
+
+    Не определилась — возвращаем `?`, а не подставляем ближайшую: неизвестная
+    буква честнее неверной (`71` §7ж).
+    """
+    import json
+    from pathlib import Path as _P
+    try:
+        d = json.loads((_P.home() / ".claude.json").read_text(encoding="utf-8"))
+        email = (d.get("oauthAccount") or {}).get("emailAddress") or ""
+    except Exception:
+        return "?"
+    if not email:
+        return "?"
+    # 🔴 29.08.2026: здесь стоял ПЕРЕЧЕНЬ из двух вахт — тот же дефект, что
+    # литеральное «V» до него, только мягче: две вахты работали, три молча
+    # получали «?». Поймано на вахте S (`gertab95@gmail.com`) сразу после
+    # `/login`. Перечень покрывает ровно то, что кто-то однажды вписал;
+    # правило читает реестр, который и так обязан быть верным.
+    registry = _P(__file__).resolve().parent.parent / "00-infrastructure" / "84-claude-accounts.md"
+    if registry.is_file():
+        for line in registry.read_text(encoding="utf-8", errors="replace").splitlines():
+            if email in line:
+                m = re.search(r"\*\*([VJMSA])\*\*", line)
+                if m:
+                    return m.group(1)
+    return "?"
+
+
 def bump(v: str, kind: str) -> str:
     a, b, c = (v.strip().split(".") + ["0", "0", "0"])[:3]
     if kind == "major":
@@ -57,8 +97,38 @@ def bump(v: str, kind: str) -> str:
     return f"{a}.{int(b)+1}.0"
 
 
+# Указатель — короткий файл, чьё содержание: «настоящий лежит там».
+# 🔴 29.08.2026: `bump_repo.py` вписал `**Версия:**` прямо в файл-указатель
+# `personal-finance-dss/WATCHLOG.md` — и **восстановил тот самый третий источник
+# правды о состоянии**, который в том же батче был оттуда убран. Инструмент,
+# не различающий документ и указатель на документ, отменяет работу по разведению
+# источников молча и на каждом подъёме версии.
+POINTER_MAX_LINES = 40
+
+
+def follow_pointer(path: Path) -> Path:
+    """Настоящий файл, если этот — указатель; иначе он сам."""
+    if not path.is_file():
+        return path
+    text = path.read_text(encoding="utf-8", errors="replace")
+    if len(text.splitlines()) > POINTER_MAX_LINES:
+        return path
+    for m in re.finditer(r"\[[^\]]*\]\(([^)]+)\)|`([^`]+)`", text):
+        target = (m.group(1) or m.group(2) or "").strip()
+        if not target or target.startswith(("http", "#")):
+            continue
+        if Path(target).name != path.name:
+            continue
+        candidate = (path.parent / target).resolve()
+        if candidate.is_file() and candidate != path.resolve():
+            return candidate
+    return path
+
+
 def watchlog_version(repo: Path) -> str | None:
-    wl = repo / "WATCHLOG.md"
+    # Идём по указателю, как write_watchlog и sync_resume_point: иначе сверка
+    # читает заглушку, не находит версии и валит батч на ровном месте.
+    wl = follow_pointer(repo / "WATCHLOG.md")
     if not wl.is_file():
         return None
     m = WL_VERSION.search(wl.read_text(encoding="utf-8", errors="replace"))
@@ -98,10 +168,10 @@ def check_all() -> int:
 
 def write_watchlog(repo: Path, new: str) -> str:
     """Строка `**Версия:**` — то, что читает деплой. Нет её — создаём."""
-    wl = repo / "WATCHLOG.md"
+    wl = follow_pointer(repo / "WATCHLOG.md")
     if not wl.is_file():
         wl.write_text(f"# {repo.name} — Вахтенный журнал\n\n"
-                      f"**Версия:** {new} · **Дата:** {TODAY} · **Вахта:** V\n",
+                      f"**Версия:** {new} · **Дата:** {TODAY} · **Вахта:** {current_watch()}\n",
                       encoding="utf-8")
         return "журнал создан"
     t = wl.read_text(encoding="utf-8")
@@ -111,9 +181,50 @@ def write_watchlog(repo: Path, new: str) -> str:
         return "строка обновлена"
     head = re.search(r"^#\s+.*$", t, re.M)
     i = t.index("\n", head.end()) if head else 0
-    wl.write_text(t[:i] + f"\n\n**Версия:** {new} · **Дата:** {TODAY} · **Вахта:** V\n"
+    wl.write_text(t[:i] + f"\n\n**Версия:** {new} · **Дата:** {TODAY} · **Вахта:** {current_watch()}\n"
                   + t[i:], encoding="utf-8")
     return "строка добавлена"
+
+
+
+def sync_resume_point(repo: Path, new: str) -> str | None:
+    """Строка «Текущая точка: vX.Y.Z» в §0 — её читает гейт (`PIT-094`).
+
+    🔴 28.08.2026: `bump_repo.py` обновлял только `**Версия:**`, а «Текущая
+    точка» оставалась прежней — то есть **сам инструмент подъёма версии
+    создавал расхождение**, которое гейт потом честно ловил. Обнаружено после
+    массового прогона по 45 репам: каждая получила `PIT-094` от своего же
+    подъёма.
+    """
+    wl = follow_pointer(repo / "WATCHLOG.md")
+    if not wl.is_file():
+        return None
+    t = wl.read_text(encoding="utf-8")
+    new_t, n = re.subn(r"([Тт]екущая точка:\s*\**v?)\d+\.\d+\.\d+", rf"\g<1>{new}", t)
+    if n:
+        wl.write_text(new_t, encoding="utf-8")
+        return f"«Текущая точка» → v{new}"
+    return None
+
+
+def sync_readme_status(repo: Path, new: str, title: str) -> str | None:
+    """Блок `<!-- STATUS -->` в README — витрина репы (`75` §1).
+
+    Та же дыра, тот же заход: подъём версии оставлял README отставшим.
+    """
+    rm = repo / "README.md"
+    if not rm.is_file():
+        return None
+    t = rm.read_text(encoding="utf-8")
+    if "<!-- STATUS -->" not in t:
+        return None
+    new_t, n = re.subn(
+        r"(> \*\*Сейчас:\*\* )`v[\d.]+`( · )\d{4}-\d{2}-\d{2}( · ).*",
+        rf"\g<1>`v{new}`\g<2>{TODAY}\g<3>{title}", t, count=1)
+    if n:
+        rm.write_text(new_t, encoding="utf-8")
+        return "README-статус обновлён"
+    return None
 
 
 def main() -> int:
@@ -187,10 +298,22 @@ def main() -> int:
     # 3. WATCHLOG §0 — то, из-за чего деплой отказывал
     how = write_watchlog(repo, new)
 
+    # 4. Всё остальное, что обязано двигаться ВМЕСТЕ с версией.
+    # 🔴 28.08.2026: без этих двух шагов сам подъём версии создавал дрейф —
+    # «Текущая точка» и README-статус оставались прежними, и гейт честно
+    # ловил `PIT-094`/`PIT-116` у 45 реп подряд. Версия репы поднимается
+    # ОДНОЙ операцией, включающей всё живое (`PIT-136` — тот же принцип).
+    resume = sync_resume_point(repo, new)
+    readme = sync_readme_status(repo, new, a.title or "версия поднята")
+
     print(f"✓ {a.repo}: {cur} → {new}")
     print(f"  · CHANGELOG — секция [{new}]")
     print(f"  · VERSION")
     print(f"  · WATCHLOG §0 — {how}")
+    if resume:
+        print(f"  · {resume}")
+    if readme:
+        print(f"  · {readme}")
 
     check = watchlog_version(repo)
     if check != new:
