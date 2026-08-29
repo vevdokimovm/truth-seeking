@@ -1,7 +1,7 @@
 # truth-seeking — Vasilii Evdokimov
 
 <!-- STATUS -->
-> **Сейчас:** `v1.3.2` · 2026-08-29 · README приведён к стандарту 98
+> **Сейчас:** `v1.3.3` · 2026-08-29 · Пересборка: архив содержал устаревший канон
 > Открытое — [`ROADMAP.md`](ROADMAP.md) · где стоим — [`WATCHLOG.md`](WATCHLOG.md) §0.
 <!-- /STATUS -->
 
