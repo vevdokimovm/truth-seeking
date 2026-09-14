@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
 # =============================================================================
-# deploy.sh v4.23.0 — ЕДИНЫЙ деплойер репозиториев. Один скрипт на всю систему.
+# deploy.sh v4.28.4 — ЕДИНЫЙ деплойер репозиториев. Один скрипт на всю систему.
+#
+# 🔴 РОЛЬ СУЖЕНА 09.09.2026 РЕШЕНИЕМ ВЛАДЕЛЬЦА (`ADR-008`, правило одной руки).
+# Обычный выпуск — коммит, тег, push, релиз — делает вахта через
+# `scripts/publish.py` из рабочей копии репы. Этот скрипт НЕ удаляется
+# (прямое требование владельца: «только сам скрипт не удаляй он важен»)
+# и остаётся нужен для того, чего publish.py не делает:
+#
+#   · раздача по зеркалам (MIRRORS)
+#   · BACKFILL старых версий из архивов
+#   · REPAIR недостающих релизов по всем тегам
+#   · сверка repos-map с GitHub
+#   · КАНОН ФОРМАТА описания — его парсер извлекает `release_notes.py`
+#
+# Запуск по репе, которую вахта уже выпустила, безвреден: увидит готовые
+# тег и релиз и напечатает «актуальна».
 #
 # ┌───────────────────────────────────────────────────────────────────────────┐
 # │ ЖЕЛЕЗНОЕ ПРАВИЛО: ВТОРОГО СКРИПТА НЕ ЗАВОДИТСЯ. НИКОГДА.                   │
@@ -37,7 +52,7 @@
 #   -> чинит уже существующие релизы, сделанные не по стандарту -> обновляет repos-map.
 #
 # ЗАПУСК:
-#   zsh deploy.sh                      # папка по умолчанию ~/Downloads
+#   zsh deploy.sh                      # папка по умолчанию ~/Developer
 #   zsh deploy.sh ~/Desktop/archives   # другая папка
 #   DRY=1 zsh deploy.sh                # ПЛАН без единого изменения (запускай первым!)
 #
@@ -52,6 +67,7 @@
 #                  ONLY=1 сделать нельзя: ONLY — это СПИСОК ИМЁН, и "1" будет
 #                  понято как репа с именем 1.
 #   SKIP="a b"     не трогать эти репы вообще
+#   LAST=N         в починке смотреть только N САМЫХ СВЕЖИХ тегов (по SemVer), а не все
 #   REPAIR=1       ТОЛЬКО починка: пройтись по существующим тегам/релизам и привести
 #                  к стандарту (заголовок, описание из CHANGELOG, недостающий ассет).
 #                  Новые версии не публикуются. Осмысленные описания не перезаписываются
@@ -89,7 +105,18 @@ fi
 if [ -n "${ZSH_VERSION:-}" ]; then setopt shwordsplit 2>/dev/null || true; fi
 
 SELF_DIR="$(cd "$(dirname "$0")" 2>/dev/null && pwd)"
-DIR="${1:-${SELF_DIR:-$HOME/Downloads}}"
+# 🔴 03.09.2026 (v4.24.0): по умолчанию — `~/Developer`, не папка скрипта.
+# Заказ владельца: артефакты системы отдельно от всего скачанного.
+#
+# Почему `SELF_DIR` убран из цепочки: он давал сюрприз. Запуск КАНОНА
+# (`templates/deploy.sh`) искал архивы в `templates/` и честно отвечал
+# «публиковать нечего» — при полной папке архивов рядом. Копия в `~/Downloads`
+# работала лишь потому, что случайно лежала там же, где архивы.
+# Умолчание, верное по совпадению, ломается при первом переносе файла.
+#
+# `BASE_ARTIFACTS` — та же переменная, что у скриптов Python (`_roots.py`):
+# один способ переопределить путь, а не два расходящихся.
+DIR="${1:-${BASE_ARTIFACTS:-$HOME/Developer}}"
 OWNER="${OWNER:-vevdokimovm}"
 BRANCH="${BRANCH:-main}"
 RETRIES="${RETRIES:-5}"; RETRY_SLEEP="${RETRY_SLEEP:-4}"
@@ -120,7 +147,7 @@ ASSET="${ASSET:-1}"
 # висеть перед тем, как механизм вообще успеет заметить проблему.
 CLONE_LOW_SPEED_LIMIT="${CLONE_LOW_SPEED_LIMIT:-51200}"  # байт/с — ниже считаем зависанием
 CLONE_LOW_SPEED_TIME="${CLONE_LOW_SPEED_TIME:-15}"        # столько секунд подряд ниже лимита → обрыв
-SCRIPT_VERSION="4.23.0"
+SCRIPT_VERSION="4.28.4"
 # Накопители по релизам. Объявлены здесь, а не в блоке 2Б: ветка REPAIR (шаг 2А)
 # вызывает ensure_release раньше, и под `set -u` обращение к необъявленной ASSET_OK
 # роняло весь прогон уже ПОСЛЕ создания релиза — работа сделана, а код возврата ошибка.
@@ -144,7 +171,7 @@ CHLOG_FILL="${CHLOG_FILL:-0}"  # 1 = дописать секции и разря
 # Публичные зеркала не трогаются массовыми режимами: служебные файлы в витрине
 # посторонним не нужны (08.08.2026 в публичную finpilot так уехала вся _base/).
 # Назвал репу явно через ONLY — значит осознанно, тогда работаем.
-# Витрина по ADR-009: КАЖДОЕ зеркало вносится сюда в момент создания, а не после
+# Витрина по mission-control::ADR-009: КАЖДОЕ зеркало вносится сюда в момент создания, а не после
 # первого инцидента. 15.08.2026 три зеркала были заведены и открыты в public раньше,
 # чем попали в этот список, — окно, в котором sync-base.sh залил бы в них _base/.
 # 🔴 Список ПУБЛИЧНЫХ реп: массовые режимы их пропускают, база в них не раздаётся.
@@ -152,10 +179,55 @@ CHLOG_FILL="${CHLOG_FILL:-0}"  # 1 = дописать секции и разря
 # не попали: algorithms-site, game-analytics-engine, claude-usage, salvation.
 # Это ровно PIT-097 («список — намерение, свойство объекта — факт»): держать список
 # в синхроне с GitHub руками невозможно, поэтому ниже стоит предохранитель по факту.
-# Сверить список с реальностью:
+# 🔴 СВЕРЯЕТСЯ ИНСТРУМЕНТОМ, А НЕ ГЛАЗАМИ (с 04.09.2026):
+#     python3 scripts/visibility_check.py
+# Он спрашивает GitHub и сравнивает с этим списком и с `repos-map.md`.
+# Первый же прогон нашёл ДВЕ публичные репы вне списка — `vevdokimovm`
+# и `vevdokimovm.github.io`, профиль и сайт. Массовый режим считал бы их
+# обычными и залил бы туда `_base/`; ровно это случилось 08.08.2026
+# с публичной `finpilot`.
+#
+# Сверить список с реальностью вручную:
 #   gh repo list vevdokimovm --limit 200 --json name,visibility \
 #     --jq '.[]|select(.visibility=="PUBLIC")|.name'
-MIRRORS="${MIRRORS:-finpilot finpilot-mirror finpilot-public-mirror vk-graph health-report-generator bron-kerbosch algorithms-site game-analytics-engine claude-usage salvation}"
+# ── deploy-repos.conf — список зеркал БЕЗ выпуска новой версии скрипта ───────
+# Заказ: `ROADMAP` §P2, «списки в теле deploy.sh». Исходная формулировка
+# («перенести списки в данные») отвергнута: файл данных сломал бы главное
+# свойство деплойера — самодостаточность. Он лежит в ПЯТИ местах, владелец
+# запускает копию из `~/Developer`, и внешний конфиг туда бы не поехал —
+# копия молча осталась бы без зеркал, то есть начала считать зеркало
+# обычной репой и залила бы в витрину `_base/`.
+#
+# 🔴 Поэтому конфиг НЕОБЯЗАТЕЛЕН и лежит РЯДОМ со скриптом. Нет файла —
+# работает ровно как раньше, на встроенном умолчании. Порядок старшинства:
+#
+#     переменная окружения  >  deploy-repos.conf  >  встроенное умолчание
+#
+# Окружение старше конфига намеренно: разовый прогон `MIRRORS="a b" ./deploy.sh`
+# обязан перебивать постоянную настройку, а не наоборот.
+#
+# Формат — по одному `КЛЮЧ=значение` в строке, `#` в начале строки — комментарий.
+# Единственный ключ сейчас — `MIRRORS`. Файл НЕ исполняется: он разбирается
+# построчно, поэтому положить в него команду нельзя.
+CONF_MIRRORS=""
+DEPLOY_CONF="${DEPLOY_CONF:-$SELF_DIR/deploy-repos.conf}"
+if [ -f "$DEPLOY_CONF" ]; then
+  while IFS= read -r _cline || [ -n "$_cline" ]; do
+    case "$_cline" in ''|'#'*) continue ;; esac
+    case "$_cline" in *=*) : ;; *) continue ;; esac
+    _ckey="${_cline%%=*}"
+    _cval="${_cline#*=}"
+    _ckey="$(printf '%s' "$_ckey" | tr -d ' \t')"
+    _cval="$(printf '%s' "$_cval" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' \
+                                        -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'\$/\1/")"
+    case "$_ckey" in
+      MIRRORS) CONF_MIRRORS="$_cval" ;;
+      *) echo "⚠ ${DEPLOY_CONF}: неизвестный ключ «${_ckey}» — пропущен" >&2 ;;
+    esac
+  done < "$DEPLOY_CONF"
+  [ -n "$CONF_MIRRORS" ] && echo "· зеркала взяты из $DEPLOY_CONF"
+fi
+MIRRORS="${MIRRORS:-${CONF_MIRRORS:-finpilot finpilot-mirror finpilot-public-mirror vk-graph health-report-generator bron-kerbosch algorithms-site game-analytics-engine claude-usage salvation vevdokimovm vevdokimovm.github.io}}"
 MIRRORS_ONLY="${MIRRORS_ONLY:-0}"
 if [ "$MIRRORS_ONLY" = "1" ]; then
   if [ -n "${ONLY:-}" ]; then
@@ -178,6 +250,22 @@ GH_TIMEOUT="${GH_TIMEOUT:-120}"   # секунд на один вызов gh —
 # затронуты.
 GH_UPLOAD_TIMEOUT="${GH_UPLOAD_TIMEOUT:-1800}"  # 30 минут — специально для заливки ассета
 REPAIR="${REPAIR:-0}"
+# 🔴 СКОЛЬКО ПОСЛЕДНИХ ВЕРСИЙ СМОТРЕТЬ В ПОЧИНКЕ. Заказ владельца 04.09.2026,
+# дословно: «он проходит ВСЕ релизы вообще, а их уже очень много и реп много.
+# Сделай функцию, чтобы он смотрел последние 5, или 10, или 2 — чтобы можно
+# было назначить, и смотрел не с начала, а последние».
+#
+# Пустая строка = без ограничения, прежнее поведение. Число N = взять N САМЫХ
+# СВЕЖИХ тегов по SemVer и чинить только их, от старшего к младшему.
+#
+# 🔴 Отбор идёт ПО ВЕРСИИ, а не по порядку `git tag -l`: тот сортирует
+# лексикографически, и v2.10.0 у него младше v2.9.0. «Последние пять»
+# по такому порядку — это пять случайных.
+LAST="${LAST:-}"
+# 🔴 `${LAST}` В СКОБКАХ ОБЯЗАТЕЛЬНО — см. кейс `I5` в тестах: переменная
+# вплотную к «» под `set -u` убивает прогон в самой диагностической строке.
+case "$LAST" in ''|*[!0-9]*) [ -n "$LAST" ] && { echo "LAST должен быть числом, получено «${LAST}»" >&2; exit 2; } ;; esac
+[ "${LAST:-0}" = "0" ] && [ -n "$LAST" ] && { echo "LAST=0 не имеет смысла — это «не чинить ничего»" >&2; exit 2; }
 FORCE="${FORCE:-0}"
 ASSETS_ONLY="${ASSETS_ONLY:-0}"
 BACKFILL="${BACKFILL:-0}"
@@ -283,8 +371,14 @@ FATAL_PATTERNS='GH001|exceeds GitHub.s file size limit|pre-receive hook declined
 
 retry(){ d="$1"; shift; a=1; s="$RETRY_SLEEP"
   while [ "$a" -le "$RETRIES" ]; do
-    _out="$("$@" 2>&1)"; _rc=$?
-    printf '%s\n' "$_out"
+    # 🔴 13.09.2026, заказ владельца: «весит на последней линии… не вижу какая
+    # скорость какой прогресс и всё ли ок». Раньше вывод копился в `$(...)` и
+    # печатался ПОСЛЕ завершения — на гигабайтном push это минуты тишины.
+    # Теперь он идёт в терминал живьём (tee), а копия нужна для FATAL_PATTERNS.
+    _rlog="$(mktemp)"
+    { "$@"; echo "$?" >"$_rlog.rc"; } 2>&1 | tee "$_rlog"
+    _rc="$(cat "$_rlog.rc" 2>/dev/null || echo 1)"; _out="$(cat "$_rlog")"
+    rm -f "$_rlog" "$_rlog.rc"
     [ "$_rc" -eq 0 ] && return 0
     if printf '%s' "$_out" | grep -qE "$FATAL_PATTERNS"; then
       red "  ✗ $d — отказ ОКОНЧАТЕЛЬНЫЙ, ретрай не поможет:"
@@ -654,6 +748,99 @@ gh_try_upload(){
   done
 }
 
+# curl_meter — читает сырой метр curl со stdin и рисует ОДНУ строку на месте:
+#   [#####---------------]  23%  227 из 957 МБ · сейчас 512 КБ/с · в среднем 911 КБ/с · прошло 0:04:15 · осталось 0:13:41
+# 🔴 13.09.2026, владелец: «таблица очень плохо». Метр curl — 12 колонок
+# с двухстрочной шапкой на английском; нужная часть — 6 чисел.
+# Читаем по `\r` (`read -d`), а не через `tr`: tr в пайпе буферизует блоками
+# по 4 КБ, и строка обновлялась бы раз в минуту вместо раза в секунду.
+# Разбор — одним awk: `set -- $строка` в zsh НЕ делит на слова (нет
+# SH_WORD_SPLIT), а в bash `$10` читается как `$1` и «0». Оба дефекта
+# пойманы проверкой 13.09.2026 до раскладки.
+curl_meter(){
+  _ml=""; _mshown=0
+  while IFS= read -r -d $'\r' _ml || [ -n "$_ml" ]; do
+    # последний кусок метра кончается на `\n`, а не на `\r`: сначала срезать
+    # хвостовой перевод строки, иначе строка «100%» теряется целиком
+    _ml="${_ml%$'\n'}"; _ml="${_ml##*$'\n'}"
+    _mo="$(printf '%s\n' "$_ml" | awk '
+      function u(x) {
+        if (x ~ /k$/) return substr(x, 1, length(x) - 1) " КБ"
+        if (x ~ /M$/) return substr(x, 1, length(x) - 1) " МБ"
+        if (x ~ /G$/) return substr(x, 1, length(x) - 1) " ГБ"
+        return x " Б"
+      }
+      NF >= 12 && $1 ~ /^[0-9]+$/ {
+        f = int($1 / 5); bar = ""
+        for (i = 0; i < 20; i++) bar = bar (i < f ? "#" : "-")
+        left = $11; if ($1 == 100) left = "готово"; else if (left ~ /-/) left = "считаю"
+        printf "[%s] %3d%%  %s из %s · сейчас %s/с · в среднем %s/с · прошло %s · осталось %s",
+               bar, $1, u($6), u($2), u($12), u($8), $10, left
+      }')"
+    if [ -n "$_mo" ]; then
+      printf '\r    %s%s%s\033[K' "$C_CYN" "$_mo" "$C_OFF" >&2
+      _mshown=1
+    fi
+    _ml=""
+  done
+  [ "$_mshown" -eq 1 ] && printf '\n' >&2
+  return 0
+}
+
+# upload_progress <репа> <тег> <файл> <имя> — заливка ассета curl'ом с ЖИВЫМ
+# прогрессом: процент, сколько залито, средняя и текущая скорость, сколько
+# осталось. 🔴 Заказ владельца 13.09.2026. `gh` процент наружу не отдаёт
+# (см. gh_try_upload выше), curl — отдаёт.
+#
+# Код 2 = путь недоступен (нет curl / токена / id релиза) → вызывающий берёт
+# gh_try_upload. Так же отрабатывает тестовый стаб gh: токена у него нет.
+# `-T`, а не `--data-binary @файл`: второй читает гигабайт в память целиком.
+# Токен идёт заголовком из файла 600, а не аргументом — иначе виден в `ps`.
+upload_progress(){
+  _pr="$1"; _pt="$2"; _pf="$3"; _pn="$4"
+  command -v curl >/dev/null 2>&1 || return 2
+  _tok="$(gh auth token 2>/dev/null)"
+  printf '%s' "$_tok" | grep -qE '^(gh[pousr]_|github_pat_)[A-Za-z0-9_]+$' || return 2
+  _rid="$(gh_try api "repos/$OWNER/$_pr/releases/tags/$_pt" --jq '.id' 2>/dev/null)"
+  case "$_rid" in ''|*[!0-9]*) return 2 ;; esac
+  _penc="$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1]))' "$_pn")"
+  _phf="$(mktemp)"; chmod 600 "$_phf"
+  printf 'Authorization: Bearer %s\n' "$_tok" >"$_phf"
+  _pa=0
+  while [ "$_pa" -lt 3 ]; do
+    _pa=$((_pa+1))
+    # clobber: недолитый/старый ассет с тем же именем даёт 422 на загрузке
+    _aid="$(gh_try api "repos/$OWNER/$_pr/releases/$_rid/assets" --paginate \
+            --jq ".[] | select(.name==\"$_pn\") | .id" 2>/dev/null | head -1)"
+    case "$_aid" in ''|*[!0-9]*) : ;;
+      *) gh_try api -X DELETE "repos/$OWNER/$_pr/releases/assets/$_aid" >/dev/null 2>&1 ;; esac
+    _presp="$(mktemp)"; _pcf="$(mktemp)"
+    # stdout curl (код HTTP) → файл, stderr (метр) → curl_meter; код выхода
+    # curl — тоже в файл: в пайпе он иначе теряется.
+    { curl -X POST -T "$_pf" -o "$_presp" -w '%{http_code}' \
+        -H @"$_phf" -H "Accept: application/vnd.github+json" \
+        -H "Content-Type: application/zip" \
+        --speed-limit 1024 --speed-time 120 \
+        "https://uploads.github.com/repos/$OWNER/$_pr/releases/$_rid/assets?name=$_penc"
+      echo "$?" >"$_pcf.rc"; } 2>&1 >"$_pcf" | curl_meter
+    _pcode="$(cat "$_pcf" 2>/dev/null)"; _pcrc="$(cat "$_pcf.rc" 2>/dev/null || echo 1)"
+    rm -f "$_pcf" "$_pcf.rc"
+    if [ "$_pcrc" -eq 0 ] && [ "$_pcode" = "201" ]; then
+      rm -f "$_presp" "$_phf"; return 0
+    fi
+    case "$_pcode" in
+      401|403|404)
+        red "    ✗ заливка отклонена (HTTP $_pcode) — ретрай не поможет:"
+        head -c 300 "$_presp" | sed 's/^/      /'; echo
+        rm -f "$_presp" "$_phf"; return 1 ;;
+    esac
+    ylw "    заливка оборвалась (curl=$_pcrc, HTTP ${_pcode:-—}) — попытка $_pa/3, повторяю"
+    ylw "    сейчас безопасно переключить VPN: следующая попытка откроет соединение заново"
+    rm -f "$_presp"; sleep $((_pa * 5))
+  done
+  rm -f "$_phf"; return 1
+}
+
 # Существует ли релиз. Отличает «нет релиза» (rc=1, ответ получен) от
 # «запрос не прошёл» (сеть/таймаут) — во втором случае возвращает 2 и версия
 # не считается отсутствующей. Раньше оба случая выглядели одинаково, и скрипт
@@ -751,6 +938,29 @@ missing_parts(){
       | grep -Fxq "$_mr-v$_mv.zip" || _miss="$_miss ассет"
   fi
   printf '%s' "$_miss"
+}
+
+# Сколько СВЕЖИХ тегов надо просмотреть, чтобы починка достала версию `$2`.
+#
+# 🔴 ЗАЧЕМ СЧИТАТЬ, А НЕ БРАТЬ ЧИСЛО АРХИВОВ. `LAST=N` ограничивает починку
+# N последними тегами репы **по SemVer**, а не N проблемными версиями. Если
+# сломанная версия лежит десятью тегами ниже головы, `LAST=2` до неё
+# не дойдёт и молча ничего не починит. Заказ владельца 08.09.2026 —
+# «пусть деплой пишет команду для фикса с учётом количества архивов» —
+# исполняется только точным числом: подсказка, которая не чинит, хуже
+# отсутствия подсказки.
+#
+# Считаем позицию версии в списке тегов, отсортированном от свежих к старым.
+# Сеть недоступна или тегов нет — возвращаем пусто, и вызывающий печатает
+# команду без `LAST`, то есть заведомо рабочую, пусть и медленную.
+repair_depth(){
+  _rdr="$1"; _rdv="$2"
+  _rdtags="$(git ls-remote --tags "$REMOTE_BASE/$_rdr.git" 2>/dev/null \
+    | awk '{print $2}' | sed 's|refs/tags/||; s|\^{}||' | grep '^v' | sort -u)"
+  [ -n "$_rdtags" ] || { printf ''; return 0; }
+  printf '%s\n' "$_rdtags" | sed 's/^v//' | sort -t. -k1,1nr -k2,2nr -k3,3nr \
+    | awk -v v="$_rdv" 'BEGIN{n=0} {n++; if ($0==v) {print n; found=1; exit}}
+                        END{if (!found) print ""}'
 }
 
 # Уборка распакованных зеркал. Вынесена в функцию, потому что нужна на ДВУХ путях:
@@ -931,18 +1141,11 @@ ensure_release(){
       fi
     fi
   else
-    if [ "$ASSET" = "1" ] && [ -n "$_z" ]; then
-      cp "$_z" "$WORK/$_aname"
-      _asz="$(du -m "$WORK/$_aname" 2>/dev/null | cut -f1)"
-      ylw "    → заливаю ассет $_aname${_asz:+ (~${_asz} МБ)}"
-      gh_try_upload "$GH_UPLOAD_TIMEOUT" release create "v$_v" "$WORK/$_aname" --repo "$OWNER/$_r" --title "$_t" --notes-file "$_n" $_lat >/dev/null \
-        && { grn "    ✓ релиз v$_v (+ассет $_aname)"; note "$_r|v$_v|релиз|создан"
-             # помечаем ассет подтверждённым: иначе автоудаление архива не сработает
-             # для только что созданных релизов (эта ветка выходит из функции раньше)
-             ASSET_OK="${ASSET_OK:-} $_v"; } \
-        || { red "    ✗ релиз v$_v не создан"; note "$_r|v$_v|релиз|✗ ошибка"; }
-      rm -f "$WORK/$_aname"; return 0
-    fi
+    # 🔴 13.09.2026: релиз создаётся БЕЗ файла, ассет льётся блоком ниже —
+    # там upload_progress показывает процент и скорость, а сверка размера
+    # и ASSET_OK уже на месте. Раньше `release create <файл>` лил гигабайт
+    # молча, с одним счётчиком секунд.
+    ylw "    → создаю релиз v$_v"
     gh_try release create "v$_v" --repo "$OWNER/$_r" --title "$_t" --notes-file "$_n" $_lat >/dev/null 2>&1 \
       && { grn "    ✓ релиз v$_v"; note "$_r|v$_v|релиз|создан"; } \
       || { red "    ✗ релиз v$_v не создан"; note "$_r|v$_v|релиз|✗ ошибка"; }
@@ -968,7 +1171,14 @@ ensure_release(){
         _lsz="$(wc -c < "$WORK/$_aname" | tr -d ' ')"
         _lmb=$(( (_lsz + 524288) / 1048576 ))
         ylw "    → заливаю ассет $_aname (~${_lmb} МБ, из $_src)"
-        if gh_try_upload "$GH_UPLOAD_TIMEOUT" release upload "v$_v" "$WORK/$_aname" --repo "$OWNER/$_r" --clobber >/dev/null; then
+        _ut0=$(date +%s)
+        upload_progress "$_r" "v$_v" "$WORK/$_aname" "$_aname"; _urc=$?
+        if [ "$_urc" -eq 2 ]; then
+          gh_try_upload "$GH_UPLOAD_TIMEOUT" release upload "v$_v" "$WORK/$_aname" --repo "$OWNER/$_r" --clobber >/dev/null
+          _urc=$?
+        fi
+        [ "$_urc" -eq 0 ] && plain "    залито за $(( $(date +%s) - _ut0 ))с"
+        if [ "$_urc" -eq 0 ]; then
           # Сверяем РАЗМЕР на GitHub с локальным: обрыв связи или нехватка места
           # дают частичный файл, который выглядит как успешная загрузка.
           _rsz="$(gh_try release view "v$_v" --repo "$OWNER/$_r" --json assets \
@@ -1586,7 +1796,17 @@ while IFS= read -r REPO; do
 
   # --- 2A. РЕЖИМ REPAIR / ASSETS_ONLY: чиним существующее, новое не публикуем ----
   if [ "$REPAIR" = "1" ] || [ "$ASSETS_ONLY" = "1" ]; then
-    for TAG in $TAGS; do
+    # Порядок починки — от СВЕЖИХ к старым, и с `LAST` берём только начало
+    # списка. Раньше шли в порядке `git tag -l`, то есть лексикографически:
+    # при обрыве на середине чинилось непонятно что.
+    _rtags="$(printf '%s\n' $TAGS | grep '^v[0-9]' \
+              | sed 's/^v//' | sort -t. -k1,1nr -k2,2nr -k3,3nr | sed 's/^/v/')"
+    if [ -n "$LAST" ]; then
+      _total="$(printf '%s\n' $_rtags | grep -c . || true)"
+      _rtags="$(printf '%s\n' $_rtags | head -n "$LAST")"
+      cyn "  LAST=$LAST: чиню последние $LAST из $_total тегов"
+    fi
+    for TAG in $_rtags; do
       V="${TAG#v}"
       case "$V" in ''|*[!0-9.]*) continue;; esac
       Z="$(awk -F'\t' -v r="$REPO" -v v="$V" '$1==r && $2==v{print $3; exit}' "$INDEX")"
@@ -1618,6 +1838,66 @@ while IFS= read -r REPO; do
     fi
 
     echo ""; ylw "→ v$VER  ($(basename "$ZIP"))"
+
+    # ─── ПРЕДОХРАНИТЕЛЬ ДОСТАВКИ (v4.25.0, `74-planner-bridge.md` §4б) ───────────
+    # 🔴 Публикация СНОСИТ рабочее дерево клона и кладёт содержимое архива.
+    # Архив собран из ЛОКАЛЬНОГО дерева, а файл доставки `INBOX-FROM-*` лежит
+    # только на GitHub — мост кладёт его туда напрямую. Значит порядок
+    # «доставка → деплой → вахта» стирал задачу БЕЗ ЕДИНОГО СИГНАЛА:
+    # в репе просто нет файла, и вахта не отличает «не доставляли»
+    # от «доставили и стёрли».
+    #
+    # Это не грязь в выводе, а молча пропущенный шаг — тот же класс, что PIT-014.
+    #
+    # Отказ ставится ДО распаковки: не начатая публикация чинится повторным
+    # запуском, а начатая и оборванная оставляет дерево в промежуточном виде.
+    # 🔴 ПУСТАЯ РЕПА — НЕ ДОСТАВКА. Отказ найден владельцем 04.09.2026 на живом
+    # прогоне: `audiobook-forge` только что создана, дерева нет, и GitHub на
+    # `contents` отвечает 404 с телом `{"message":"This repository is empty."}`.
+    # Прежняя строка глотала код возврата (`|| true`) и подставляла это тело
+    # в `_inbox` как «имя доставки» — публикация ПЕРВОЙ версии новой репы
+    # становилась невозможной навсегда.
+    #
+    # Два предохранителя вместо одного:
+    #   · код возврата `gh api` проверяется ОТДЕЛЬНО, а не сливается в строку;
+    #   · фильтр отвечает только на МАССИВ (`if type=="array"`), иначе пусто —
+    #     объект-ошибка не может притвориться списком файлов.
+    # Плюс третий, на выходе: имя обязано выглядеть именем (`^INBOX-FROM-`).
+    #
+    # Тесты этого не поймали, потому что стаб `gh` не знал команды `api`
+    # и отвечал на неё успехом с пустым выводом — «нет такого случая»
+    # неотличимо от «случай проверен» (`69` §4м). Стаб научен отвечать.
+    if [ "$HAVE_GH" -eq 1 ]; then
+      _inbox=""
+      if _raw="$(gh api "repos/$OWNER/$REPO/contents" --jq \
+            'if type=="array" then (.[] | select(.name | startswith("INBOX-FROM-")) | .name) else empty end' \
+            2>/dev/null)"; then
+        _inbox="$(printf '%s\n' "$_raw" | grep '^INBOX-FROM-' || true)"
+      fi
+      if [ -n "$_inbox" ]; then
+        # 🔴 Смотрим В АРХИВ, а не в дерево: дерева ещё нет — распаковка ниже.
+        # Проверять надо ровно то, что ляжет в репу, а ляжет содержимое архива.
+        # Первая редакция ссылалась на `$SRC_TREE`, которой в этой точке
+        # не существует, — поймано `bash -n` не было (переменная синтаксически
+        # верна), поймано `grep`ом по имени. Проверка правки ЗАПУСКОМ,
+        # а не перечитыванием (`/auto` §2г п.3).
+        _names="$(unzip -Z1 "$ZIP" 2>/dev/null || true)"
+        _missing=""
+        for _f in $_inbox; do
+          printf '%s\n' "$_names" | grep -qE "(^|/)$_f\$" || _missing="$_missing $_f"
+        done
+        if [ -n "$_missing" ]; then
+          red "  🔴 ОТКАЗ: на GitHub есть доставка, которой нет локально:$_missing"
+          red "     Публикация снесла бы её молча — задача исчезла бы без следа."
+          red "     Разобрать доставку ДО публикации (74-planner-bridge.md §4б),"
+          red "     затем повторить прогон."
+          note "$REPO|v$VER|доставка|✗ INBOX только на GitHub:$_missing"
+          continue
+        fi
+      fi
+    fi
+    # ─────────────────────────────────────────────────────────────────────────────
+
     SRCDIR="$WORK/unpack_${REPO}_$VER"; rm -rf "$SRCDIR"; mkdir -p "$SRCDIR"
     unzip -oq "$ZIP" -d "$SRCDIR" </dev/null || { red "  unzip не удался — пропускаю"; note "$REPO|v$VER|распаковка|✗ битый архив"; continue; }
 
@@ -1716,6 +1996,10 @@ while IFS= read -r REPO; do
     # а VERSION ещё и одного размера — git по паре size+mtime решает «файл не менялся»
     # и НЕ хэширует содержимое. Итог: дерево новое, индекс пуст, тег висит на старом
     # дереве. Поэтому индекс пересобираем принудительно, а не доверяем stat-кэшу.
+    _cn=$(find . -path ./.git -prune -o \( -type f -o -type l \) -print | wc -l | tr -d ' ')
+    _cm=$(du -sm "$SRC" 2>/dev/null | cut -f1)
+    cyn "  → индексирую и коммичу: $_cn файлов${_cm:+, ~$_cm МБ} (у git add нет прогресса — идёт работа)"
+    _ct0=$(date +%s)
     git rm -r --cached -q . >/dev/null 2>&1 || true
     git add -A -f                                                        # PIT-006
     if git diff --cached --quiet && [ -n "$(git tag -l)" ]; then
@@ -1726,13 +2010,15 @@ while IFS= read -r REPO; do
       CMSG="$(build_notes "$SRC" "$VER" "$REPO" "$NOTES_DIR/v$VER.md" 2>/dev/null)" || CMSG=""
       [ -n "$CMSG" ] || CMSG="$REPO v$VER"
       git commit -q -m "$CMSG" || { red "  commit не удался"; continue; }
-      TREE_N=$(find . -path ./.git -prune -o -type f -print | wc -l | tr -d ' ')
+      # PIT-007: git хранит симлинки как объекты — считать их наравне с файлами.
+      # 13.09.2026: 13 ссылок web/node_modules/.bin дали 9350 ≠ 9337 и стоп self-map.
+      TREE_N=$(find . -path ./.git -prune -o \( -type f -o -type l \) -print | wc -l | tr -d ' ')
       GIT_N=$(git ls-tree -r --name-only HEAD | wc -l | tr -d ' ')
       if [ "$GIT_N" != "$TREE_N" ]; then
         red "  в коммите $GIT_N файлов, в дереве $TREE_N (PIT-006/007) — стоп по этой репе"
         note "$REPO|v$VER|коммит|✗ расхождение файлов"; break
       fi
-      grn "  ✓ коммит: $GIT_N файлов"
+      grn "  ✓ коммит: $GIT_N файлов за $(( $(date +%s) - _ct0 ))с"
     fi
     git tag -a "v$VER" -m "$TITLE" || { red "  tag не удался"; continue; }
     PUBLISHED="$PUBLISHED $VER"
@@ -1752,13 +2038,15 @@ while IFS= read -r REPO; do
       note "$REPO|$VER|push|ОТКАЗ: файлы >100МБ"
       continue
     fi
-    echo ""; ylw "→ пушу ветку и теги"
+    _gsz="$(du -sm .git 2>/dev/null | cut -f1)"
+    echo ""; ylw "→ пушу ветку и теги${_gsz:+ (.git ~${_gsz} МБ)} — ниже живой прогресс git: объекты, МиБ, скорость"
+    _pt0=$(date +%s)
     pushb(){ git -c "http.lowSpeedLimit=$CLONE_LOW_SPEED_LIMIT" \
-      -c "http.lowSpeedTime=$CLONE_LOW_SPEED_TIME" push -u origin "$BRANCH"; }
+      -c "http.lowSpeedTime=$CLONE_LOW_SPEED_TIME" push --progress -u origin "$BRANCH"; }
     pusht(){ git -c "http.lowSpeedLimit=$CLONE_LOW_SPEED_LIMIT" \
-      -c "http.lowSpeedTime=$CLONE_LOW_SPEED_TIME" push origin --tags; }
+      -c "http.lowSpeedTime=$CLONE_LOW_SPEED_TIME" push --progress origin --tags; }
     if retry "git push branch" pushb && retry "git push tags" pusht; then
-      grn "✓ запушено"
+      grn "✓ запушено за $(( $(date +%s) - _pt0 ))с"
     else
       red "✗ push не удался (проверь токен/сеть) — репа пропущена, локальная работа в $WORK"
       note "$REPO|—|push|✗ не удался"; continue
@@ -1984,7 +2272,7 @@ fi
 # прогоне: архив мог уехать на GitHub раньше, и его всё равно надо убрать с диска.
 if [ "$DELETE_AFTER" = "1" ] && [ "$HAVE_GH" -eq 1 ]; then
   echo ""; bld "── Убираю локальные копии того, что полностью на GitHub"
-  _del=0; _kept=""
+  _del=0; _kept=""; _broken=""
   while IFS="$(printf '\t')" read -r r v z; do
     [ -n "$r" ] && [ -f "$z" ] || continue
     _m="$(missing_parts "$r" "$v")"
@@ -1993,6 +2281,9 @@ if [ "$DELETE_AFTER" = "1" ] && [ "$HAVE_GH" -eq 1 ]; then
     else
       _kept="$_kept
   $(basename "$z") — не хватает:$_m"
+      # Копим «репа TAB версия» — по ним потом считается глубина починки.
+      _broken="$_broken$r	$v
+"
     fi
   done < "$INDEX"
   MIR_DEL=0; cleanup_mirrors; _del=$((_del + MIR_DEL))
@@ -2005,25 +2296,55 @@ if [ "$DELETE_AFTER" = "1" ] && [ "$HAVE_GH" -eq 1 ]; then
     # никогда, и повторный запуск честно скажет «новых версий нет». Пока команда
     # не названа здесь, владелец видит проблему и не видит выхода.
     case "$_kept" in
-      *релиз*)
+      *релиз*|*тег*)
         echo ""
-        cyn "  Тег есть, релиза нет — обычным прогоном это не чинится:"
-        cyn "  по умолчанию релизы делаются только для версий текущего прогона."
-        bld "      REPAIR=1 zsh ~/Downloads/deploy.sh"
-        cyn "  (пройдёт по ВСЕМ тегам репы и до-создаст недостающие релизы с ассетами)"
+        cyn "  Обычным прогоном это не чинится: по умолчанию релизы делаются"
+        cyn "  только для версий текущего прогона, а версия НИЖЕ старшего тега"
+        cyn "  пропускается как уже пройденная."
+        echo ""
+        # 🔴 КОМАНДА НА КАЖДУЮ РЕПУ ОТДЕЛЬНО, И С ТОЧНЫМ `LAST`.
+        # Прежняя редакция печатала одну строку `REPAIR=1` на все случаи.
+        # Она верна, но проходит по ВСЕМ тегам: у `base-repo` это 527 релизов
+        # ради одной дырки. Заказ владельца 08.09.2026 — считать глубину.
+        printf '%s\n' "$_broken" | sed '/^$/d' | awk -F'\t' '{print $1}' | sort -u \
+        | while IFS= read -r _br; do
+            [ -n "$_br" ] || continue
+            # Самая СТАРАЯ проблемная версия этой репы — до неё и надо достать.
+            _bv="$(printf '%s\n' "$_broken" | sed '/^$/d' | awk -F'\t' -v r="$_br" \
+                    '$1==r{print $2}' | sort -t. -k1,1n -k2,2n -k3,3n | head -1)"
+            _need_tag=0
+            case "$_kept" in *"$_br-v$_bv"*"тег"*) _need_tag=1 ;; esac
+            _depth="$(repair_depth "$_br" "$_bv")"
+            if [ "$_need_tag" = "1" ]; then
+              # Тега нет вовсе — REPAIR его не создаст, он чинит только релизы
+              # у существующих тегов. Нужен BACKFILL, он разворачивает архив.
+              bld "      BACKFILL=1 ONLY=$_br zsh ~/Downloads/deploy.sh"
+              cyn "      ($_br: нет тега v$_bv — BACKFILL развернёт архив и создаст его)"
+            elif [ -n "$_depth" ]; then
+              bld "      REPAIR=1 LAST=$_depth ONLY=$_br zsh ~/Downloads/deploy.sh"
+              cyn "      ($_br: v$_bv — $_depth-й тег с конца, дальше смотреть незачем)"
+            else
+              bld "      REPAIR=1 ONLY=$_br zsh ~/Downloads/deploy.sh"
+              cyn "      ($_br: глубину посчитать не удалось — пойдёт по всем тегам)"
+            fi
+          done
         ;;
     esac
   fi
 fi
 
-printf '%s\n' "$SUMMARY" > "$HOME/Downloads/deploy_last_run.log"
+# 🔴 Лог кладётся В РАБОЧУЮ ПАПКУ, а не жёстко в `~/Downloads` (v4.24.0).
+# Прежде он всегда уезжал в `Downloads`, даже когда прогон шёл с другой
+# папкой: `zsh deploy.sh ~/Desktop/archives` писал лог не туда, где работал.
+# Лог относится к прогону — значит лежит там же, где его артефакты.
+printf '%s\n' "$SUMMARY" > "$DIR/deploy_last_run.log"
 # Владельцу не нужно помнить про режим — говорим сами, каждый раз.
 echo ""
 if [ "$DELETE_AFTER" != "1" ]; then
 cyn "Архивы не удалялись (KEEP_ARCHIVES=1). Посмотреть, что уже можно убрать —"
 cyn "  VERIFY=1 zsh $0"
 fi
-echo ""; cyn "лог: ~/Downloads/deploy_last_run.log"
+echo ""; cyn "лог: $DIR/deploy_last_run.log"
 
 rm -f "$INDEX" "$REPOLIST" "$PARSER"
 grn "✓ все репозитории обработаны"
