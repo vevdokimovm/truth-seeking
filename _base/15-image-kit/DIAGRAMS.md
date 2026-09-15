@@ -198,7 +198,7 @@ npx -y @mermaid-js/mermaid-cli -i schema.mmd -o schema.png -b transparent -w 240
 | `ffmpeg` | 🟢 да, 8.1.2 | см. §5б |
 | `npx` mermaid-cli | 🟢 через npx | mermaid → PNG, 23 597 байт |
 | ImageMagick, Pillow | 🔴 **нет** | — |
-| Gamma MCP | 🔴 **отключён** в этой сессии | генерацию проверить не удалось |
+| Gamma MCP | 🔴 **отключён** в этой сессии | генерацию проверить не удалось — 🟢 **проверено 14.09.2026**, см. [`README.md`](README.md) §1 |
 
 ### Ответ: изображение пишется как SVG и рендерится локально
 

@@ -119,9 +119,10 @@ def check_weight(path: Path) -> str | None:
     # ЗАПРЕЩАЕТ. В самой базе файлы проходили только потому, что давно
     # не менялись: первая же пересборка кита заблокировала бы и её.
     #
-    # Исключён ТОЛЬКО запрет форматов и только в `11-presentation-kit/output/`.
+    # Исключён ТОЛЬКО запрет форматов и только в `16-document-kit/output/`
+    # (до 14.09.2026 каталог жил в `11-presentation-kit/output/`).
     # Лимиты веса и проверка секретов действуют и здесь.
-    if "11-presentation-kit/output/" in path.as_posix() and suffix in BANNED_SUFFIXES:
+    if "16-document-kit/output/" in path.as_posix() and suffix in BANNED_SUFFIXES:
         return None
 
     if suffix in BANNED_SUFFIXES:

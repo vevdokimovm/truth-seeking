@@ -20,7 +20,7 @@
 | **TXT** | `textutil -convert txt` | 🟢 | плоский текст |
 | **EPUB** | `zipfile` вручную | 🟢 1192 байта, `application/epub+zip` | структура собирается руками |
 | **XLSX** | `zipfile` вручную | 🟢 2090 байт, опознан системой | то же |
-| **SVG · PNG · GIF · MP4** | `11-presentation-kit/DIAGRAMS.md` | 🟢 | отдельный кит, там же примеры |
+| **SVG · PNG · JPG · GIF · MP4** | `15-image-kit/` | 🟢 | отдельный кит изображений, там же примеры |
 | PPTX | — | 🔴 **не проверено** | структура сложнее, повода не было |
 
 ---
@@ -163,6 +163,6 @@ xl/worksheets/sheet1.xml      ← сами ячейки
 - **сохранения при обратной конверсии.** `md → docx → md` теряет разметку,
   и это свойство `textutil`, а не дефект.
 
-**Связки:** [`DIAGRAMS.md`](DIAGRAMS.md) (картинки, гифки, видео, звук) ·
+**Связки:** [`15-image-kit/DIAGRAMS.md`](../15-image-kit/DIAGRAMS.md) (картинки, гифки, видео, звук) ·
 `scripts/md_to_pdf.py` · `00-infrastructure/43-archive-naming-and-packaging.md`
 (как называть то, что отдаёшь).

@@ -28,7 +28,7 @@ PDF, EPUB, DOCX, XLSX и прочее. Исходник всегда `.md` в р
 
 ```bash
 python3 scripts/make_document.py ONBOARDING.md --to pdf \
-        --out 11-presentation-kit/output/ONBOARDING.pdf
+        --out 16-document-kit/output/ONBOARDING.pdf
 ```
 
 Форматы: `pdf` · `docx` · `epub` · `xlsx` · `rtf` · `html` · `txt`.
