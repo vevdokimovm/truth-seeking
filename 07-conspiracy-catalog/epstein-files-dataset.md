@@ -1,5 +1,9 @@
 # Epstein Files Transparency Act (H.R. 4405) — датасет первоисточников
 
+> 🔴 **25.09.2026: датасет обработан.** Корпус, синтез и план —
+> [`06-document-investigations/epstein/`](../06-document-investigations/epstein/SYNTHESIS.md).
+> Опись ниже (33 382 файла) — старая частичная копия; полная опись — `epstein/PLAN.md` §1.
+
 **Служебка вместо файлов.** Оригинал — **33 382 файла, 100 МБ (логически ~1.4 ГБ)** — лежал
 в `~/Documents/schizophrenic_things/Rabbit Hole/Epstein files/` и приехал сюда кампанией
 переноса 22.08.2026. В репе оставлено это описание; сами файлы удалены по

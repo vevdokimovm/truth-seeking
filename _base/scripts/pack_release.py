@@ -59,15 +59,38 @@ from pathlib import Path
 FORCE_STUBS = "--force-stubs" in sys.argv
 if FORCE_STUBS:
     sys.argv.remove("--force-stubs")
-REPO = Path(sys.argv[1]).expanduser().resolve() if len(sys.argv) > 1 \
-    else Path(os.environ.get("BASE_REPO", Path(__file__).resolve().parent.parent)).expanduser()
 # 🔴 03.09.2026: было `Path.home()/"Downloads"` жёстко. Теперь путь спрашивается
 # у `_roots`, потому что его знают ПЯТЬ скриптов, и пятая копия литерала
 # разошлась бы с остальными на первой же правке (`PIT-178`: список вместо
 # признака). Переопределяется `BASE_ARTIFACTS` — на этом держатся тесты.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _roots import artifacts_dir  # noqa: E402
+from _roots import artifacts_dir, resolve_roots  # noqa: E402
 OUT_DIR = artifacts_dir()
+
+
+def _цель(аргумент: str) -> Path:
+    """Путь к репе по аргументу — и по пути, и по ИМЕНИ репы.
+
+    🔴 Заведено 26.09.2026. Аргумент читался только как путь, а соседний
+    `publish.py` принимает ровно наоборот — имя. Два скрипта одного ритуала,
+    вызываются подряд, интерфейсы противоположны, и ошибка не объясняет себя:
+    имя давало `FileNotFoundError: <репа>/<репа>/VERSION`, где второе `<репа>`
+    видно только если вчитаться в путь. На выпуске v2.68.0 это стоило трёх
+    прогонов подряд. Принимать оба вида дешевле, чем помнить, какой где.
+    """
+    p = Path(аргумент).expanduser()
+    if p.exists():
+        return p.resolve()
+    _, repos, _ = resolve_roots(__file__)
+    кандидат = repos / аргумент
+    if кандидат.is_dir():
+        return кандидат.resolve()
+    print(f"🔴 не найдена репа «{аргумент}»: ни путь, ни имя в {repos}")
+    sys.exit(1)
+
+
+REPO = _цель(sys.argv[1]) if len(sys.argv) > 1 \
+    else Path(os.environ.get("BASE_REPO", Path(__file__).resolve().parent.parent)).expanduser()
 NAME = REPO.name
 
 JUNK_NAMES = {".DS_Store", "Thumbs.db"}
@@ -208,33 +231,13 @@ def main():
         print(f"     python3 07-media-to-text-lab/tools/heavy_media_to_note.py --repo {NAME} --apply")
         sys.exit(1)
 
-    # 🔴 Суммарный вес репы — порог из 01-repo-standard.md §4, не проверялся здесь
-    # ДО 26.08.2026, из-за чего misc-vault (674 МБ) и academic-portfolio (1018 МБ)
-    # ушли в архив без единого предупреждения. Найдено владельцем при разборе
-    # деплоя: «у нас же есть правило максимум 500 МБ на репу??».
-    # Пороги те же, что для самой базы (06-volume-compression.md):
-    # 🟢 ≤50 МБ цель · 🟡 100 МБ мягкий · 🟡 500 МБ ещё мягче с явным обоснованием ·
-    # 🔴 >500 МБ жёсткий потолок — Claude физически не берёт архив целиком.
-    # Исключение — файл `.size-exception` в корне репы с обоснованием (образец:
-    # portrait-of-taste — эталоны фото нужны по существу задачи, не мусор).
+    # Пороги веса репы отменены 25.09.2026 (патчноут v4.214.0): 50/100/500 МБ
+    # описывали предел веб-Claude, куда архив грузился целиком, а не здоровье репы.
+    # Вес печатается как факт — он полезен для понимания, сколько поедет в релиз,
+    # но упаковку больше не останавливает и обоснования в `.size-exception` не требует.
     _total = sum(f.stat().st_size for f in _files)
     _total_mb = _total / 2**20
-    _exception = REPO / ".size-exception"
-    if _total_mb > 500:
-        if _exception.is_file():
-            print(f"🟡 {NAME}: {_total_mb:.0f} МБ — выше жёсткого потолка 500 МБ, но есть обоснование:")
-            print(f"   {_exception.read_text(encoding='utf-8').strip()}")
-        else:
-            print(f"🔴 {NAME}: {_total_mb:.0f} МБ — выше жёсткого потолка 500 МБ (01-repo-standard.md §4).")
-            print("   Свернуть тяжёлое в служебки через лабу медиа→текст:")
-            print(f"     python3 07-media-to-text-lab/tools/heavy_media_to_note.py --repo {NAME} --apply")
-            print("   Если вес обоснован (нужны сами эталоны, не мусор) — завести")
-            print(f"     {_exception} с обоснованием одной строкой, по образцу portrait-of-taste.")
-            sys.exit(1)
-    elif _total_mb > 100:
-        print(f"🟡 {NAME}: {_total_mb:.0f} МБ — выше мягкого порога 100 МБ, пакую, но стоит разобрать")
-    elif _total_mb > 50:
-        print(f"🟡 {NAME}: {_total_mb:.0f} МБ — выше цели 50 МБ, пакую")
+    print(f"вес репы: {_total_mb:.0f} МБ (порогов нет)")
 
     wrapper = f"{NAME}-v{version}"
     out = OUT_DIR / f"{wrapper}.zip"
@@ -339,11 +342,34 @@ def main():
     ledger.parent.mkdir(parents=True, exist_ok=True)
     if not ledger.exists():
         ledger.write_text("# дата\tверсия\tфайлов\tбайт\tsha256\n", encoding="utf-8")
-    prev = ledger.read_text(encoding="utf-8")
-    if f"\t{version}\t" not in prev:          # пересборка той же версии строку не двоит
+    строка = (f"{datetime.date.today():%Y-%m-%d}\t{version}\t{len(files)}\t"
+              f"{size}\t{sha}\n")
+    # 🔴 ПЕРЕСБОРКА ТОЙ ЖЕ ВЕРСИИ ЗАМЕЩАЕТ СТРОКУ, А НЕ ПРОПУСКАЕТСЯ.
+    # Прежний код умел только «не двоить»: при повторной упаковке в журнале
+    # оставались числа ПЕРВОГО архива, а выпускался последний. Замерено
+    # 26.09.2026 на v2.68.0: в релизе лежал `d503803…` (472 460 253 Б),
+    # в журнале стоял `e673835…` (472 460 003 Б). Журнал заявлен
+    # доказательством выпуска (см. выше по файлу) — доказательство,
+    # расходящееся с доказываемым, хуже отсутствия.
+    #
+    # 🔴 И ВОТ ЧТО ЗДЕСЬ ГЛАВНОЕ. Архив ВОСПРОИЗВОДИМ побайтно: пересборка
+    # неизменной репы даёт тот же sha256 (проверено дважды на v2.68.0 —
+    # `d503803…` оба раза). Значит другой sha означает не «пересобрали»,
+    # а **содержимое репы изменилось между упаковками** — то есть один архив
+    # заведомо не соответствует выпуску. Первая редакция этого комментария
+    # объясняла расхождение временем упаковки внутри zip; замер это опроверг,
+    # и объяснение было бы вредным: оно списывало настоящий дефект (упаковка
+    # шла до правки WATCHLOG, см. `close_batch.py`) на безобидный шум.
+    строки = ledger.read_text(encoding="utf-8").splitlines(keepends=True)
+    для_замены = [i for i, ln in enumerate(строки) if f"\t{version}\t" in ln]
+    if для_замены:
+        строки[для_замены[0]] = строка
+        for i in reversed(для_замены[1:]):
+            del строки[i]
+        ledger.write_text("".join(строки), encoding="utf-8")
+    else:
         with ledger.open("a", encoding="utf-8") as fh:
-            fh.write(f"{datetime.date.today():%Y-%m-%d}\t{version}\t{len(files)}\t"
-                     f"{size}\t{sha}\n")
+            fh.write(строка)
     n_rel = sum(1 for ln in ledger.read_text(encoding="utf-8").splitlines()
             if ln.strip() and not ln.startswith("#"))
     print(f"журнал: {ledger.relative_to(REPO)} — выпусков записано: {n_rel}")

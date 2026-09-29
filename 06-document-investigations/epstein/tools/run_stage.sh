@@ -26,7 +26,7 @@ for n in "${SETS[@]}"; do
   for try in 1 2 3 4 5; do
     url=$(curl -sIL -o /dev/null -w '%{url_effective}' "$ITEM/$(zipname "$n")")
     echo "$(date '+%F %T') DS$n try $try $url"
-    "$PY" "$HERE/efta_to_md.py" --url "$url" --ds "$n" --out "$out" 2>&1 \
+    "$PY" "$HERE/efta_to_md.py" --url "$url" --ds "$n" --out "$out" --workers "${WORKERS:-8}" 2>&1 \
       | grep --line-buffered -v deprecat
     [ "${PIPESTATUS[0]}" -eq 0 ] && break
     sleep 60

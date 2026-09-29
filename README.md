@@ -1,7 +1,7 @@
 # truth-seeking — Vasilii Evdokimov
 
 <!-- STATUS -->
-> **Сейчас:** `v1.3.3` · 2026-08-29 · Пересборка: архив содержал устаревший канон
+> **Сейчас:** `v1.4.0` · 2026-09-25 · Epstein Library: корпус в текст + синтез v1
 > Открытое — [`ROADMAP.md`](ROADMAP.md) · где стоим — [`WATCHLOG.md`](WATCHLOG.md) §0.
 <!-- /STATUS -->
 

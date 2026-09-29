@@ -13,7 +13,7 @@
   3. Крупные файлы: > WARN_FILE_MB -> warning, > FAIL_FILE_MB -> FAIL
      (жёсткий лимит GitHub 100 МБ на файл).
   4. Суммарный размер дерева против порогов 01-repo-standard.md
-     (цель 50 МБ -> warning, мягкий 100 МБ -> warning, жёсткий 500 МБ -> FAIL).
+     (порогов нет с 25.09.2026 — печатается как факт, гейт не валит).
   5. Пустые папки -> warning (мусор структуры).
   6. Архивы/тяжёлые бинарники в git-дереве -> warning
      («zip — транспорт, а не версионируемый исходник», 15-gotchas §2).
@@ -50,6 +50,24 @@ FROZEN_DIRS = (
     "reports/audits",
 )
 FROZEN_FILES = ("CHANGELOG.md",)
+
+# Дословные корпуса: текст снят с источника как есть и правке НЕ подлежит —
+# любая «починка» исказит первоисточник. Структурные и языковые проверки к ним
+# неприменимы по существу, а не по договорённости:
+#   · иероглифы в корпусе — настоящий контент многоязычных страниц, не токен-слип;
+#   · повтор «## 1, ## 2» в тексте приказа — нумерация внутри его приложений.
+# Введено 25.09.2026, когда гейт валил 98 таких ложных срабатываний подряд.
+VERBATIM_DIRS = ("10-normativka",)
+VERBATIM_MARKER = "pervoistochnik"
+
+
+def is_verbatim(rel: Path) -> bool:
+    """True for a file inside a verbatim corpus of an external source."""
+    parts = rel.as_posix().split("/")
+    if parts and parts[0] in VERBATIM_DIRS:
+        return True
+    return any(part.startswith(VERBATIM_MARKER) for part in parts)
+
 # Каталоги машинных выгрузок из внешних сервисов: содержимое — дословный
 # слепок источника, ссылки внутри отражают состояние ТАМ, а не здесь.
 # Каталоги ЧУЖИХ материалов: скачанные курсы, склонированные репозитории,
@@ -3167,6 +3185,28 @@ def check_delivery(root: Path) -> tuple[list[str], list[str]]:
     return провалы, предупреждения
 
 
+def check_archives(root: Path) -> tuple[list[str], list[str]]:
+    """Архивы не копятся в `~/Developer`: выпуск доводится до конца (приказ 25.09.2026).
+
+    🔴 ЗАЧЕМ В ГЕЙТЕ. За сутки 23–24.09.2026 скопилось 103 архива на 8.4 ГБ при
+    16 ГБ свободного места: вахты собирали архив упаковщиком и бросали выпуск.
+    `deploy.sh` удалял опубликованный архив с самого начала, а пути «изнутри
+    вахты» — нет; научены 15.09 (`publish.py`) и 25.09 (`github_sync.py`).
+
+    🔴 ЧЕГО НЕ ЛОВИТ (слепое пятно). Не знает, идёт ли выпуск прямо сейчас:
+    архив, собранный минуту назад другой вахтой, выглядит как брошенный —
+    поэтому WARN, а не FAIL. Не сверяет sha256 (это делают инструменты выпуска).
+    """
+    инструмент = root / "scripts" / "archives_check.py"
+    if not инструмент.is_file():
+        return [], []
+    res = subprocess.run([sys.executable, str(инструмент)],
+                         capture_output=True, text=True, encoding="utf-8")
+    провалы = [l.strip()[1:].strip() for l in res.stdout.splitlines() if l.startswith("🔴")]
+    предупреждения = [l.strip()[1:].strip() for l in res.stdout.splitlines() if l.startswith("🟡")]
+    return провалы, предупреждения
+
+
 def check_tools_linked(root: Path) -> list[str]:
     """Каждый инструмент в `<кит>/bin/` упомянут в README своего кита.
 
@@ -3973,6 +4013,18 @@ def main() -> int:
             print(f"    · {line}")
     else:
         print("[OK] Доставка в репы: правила, новости, вход на месте")
+
+    брошены, в_работе = check_archives(root)
+    if брошены:
+        print(f"[WARN] Архивы опубликованы, но лежат в ~/Developer: {len(брошены)}")
+        for line in брошены[:3]:
+            print(f"    · {line[:150]}")
+    elif not в_работе:
+        print("[OK] Архивы не копятся: выпуск доводится до конца")
+    if в_работе:
+        print(f"[WARN] Выпуск не доведён или промежуточные архивы: {len(в_работе)}")
+        for line in в_работе[:3]:
+            print(f"    · {line[:150]}")
     if отстают:
         print(f"[WARN] Репы отстают от канона: {len(отстают)}")
         for line in отстают[:5]:
@@ -4080,7 +4132,8 @@ def main() -> int:
         for line in rot:
             print(f"    · {line}")
 
-    sec_dupes = check_section_dupes(root, files)
+    own_files = [f for f in files if not is_verbatim(f.relative_to(root))]
+    sec_dupes = check_section_dupes(root, own_files)
     if sec_dupes:
         failures.extend(sec_dupes)
         print(f"[FAIL] Повторяющиеся номера разделов внутри документа: {len(sec_dupes)}")
@@ -4104,7 +4157,7 @@ def main() -> int:
                         "глушит проверку вместо сужения")
         print("[FAIL] Канарейка cjk-term: самопроверка не прошла")
     else:
-        cjk_hits = check_cjk(root, files, allowlist)
+        cjk_hits = check_cjk(root, own_files, allowlist)
         if cjk_hits:
             failures.extend(cjk_hits)
             print(f"[FAIL] Токен-слип модели, иероглифы в тексте: {len(cjk_hits)}")
@@ -4137,17 +4190,11 @@ def main() -> int:
         print(f"[WARN] Тяжёлое в дереве: {len(size_warns)}")
         for line in size_warns:
             print(f"    · {line}")
-    label = "OK"
-    if total_mb > REPO_HARD_MB:
-        failures.append(f"размер репы {total_mb:.1f} МБ > жёсткого порога {REPO_HARD_MB} МБ")
-        label = "FAIL"
-    elif total_mb > REPO_SOFT_MB:
-        warnings.append(f"размер репы {total_mb:.1f} МБ > мягкого порога {REPO_SOFT_MB} МБ")
-        label = "WARN"
-    elif total_mb > REPO_TARGET_MB:
-        warnings.append(f"размер репы {total_mb:.1f} МБ > целевого порога {REPO_TARGET_MB} МБ")
-        label = "WARN"
-    print(f"[{label}] Размер дерева: {total_mb:.1f} МБ (цель {REPO_TARGET_MB} / мягкий {REPO_SOFT_MB} / жёсткий {REPO_HARD_MB})")
+    # Пороги размера репы отменены 25.09.2026 (патчноут v4.214.0): они описывали
+    # предел веб-Claude, куда архив грузился целиком, а не здоровье репы. Размер
+    # печатается как факт и гейт не валит — иначе правило жило бы в проверке
+    # после отмены в каноне.
+    print(f"[INFO] Размер дерева: {total_mb:.1f} МБ (порогов нет)")
 
     rp_problems = check_resume_point_content(root, allowlist)
     if rp_problems:

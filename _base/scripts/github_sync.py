@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import importlib.machinery
 import importlib.util
+import hashlib
 import os
 import re
 import shutil
@@ -243,6 +244,36 @@ def релиз(репа: str, версия: str, заголовок: str, тел
     return False
 
 
+def убрать_архив(репа: str, версия: str, архив: Path) -> None:
+    """Удалить архив, доказанно лежащий в релизе (паритет с `deploy.sh` и `publish.py`).
+
+    🔴 ПРИКАЗ ВЛАДЕЛЬЦА 25.09.2026: *«они должны выполнять работу деплой скрипта
+    и коммитить репы и удалять архивы затем»*. `deploy.sh` удаляет опубликованный
+    архив по умолчанию (`DELETE_AFTER=1`), `publish.py` научили 15.09 — а этот
+    путь (деплой из архива) не удалял ничего. За сутки 23–24.09 в `~/Developer`
+    скопилось 103 архива на 8.4 ГБ при 16 ГБ свободного места на диске.
+
+    Удаление — только после сверки размера И sha256 с ассетом релиза: имя файла
+    в релизе не доказывает, что загрузка дошла целиком.
+    """
+    try:
+        r = subprocess.run(
+            ["gh", "api", f"repos/{OWNER}/{репа}/releases/tags/v{версия}", "-q",
+             f'.assets[]|select(.name=="{архив.name}")|"\\(.size) \\(.digest)"'],
+            capture_output=True, text=True, timeout=120)
+    except subprocess.TimeoutExpired:
+        say(f"      🟡 архив не удалён: GitHub не ответил про ассет {архив.name}")
+        return
+    размер, _, дайджест = r.stdout.strip().partition(" ")
+    свой = hashlib.sha256(архив.read_bytes()).hexdigest()
+    if r.returncode == 0 and размер == str(архив.stat().st_size) \
+            and дайджест.removeprefix("sha256:") == свой:
+        архив.unlink()
+        say(f"      архив сверен по sha256 и удалён: {архив.name}")
+    else:
+        say(f"      🟡 архив НЕ удалён — не сверился с ассетом релиза: {архив.name}")
+
+
 def зафиксировать(корень: Path, дерево_коммита: str, сообщение: str) -> str:
     """Коммит поверх HEAD без касания рабочего дерева."""
     _, родитель = git(корень, "rev-parse", "HEAD")
@@ -320,6 +351,8 @@ def выпустить_подготовленное(корень: Path, репа
     for г in готовые:
         if релиз(репа, г["версия"], г["заголовок"], г["тело"], г["архив"]):
             say(f"   🟢 релиз v{г['версия']} с архивом")
+            if г["архив"] and Path(г["архив"]).is_file():
+                убрать_архив(репа, г["версия"], Path(г["архив"]))
         else:
             say(f"   🔴 релиз v{г['версия']} не создан")
             ок = False

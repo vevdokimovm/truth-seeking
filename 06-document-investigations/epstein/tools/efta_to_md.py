@@ -20,10 +20,12 @@ import argparse
 import csv
 import io
 import os
+import struct
 import subprocess
 import sys
 import time
 import zipfile
+import zlib
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
@@ -47,11 +49,18 @@ class ZipSource:
     def __init__(self, zip_path: str | None, url: str | None) -> None:
         self.zip_path, self.url = zip_path, url
 
-    def open(self) -> zipfile.ZipFile:
+    def open(self, tries: int = 6) -> zipfile.ZipFile:
         if self.zip_path:
             return zipfile.ZipFile(self.zip_path)
         from remotezip import RemoteZip
-        return RemoteZip(self.url)
+        for i in range(tries):
+            try:
+                return RemoteZip(self.url, timeout=120)
+            except Exception:
+                if i == tries - 1:
+                    raise
+                time.sleep(20 * (i + 1))
+        raise RuntimeError("unreachable")
 
 
 def ocr_page(page: pymupdf.Page) -> tuple[str, float, int]:
@@ -93,7 +102,12 @@ def pdf_to_md(name: str, data: bytes, ds: int, source: str) -> tuple[str, dict]:
         text = page.get_text().strip()
         if len(text) > TEXT_LAYER_MIN:
             st["layer"] += 1
-            parts.append(f"### Стр. {i} · текстовый слой\n\n{text}")
+            dark = dark_share(page)
+            mark = ""
+            if dark > 0.2:
+                st["redacted"] += 1
+                mark = f" · 🔲 зачернено {dark:.0%}"
+            parts.append(f"### Стр. {i} · текстовый слой{mark}\n\n{text}")
             continue
         text, conf, words = ocr_page(page)
         if conf >= OCR_MIN_CONF and words >= OCR_MIN_WORDS:
@@ -144,6 +158,12 @@ def sheet_to_md(name: str, data: bytes, ds: int, source: str) -> str:
             f"\n\n```\n{text.strip()}\n```\n")
 
 
+def note_name(member: str) -> str:
+    """Natives share their EFTA number with a slip-sheet PDF: keep both notes."""
+    p = Path(member)
+    return f"{p.stem}.md" if p.suffix.lower() == ".pdf" else f"{p.name}.md"
+
+
 def read_retry(z: zipfile.ZipFile, name: str, tries: int = 4) -> bytes:
     """archive.org datanodes return sporadic 5xx; back off and retry."""
     for i in range(tries):
@@ -156,15 +176,55 @@ def read_retry(z: zipfile.ZipFile, name: str, tries: int = 4) -> bytes:
     raise RuntimeError("unreachable")
 
 
-def work(src: ZipSource, names: list[str], ds: int, out: str, label: str) -> list[dict]:
+Entry = tuple[str, int, int, int]  # name, local header offset, compressed size, method
+
+
+def fetch_member(session, url: str, entry: Entry, tries: int = 4) -> bytes:
+    """Read one member by HTTP Range using offsets from the central directory.
+
+    Opening RemoteZip per chunk re-downloads the whole central directory
+    (~30 MB for DS11's 331k entries); offsets make each read one small request.
+    """
+    name, offset, csize, method = entry
+    end = offset + 30 + 4 * len(name) + 1024 + csize
+    for i in range(tries):
+        try:
+            r = session.get(url, headers={"Range": f"bytes={offset}-{end}"}, timeout=120)
+            r.raise_for_status()
+            b = r.content
+            if b[:4] != b"PK\x03\x04":
+                raise IOError("no local file header at offset")
+            n, x = struct.unpack("<HH", b[26:30])
+            raw = b[30 + n + x:30 + n + x + csize]
+            if len(raw) != csize:
+                raise IOError(f"short read {len(raw)}/{csize}")
+            if method == zipfile.ZIP_STORED:
+                return raw
+            if method == zipfile.ZIP_DEFLATED:
+                return zlib.decompress(raw, -15)
+            raise IOError(f"unsupported compression {method}")
+        except Exception:
+            if i == tries - 1:
+                raise
+            time.sleep(15 * (i + 1))
+    raise RuntimeError("unreachable")
+
+
+def work(src: ZipSource, entries: list[Entry], ds: int, out: str,
+         label: str) -> list[dict]:
     """Worker: process a chunk of zip members, write notes, return stats."""
+    import contextlib
+    import requests
     stats = []
-    with src.open() as z:
-        for name in names:
+    session = requests.Session()
+    with (src.open() if src.zip_path else contextlib.nullcontext()) as z:
+        for entry in entries:
+            name = entry[0]
             ext = Path(name).suffix.lower()
-            target = Path(out) / f"{Path(name).stem}.md"
+            target = Path(out) / note_name(name)
             try:
-                data = read_retry(z, name)
+                data = (read_retry(z, name) if z is not None
+                        else fetch_member(session, src.url, entry))
                 if ext == ".pdf":
                     md, st = pdf_to_md(name, data, ds, label)
                     target.write_text(md, encoding="utf-8")
@@ -195,11 +255,13 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
 
     with src.open() as z:
-        members = [i.filename for i in z.infolist() if not i.is_dir()]
+        infos = {i.filename: (i.filename, i.header_offset, i.compress_size, i.compress_type)
+                 for i in z.infolist() if not i.is_dir()}
+    members = list(infos)
     media = [m for m in members if Path(m).suffix.lower() in MEDIA]
     todo = [m for m in members
             if Path(m).suffix.lower() in ({".pdf"} | SHEETS)
-            and not (out / f"{Path(m).stem}.md").exists()]
+            and not (out / note_name(m)).exists()]
     if a.limit:
         todo = todo[:a.limit]
     with open(out / "_media_queue.tsv", "w") as f:
@@ -207,7 +269,8 @@ def main() -> int:
     print(f"DS{a.ds}: members={len(members)} todo={len(todo)} media={len(media)}",
           flush=True)
 
-    chunks = [todo[i:i + a.chunk] for i in range(0, len(todo), a.chunk)]
+    entries = [infos[m] for m in todo]
+    chunks = [entries[i:i + a.chunk] for i in range(0, len(entries), a.chunk)]
     log = out / "_stats.tsv"
     new = not log.exists()
     done = errors = 0
