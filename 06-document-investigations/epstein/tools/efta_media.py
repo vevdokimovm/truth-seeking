@@ -43,6 +43,15 @@ SILENCE_DB = -35
 SILENCE_MIN = 2.0
 VAD_MODEL = Path.home() / ("Developer/whisper-models/whisper.cpp-1.9.4/models/"
                            "ggml-silero-v5.1.2.bin")
+# Клише, которыми whisper отвечает на тишину и невнятную речь. Нормализуются
+# до букв и пробелов, поэтому пунктуация и регистр здесь не нужны.
+CLICHE = {
+    "thank you", "thank you very much", "thanks for watching",
+    "thank you for watching", "thanks", "bye", "you", "okay", "ok",
+    "please subscribe", "subscribe to my channel", "the end",
+    "продолжение следует", "спасибо", "спасибо за просмотр",
+    "субтитры сделал dimatorzok", "редактор субтитров",
+}
 
 
 def zip_url(ds: int) -> str:
@@ -102,24 +111,39 @@ def voiced_seconds(path: Path, total: float) -> float:
 
 
 def hallucination_warning(note_text: str) -> str:
-    """Предупреждение, если расшифровка выродилась в повтор одной фразы.
+    """Предупреждение, если расшифровка похожа на выдумку модели.
 
-    На тишине whisper не молчит, а заполняет окна клише («Thank you.»,
-    «Продолжение следует…»). Первая ночь этапа E дала 9 таких нот из 25:
-    119–121 сегмент подряд, все одинаковые. VAD закрывает причину, это —
-    страховка на случай, когда он не сработал (METHOD-SPEECH §1).
+    Два признака, оба сняты с живых нот 30.09.2026:
+
+    · **повтор одной строки.** На цифровой тишине whisper заполняет каждое
+      30-секундное окно клише: 9 нот из 25 в первую ночь этапа E оказались
+      119–121 сегментом «Thank you.» подряд. Причину закрывает VAD;
+    · **только клише и ничего больше.** `EFTA01614407.amr` (13 с, сигнал есть:
+      mean −39.8 dB, VAD нашёл 5 сегментов речи) дал один сегмент «Thank you.».
+      Здесь VAD не помогает — он слышит активность, но не разборчивость,
+      и на тихой невнятной речи модель выдаёт то же клише.
+
+    Второй признак ловит короткие файлы, которые первый пропускает по порогу.
     """
     segs = [m.strip() for m in
             re.findall(r"^\*\*\d\d:\d\d(?::\d\d)?\*\* (.+?)\s*$", note_text, re.M)]
-    if len(segs) < 3:
+    if not segs:
         return ""
-    top, n = Counter(segs).most_common(1)[0]
-    if n / len(segs) < 0.8:
-        return ""
-    return (f"\n---\n\n🔴 **Подозрение на галлюцинацию модели.** "
-            f"{n} из {len(segs)} сегментов — одна и та же строка «{top[:60]}». "
-            f"Так whisper заполняет тишину. Расшифровку читать как непроверенную, "
-            f"файл перепрогнать с `--vad` и сверить `ffmpeg volumedetect`.\n")
+    if len(segs) >= 3:
+        top, n = Counter(segs).most_common(1)[0]
+        if n / len(segs) >= 0.8:
+            return (f"\n---\n\n🔴 **Подозрение на галлюцинацию модели.** "
+                    f"{n} из {len(segs)} сегментов — одна и та же строка "
+                    f"«{top[:60]}». Так whisper заполняет тишину. Расшифровку "
+                    f"читать как непроверенную, файл перепрогнать с `--vad` "
+                    f"и сверить `ffmpeg volumedetect`.\n")
+    norm = {re.sub(r"[^a-zа-яё ]", "", s.lower()).strip() for s in segs}
+    if norm and norm <= CLICHE:
+        return (f"\n---\n\n🟡 **Расшифровка состоит только из типового клише "
+                f"whisper** («{segs[0][:50]}»). Так модель отвечает на тихую или "
+                f"неразборчивую речь — содержанием файла это считать нельзя. "
+                f"Проверить глазами: `efta_vad_probe.py <EFTA> --ds <N>`.\n")
+    return ""
 
 
 def no_speech_note(member: str, ds: int, voiced: float, total: float) -> str:

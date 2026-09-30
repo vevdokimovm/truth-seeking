@@ -36,3 +36,4 @@ date,source,kind,duration_s,model,threads,wall_s,ratio,loadavg,parallel_asr,tool
 2026-09-30,EFTA00221046.m4a,audio,179,large-v3-turbo-q5_0,4,699,3.89,13,1,efta_bench.py,"A/B с VAD: ускорение x0.98, совпадение 92.2%, слов -5"
 2026-09-30,EFTA00033407.mp4 (5 мин),video,300,large-v3-turbo-q5_0,4,552,1.84,14,1,efta_bench.py,A/B без VAD
 2026-09-30,EFTA00033407.mp4 (5 мин),video,300,large-v3-turbo-q5_0,4,11,0.04,14,1,efta_bench.py,"A/B с VAD: ускорение x50.78, совпадение 0.0%, слов -20"
+2026-09-30,EFTA01614407.amr,video,13,large-v3-turbo-q5_0,4,50,3.79,9.8,0,tools/video_to_note.py,сегментов 1
