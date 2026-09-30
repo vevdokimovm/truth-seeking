@@ -30,7 +30,12 @@ from pathlib import Path
 from remotezip import RemoteZip
 
 HERE = Path(__file__).resolve().parent
-TIMINGS = HERE.parents[2] / "_base/07-media-to-text-lab/asr-timings.csv"
+# Реестр замеров — в ОРИГИНАЛЕ базы, не в зеркале `_base/`: зеркало затирается
+# следующей раздачей канона, и замер, записанный туда, исчезает без следа.
+# 30.09.2026 ночной прогон отчитался «записано», а строк не осталось нигде.
+ORIGIN_TIMINGS = Path.home() / "repos/base-repo/07-media-to-text-lab/asr-timings.csv"
+MIRROR_TIMINGS = HERE.parents[2] / "_base/07-media-to-text-lab/asr-timings.csv"
+TIMINGS = ORIGIN_TIMINGS if ORIGIN_TIMINGS.is_file() else MIRROR_TIMINGS
 ITEM = "https://archive.org/download/data-set-8_20251228/"
 MODEL = Path.home() / "Developer/whisper-models/ggml-large-v3-turbo-q5_0.bin"
 VAD = (Path.home() / "Developer/whisper-models/whisper.cpp-1.9.4/models/"
@@ -107,12 +112,28 @@ def transcribe(wav: Path, tag: str, vad: bool) -> tuple[float, list[str]]:
 
 
 def record(source: str, kind: str, dur: float, wall: float, note: str) -> None:
+    """Дописать замер в реестр и УБЕДИТЬСЯ, что он там оказался.
+
+    Проверка после записи — не паранойя: 30.09.2026 прогон напечатал «записано»,
+    а строк не нашлось ни в рабочей копии, ни в git. Молчаливая потеря замера
+    хуже отсутствия замера: числа выглядят снятыми, а их нет.
+    """
+    row = [datetime.date.today().isoformat(), source, kind, f"{dur:.0f}",
+           "large-v3-turbo-q5_0", "4", f"{wall:.0f}",
+           f"{wall / dur:.2f}" if dur else "", f"{loadavg():.0f}", "1",
+           "efta_bench.py", note]
+    before = TIMINGS.read_text(encoding="utf-8").count("\n") if TIMINGS.is_file() else 0
     with open(TIMINGS, "a", newline="", encoding="utf-8") as f:
-        csv.writer(f).writerow([
-            datetime.date.today().isoformat(), source, kind, f"{dur:.0f}",
-            "large-v3-turbo-q5_0", "4", f"{wall:.0f}",
-            f"{wall / dur:.2f}" if dur else "", f"{loadavg():.0f}", "1",
-            "efta_bench.py", note])
+        csv.writer(f).writerow(row)
+        f.flush()
+        os.fsync(f.fileno())
+    after = TIMINGS.read_text(encoding="utf-8").count("\n")
+    if after <= before:
+        print(f"  🔴 ЗАМЕР НЕ ЗАПИСАН в {TIMINGS} — строк было {before}, стало "
+              f"{after}. Числа ниже перенести в реестр руками:\n    {row}",
+              flush=True)
+    else:
+        print(f"  ✅ в реестр: {source} · {wall:.0f} с", flush=True)
 
 
 def one(name: str, wav: Path, kind: str) -> None:

@@ -1,0 +1,5 @@
+# Журналы стендов лаборатории: пишутся прогонами, не каноном.
+# Признак и разбор — scripts/runtime_writes.py.
+
+local-brain/bench-results.tsv   # bench.py — строка на задачу прогона
+local-brain/tool-results.tsv    # tool_probe.py — строка на ступень вызова

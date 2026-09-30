@@ -54,26 +54,72 @@ CLICHE = {
 }
 
 
-def zip_url(ds: int) -> str:
-    """Resolve the datanode URL of a dataset zip (redirects are slow to repeat)."""
+def zip_url(ds: int, tries: int = 5) -> str:
+    """Resolve the datanode URL of a dataset zip (redirects are slow to repeat).
+
+    С ретраями: archive.org отвечает на этот HEAD то 500, то таймаутом, а без
+    повтора падал весь датасет (01.10.2026 — `HTTP Error 500` на первом же DS).
+    """
     name = "DataSet 09 - Incomplete.zip" if ds == 9 else f"DataSet {ds:02d}.zip"
     req = urllib.request.Request(ITEM + urllib.parse.quote(name), method="HEAD")
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return r.url
-
-
-def extract(url: str, member: str, dest: Path, tries: int = 5) -> None:
-    """Stream one zip member to disk, retrying archive.org 5xx."""
     for i in range(tries):
         try:
-            with RemoteZip(url, timeout=120) as z, z.open(member) as src, \
-                    open(dest, "wb") as out:
-                shutil.copyfileobj(src, out, 1 << 20)
-            return
-        except Exception:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return r.url
+        except Exception as e:
             if i == tries - 1:
                 raise
-            time.sleep(20 * (i + 1))
+            print(f"  zip_url DS{ds} попытка {i + 1}: {e!r}"[:160], flush=True)
+            time.sleep(15 * (i + 1))
+    raise RuntimeError("unreachable")
+
+
+class ZipSession:
+    """Одно соединение с удалённым zip на весь прогон датасета.
+
+    🔴 Так было не всегда: до 01.10.2026 `RemoteZip` открывался НА КАЖДЫЙ файл,
+    то есть центральный каталог качался заново каждый раз. У DS10 это полмиллиона
+    записей — десятки мегабайт ради файла в сотню килобайт. Ночной прогон дал
+    12 нот за 5 часов, и узким местом был не whisper, а этот перекачиваемый
+    каталог. Тот же дефект уже исправляли в `efta_to_md.py` (релиз 1.5.0,
+    «ускорение ×4»), в медиа-раннер исправление не перенесли.
+
+    Соединение пересоздаётся при сетевом сбое: archive.org рвёт сессии, и
+    держать одну вечно нельзя.
+    """
+
+    def __init__(self, url: str) -> None:
+        self.url = url
+        self._zip: RemoteZip | None = None
+
+    def _open(self) -> RemoteZip:
+        if self._zip is None:
+            self._zip = RemoteZip(self.url, timeout=120)
+        return self._zip
+
+    def close(self) -> None:
+        if self._zip is not None:
+            try:
+                self._zip.close()
+            except Exception:
+                pass
+            self._zip = None
+
+    def names(self) -> list[tuple[str, int]]:
+        return [(i.filename, i.file_size) for i in self._open().infolist()]
+
+    def extract(self, member: str, dest: Path, tries: int = 5) -> None:
+        """Забрать один член на диск, пересоздавая сессию при сбое."""
+        for i in range(tries):
+            try:
+                with self._open().open(member) as src, open(dest, "wb") as out:
+                    shutil.copyfileobj(src, out, 1 << 20)
+                return
+            except Exception:
+                self.close()          # порванную сессию переиспользовать нельзя
+                if i == tries - 1:
+                    raise
+                time.sleep(20 * (i + 1))
 
 
 def audio_streams(path: Path) -> int:
@@ -189,9 +235,9 @@ def main() -> int:
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     url = zip_url(a.ds)
-    with RemoteZip(url, timeout=120) as z:
-        members = [(i.filename, i.file_size) for i in z.infolist()
-                   if Path(i.filename).suffix.lower() in MEDIA]
+    session = ZipSession(url)
+    members = [(n, s) for n, s in session.names()
+               if Path(n).suffix.lower() in MEDIA]
     if a.kind != "all":
         want_audio = a.kind == "audio"
         members = [(m, s) for m, s in members
@@ -209,7 +255,7 @@ def main() -> int:
             src = Path(tmp) / Path(member).name
             note = out / f"{Path(member).name}.md"
             try:
-                extract(url, member, src)
+                session.extract(member, src)
                 if audio_streams(src) == 0:
                     note.write_text(silent_note(member, a.ds, src), encoding="utf-8")
                     continue
@@ -252,6 +298,7 @@ def main() -> int:
                 if n % 10 == 0 or n == len(todo):
                     print(f"  media {n}/{len(todo)} silent={skipped} "
                           f"suspect={suspect} failed={failed}", flush=True)
+    session.close()
     return 1 if failed else 0
 
 

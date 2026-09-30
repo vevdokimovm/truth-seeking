@@ -11,7 +11,6 @@
 set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 PY="$HOME/epstein/.venv/bin/python"
-LOG="$HOME/epstein/stageE.log"
 BENCH=1; FORCE=0
 for a in "$@"; do
   case "$a" in
@@ -20,7 +19,9 @@ for a in "$@"; do
   esac
 done
 
-say() { echo "$(date '+%F %T') $*" | tee -a "$LOG"; }
+# Пишем только в stdout: раннер запускают с `>> stageE.log`, и tee сюда же
+# давал каждую строку дважды — лог читался вдвое хуже без всякой пользы.
+say() { echo "$(date '+%F %T') $*"; }
 
 # ── 1. свободна ли машина (METHOD-SPEECH §7а) ────────────────────────────────
 # Мерим ДОСТУПНУЮ память, а не занятый своп: macOS держит своп занятым почти
@@ -51,10 +52,10 @@ say "машина свободна, работаем"
 # ── 2. A/B-замер VAD на реальных файлах корпуса ──────────────────────────────
 if [ "$BENCH" -eq 1 ]; then
   say "===== A/B-замер VAD (2 файла: аудио DS9 + 5 мин видео DS8) ====="
-  "$PY" "$HERE/efta_bench.py" 2>&1 | tee -a "$LOG"
+  "$PY" "$HERE/efta_bench.py" 2>&1
   say "===== замер окончен, числа в asr-timings.csv ====="
 fi
 
 # ── 3. очередь ───────────────────────────────────────────────────────────────
-bash "$HERE/run_media.sh" audio video 2>&1 | tee -a "$LOG"
+bash "$HERE/run_media.sh" audio video 2>&1
 say "STAGE E: раннер завершился"

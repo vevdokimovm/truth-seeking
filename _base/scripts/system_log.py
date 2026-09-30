@@ -132,6 +132,43 @@ def запись(репа: Path, коммит: str) -> dict[str, str]:
     }
 
 
+def старт_сессии(репа: Path) -> int:
+    """Запись «вахта открыта» в общий журнал — по заказу владельца 30.09.2026.
+
+    🔴 ЗАЧЕМ ОТДЕЛЬНАЯ ЗАПИСЬ, ЕСЛИ ЕСТЬ `--live`. `--live` отвечает «кто
+    работает СЕЙЧАС» и ничего не помнит: закрылась консоль — и следа нет.
+    Строка о старте остаётся навсегда, поэтому на вопрос «сколько консолей
+    было открыто, когда сломалось» отвечает только она.
+
+    Дословно заказ: «пусть в этот журнал каждая вахта сессия то ли пишет
+    когда начинает работать. чтобы понимать когда несколько консолей открыто
+    и в разных репах системы идут свои задачи».
+
+    🔴 Ключ дедупликации — `сессия:<pid>`: без pid все старты в одной репе
+    считались бы одной записью и второй консоли в журнале не было бы видно
+    вовсе — то есть исчезло бы ровно то, ради чего запись заводится.
+    """
+    import datetime as dt
+    pid = os.getppid()
+    сессий = subprocess.run(["pgrep", "-f", "claude --resume"],
+                            capture_output=True, text=True)
+    живых = len([с for с in сессий.stdout.splitlines() if с.strip()])
+    версия = ""
+    ф = репа / "VERSION"
+    if ф.is_file():
+        версия = ф.read_text(encoding="utf-8").strip()
+    дописать([{
+        "время": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+        "репа": репа.name,
+        "коммит": f"сессия:{pid}",
+        "ветка": гит(репа, "rev-parse", "--abbrev-ref", "HEAD"),
+        "файлов": "", "добавлено": "", "удалено": "",
+        "версия": версия,
+        "заголовок": f"🟢 вахта открыта · консолей в системе: {живых}",
+    }])
+    return 0
+
+
 def живое() -> int:
     """🔴 Кто трогает систему прямо сейчас — то, чего не хватило 30.09.2026."""
     код = subprocess.run(["pgrep", "-f", "claude --resume"],
@@ -211,6 +248,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--live", action="store_true")
+    ap.add_argument("--session-start", dest="старт", metavar="РЕПА",
+                   help="записать открытие вахты (зовёт SessionStart-хук)")
     ap.add_argument("--scan", action="store_true")
     ap.add_argument("--record", metavar="РЕПА")
     ap.add_argument("--show", action="store_true")
@@ -223,6 +262,9 @@ def main() -> int:
         return selftest()
     if a.live:
         return живое()
+    if a.старт:
+        репа = РЕПЫ / a.старт
+        return старт_сессии(репа) if (репа / ".git").exists() else 0
 
     if a.record:
         репа = РЕПЫ / a.record
