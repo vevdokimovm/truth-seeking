@@ -11,8 +11,7 @@
 set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 PY="$HOME/epstein/.venv/bin/python"
-KINDS=("${1:-audio video}")
-read -ra KINDS <<< "${KINDS[0]}"
+if [ "$#" -gt 0 ]; then KINDS=("$@"); else KINDS=(audio video); fi
 
 for kind in "${KINDS[@]}"; do
   echo "$(date '+%F %T') ===== PASS $kind ====="
