@@ -154,7 +154,7 @@ def check(root: Path, staged_mode: bool) -> list[str]:
 
     readme_text = read_text(root, README)
     if readme_text is None:
-        return [f"нет {README} — заводится из templates/REPO_README_TEMPLATE.md"]
+        return [f"нет {README} — заводится из templates/REPO-README-TEMPLATE.md"]
 
     status = parse_status(readme_text)
     if status is None:
@@ -172,9 +172,15 @@ def check(root: Path, staged_mode: bool) -> list[str]:
         )
 
     try:
-        parsed_date = dt.date.fromisoformat(status.date)
+        # 🔴 Берётся только ДАТА: в блоке законно стоит `ГГГГ-ММ-ДД ЧЧ:ММ`
+        # (с 03.09.2026), и `date.fromisoformat` на времени падает. Регулярку
+        # разбора тогда расширили, а валидатор рядом — нет: тот же `PIT-G`,
+        # «артефакт правлен, его обвязка — нет», в одном файле с собой.
+        # Поймано выпуском v4.216.0, который встал на собственной витрине.
+        parsed_date = dt.date.fromisoformat(status.date.split()[0])
     except ValueError:
-        problems.append(f"дата «{status.date}» не разбирается как ISO (ГГГГ-ММ-ДД)")
+        problems.append(f"дата «{status.date}» не разбирается как ISO "
+                        f"(ГГГГ-ММ-ДД или ГГГГ-ММ-ДД ЧЧ:ММ)")
     else:
         if parsed_date > dt.date.today():
             problems.append(f"дата {status.date} из будущего")

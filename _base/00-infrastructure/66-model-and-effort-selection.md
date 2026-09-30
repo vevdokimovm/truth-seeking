@@ -434,4 +434,4 @@ Details: `[reasoning_extraction]`
 `64-claude-code-sandbox.md` · `63-ai-tools-landscape.md` ·
 `61-token-analytics.md` · `28-empirical-experiment-methodology.md` (как мерить) ·
 `76-repo-classes.md` (восемь классов, §3б берёт их как ось) ·
-`reports/adr/adr_002_model_and_effort_for_campaign.md` (решение, откуда §3б/§3в)
+`reports/adr/adr-002-model-and-effort-for-campaign.md` (решение, откуда §3б/§3в)

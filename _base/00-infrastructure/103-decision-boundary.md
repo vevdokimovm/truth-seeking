@@ -198,7 +198,7 @@
 
 `/auto` §1 (правило нулевого шага) · `/auto` §5 (три стоп-класса) ·
 `/options` (раскладывает варианты, не выбирает) ·
-`06-autonomous-mode-kit/STOP_CONDITIONS.md` ·
+`06-autonomous-mode-kit/STOP-CONDITIONS.md` ·
 `90-existing-file-priority.md` (не заводить своё вместо чужого) ·
 `93-citation-convention.md` (нотация `репа::КОД`) ·
 `portrait-of-taste/reports/pitfalls.md` — источник §2:

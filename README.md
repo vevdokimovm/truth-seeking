@@ -1,7 +1,7 @@
 # truth-seeking — Vasilii Evdokimov
 
 <!-- STATUS -->
-> **Сейчас:** `v1.5.0` · 2026-09-26 18:21 · Epstein Library: этап B, три разбора корпуса, ускорение ×4, телеметрия сети
+> **Сейчас:** `v1.6.0` · 2026-09-30 16:05 · Epstein Library: этапы B–D закрыты, этап E перестроен по замерам
 > Открытое — [`ROADMAP.md`](ROADMAP.md) · где стоим — [`WATCHLOG.md`](WATCHLOG.md) §0.
 <!-- /STATUS -->
 

@@ -22,3 +22,13 @@ date,source,kind,duration_s,model,threads,wall_s,ratio,loadavg,parallel_asr,tool
 2026-09-15,breathing-exercises-part-1.mp4,video,677,base,4,760,1.12,63.8,2,tools/video_to_note.py,первый видеопрогон; машина свободна; речь 2-й половины галлюцинировала
 2026-09-15,Мастер-класс от Александра про общение с военкоматом.mp4,video,3375,large-v3-turbo-q5_0,4,25734,7.62,6.1,0,tools/video_to_note.py,"мастер-класс legal; loadavg 90-134 весь прогон, параллельно батч self-map -t 8 и iCloud; замер не показателен для свободной машины"
 2026-09-15,ч2.mp4,video,282,large-v3-turbo-q5_0,4,1039,3.68,6.2,0,tools/video_to_note.py,сегментов 79
+2026-09-30,EFTA00155551.m4a,audio,8,large-v3-turbo-q5_0,4,150,19.95,192.7,0,tools/video_to_note.py,сегментов 2
+2026-09-30,epstein DS8 EFTA00033016.mp4,video,3562,large-v3-turbo-q5_0,4,5520,1.55,,1,efta_media.py,"реальный корпус, CCTV: час видео → 238 слов; -l auto, без VAD"
+2026-09-30,synthetic wtest.wav (sine 46s),audio,46,large-v3-turbo-q5_0,4,211,4.59,31,1,whisper-cli,"замер load/encode: load 2.2 с (1%), encode 182 с (94%) — узкое место энкодер, не загрузка модели"
+2026-09-30,synthetic wtest.wav (sine 46s),audio,46,large-v3-turbo-q5_0,8,227,4.93,31,1,whisper-cli,"-t 8 -bo 1 -bs 1: потоки и лучи не дали ничего, encode тот же"
+2026-09-30,synthetic wtest.wav (sine 46s),audio,46,large-v3-turbo-q5_0,4,195,4.23,31,1,whisper-cli,"-l en вместо auto: 2 прогона энкодера вместо 3"
+2026-09-30,synthetic mixed.wav (20s речь + 40s тишина),audio,60,large-v3-turbo-q5_0,4,244,4.04,31,1,whisper-cli,"-l en, без VAD: encode 182 с / 3 прогона"
+2026-09-30,synthetic mixed.wav (20s речь + 40s тишина),audio,60,large-v3-turbo-q5_0,4,175,2.90,31,1,whisper-cli,"-l en + --vad silero: аудио -67.4%, encode 83 с / 1 прогон, VAD стоит 1.7 с"
+2026-09-30,synthetic speech_only.wav (say TTS),audio,20,base,4,29,1.42,31,1,whisper-cli,"скрининг: текст почти совпал с turbo на чистой речи, разошлись в одном слове"
+2026-09-30,synthetic speech_only.wav (say TTS),audio,20,large-v3-turbo-q5_0,4,112,5.49,31,1,whisper-cli,"эталон качества для сравнения с base"
+2026-09-30,EFTA01616766.amr,video,12,large-v3-turbo-q5_0,4,5,0.42,5.6,0,tools/video_to_note.py,сегментов 0

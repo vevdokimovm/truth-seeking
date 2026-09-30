@@ -1,7 +1,7 @@
 # 🔴 STOP. CLAUDE — ЧИТАТЬ ДО ПЕРВОГО ДЕЙСТВИЯ
 
 > Один дефект отравляет больше сессий, чем все остальные вместе. Он уже описан в
-> [`02-methodology-library/tool_call_channel_failures.md`](02-methodology-library/tool_call_channel_failures.md)
+> [`02-methodology-library/tool-call-channel-failures.md`](02-methodology-library/tool-call-channel-failures.md)
 > и в реестре (PIT-011) — **и всё равно повторяется**. Значит, описан он был не там, где
 > его читают. Поэтому он здесь: в корне, первым файлом, до всего остального.
 >
@@ -69,7 +69,7 @@ court
 ## Реестр
 
 - `reports/pitfalls.md` → **PIT-011** (короткая карточка).
-- `02-methodology-library/tool_call_channel_failures.md` → полная методичка со всеми кейсами.
+- `02-methodology-library/tool-call-channel-failures.md` → полная методичка со всеми кейсами.
 
 ---
 
@@ -167,6 +167,38 @@ Telegram-токены в закоммиченном коде. Из git секр�
 
 ---
 
+## Второе-кватро — карантинная зона и запрет сетевой/гео-разведки
+
+🔴 **Приказ владельца 29.09.2026.** `~/Documents/NOT FOR CLAUDE` — абсолютная
+слепая зона: Claude никогда не читает, не листит и не правит ничего по этому
+пути. Claude никогда сам не выполняет команды сетевой/гео-разведки (внешний
+IP, шлюз, SSID Wi-Fi, VPN, маршруты, геолокация по IP). Повод — у владельца
+юридически чувствительная волонтёрская деятельность (помощь
+призывникам/отказникам), и сетевая/гео-телеметрия о его машине не должна
+оказываться в контексте ИИ-сессии ни в каком виде.
+
+**Два слоя, не один:** хук `~/.claude/hooks/quarantine-guard.sh` (`PreToolUse`,
+глобальный — действует в каждой сессии на машине, не только в base-repo) ловит
+вызов по форме (путь, текст Bash-команды); раздел в `~/.claude/CLAUDE.md` —
+то, что хук не может поймать механически (формулировку запроса, случайную
+утечку IP в выводе разрешённой команды).
+
+Полный разбор — `00-infrastructure/107-network-quarantine-and-recon-block.md`.
+
+---
+
+## Второе-квинто — `.claude/` живёт глобально, не только в base-repo
+
+🔴 **30.09.2026.** Скиллы, агенты и хуки base-repo видны Claude Code ТОЛЬКО
+внутри сессий этой репы, если лежат лишь в `base-repo/.claude/`. Канон
+правится здесь (git), но АКТИВНАЯ копия — `~/.claude/{skills,agents}/` +
+хуки в `~/.claude/settings.json`, куда её раскатывает
+`python3 scripts/sync_global_claude.py`. Тронул `.claude/skills|agents|hooks/`
+в base-repo — прогони синк, иначе правка не доедет ни до одной другой репы.
+Разбор — `00-infrastructure/108-global-claude-consolidation.md`.
+
+---
+
 ## Третье — массовые файловые операции (перенос, синк, чистка)
 
 **Любая операция, которая пишет или удаляет файлы пачками, обязана быть недеструктивной
@@ -252,7 +284,7 @@ python3 scripts/deploy_version_gate.py --fix    # починить докуме�
 ушёл до 4.16.1 — и документация в четырёх местах называла каноном именно базу. Вахта,
 следовавшая документации, откатила единственный инструмент публикации всей системы на
 13 версий назад. Спасла только строка с версией в выводе скрипта.
-Разбор — `reports/incidents/deployer_downgrade_incident.md`, урок — PIT-063.
+Разбор — `reports/incidents/deployer-downgrade-incident.md`, урок — PIT-063.
 
 ---
 
@@ -303,5 +335,5 @@ python3 scripts/revision_check.py     # check_campaign_log
 об этом не знает.
 
 Полный стандарт — `05-infra-synthesis-lab/STANDARD.md` §0 (четыре закона) и §0а (триггеры).
-Разборы, из-за которых правила появились: `reports/incidents/filter_lists_from_memory_pattern.md`,
+Разборы, из-за которых правила появились: `reports/incidents/filter-lists-from-memory-pattern.md`,
 `reports/situations/2026-08-20-premature-synthesis-optimization.md`.

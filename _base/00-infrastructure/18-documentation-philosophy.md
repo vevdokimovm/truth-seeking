@@ -566,4 +566,4 @@ PIT-063 (документ отменяет в одном месте то, что
 | `23-session-continuity.md` | Чекпоинт-дисциплина и работа на нескольких аккаунтах |
 | `24-changelog-protocol.md` | Подробный CHANGELOG: полная история сделанного |
 | `05-knowledge-base-rules.md` | Пять правил чистоты (актуальность, дубли, обобщённость, лёгкость, зона) |
-| `reports/documentation_methodology.md` | Индустриальная теория (blameless, RCA, runbook, ADR, SLO) |
+| `reports/documentation-methodology.md` | Индустриальная теория (blameless, RCA, runbook, ADR, SLO) |

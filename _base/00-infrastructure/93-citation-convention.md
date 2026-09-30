@@ -23,7 +23,7 @@
 | спор с самим собой не разрешается | разрешается открытием источника |
 
 Это прямое продолжение правила «факт = подтверждён источником»
-(`71-fail-loud-and-sourcing.md`, `templates/FACTS_HYPOTHESES_TEMPLATE.md`).
+(`71-fail-loud-and-sourcing.md`, `templates/FACTS-HYPOTHESES-TEMPLATE.md`).
 Цитирование — **форма** для того же принципа.
 
 ---
@@ -199,7 +199,7 @@ python3 scripts/links_check.py --selftest # семь случаев
 ## Связки
 
 `71-fail-loud-and-sourcing.md` (правило источника, §7 про словесные подделки) ·
-`templates/FACTS_HYPOTHESES_TEMPLATE.md` (форма реестра: факт обязан нести
+`templates/FACTS-HYPOTHESES-TEMPLATE.md` (форма реестра: факт обязан нести
 источник) · `72-source-of-truth.md` · `18-documentation-philosophy.md` ·
 `truth-seeking/00-method/04-evidence-hierarchy.md` (иерархия доказательств —
 внешняя, содержательная сторона того же вопроса).

@@ -164,7 +164,7 @@ sudo ln -sfn 3.13 /Library/Frameworks/Python.framework/Versions/Current
 `WATCHLOG-personal-finance-dss-v8.30.1.md` — **два формата для одного вида
 артефакта**. Скрипта, который их порождает, нет: имена делались руками.
 
-Руками — **по канону**: `02-methodology-library/development_process_methodology.md`
+Руками — **по канону**: `02-methodology-library/development-process-methodology.md`
 строкой 118 предписывал `WATCHLOG_finpilot_vX_Y_Z.md`, то есть ровно тот формат,
 который стандарт `43` §1 называет легаси («внутри версии — только точки,
 не `v2_12_0`»).

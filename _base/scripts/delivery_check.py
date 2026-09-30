@@ -77,14 +77,32 @@ def expects_base(repo: Path, private: set[str] | None) -> bool:
         return False
     if private is not None:
         return repo.name in private
+    return объявленная_приватность(repo) is not False
+
+
+def объявленная_приватность(repo: Path) -> bool | None:
+    """Намерение из `.repo-meta`: True приватная, False публичная, None не сказано.
+
+    🔴 ФОРМАТ `ключ=значение`, А НЕ JSON. Первая редакция резервного пути
+    разбирала метафайл как JSON и глохла на `JSONDecodeError` — то есть
+    резервный путь не работал НИ РАЗУ и молча возвращал «базу ждём»
+    для любой репы. Дефект не проявлялся, пока отвечал `gh`: ошибка была
+    закрыта работающим основным путём и вскрылась в день, когда `gh`
+    отвалился по таймауту keyring, — сразу одиннадцатью ложными падениями,
+    требовавшими разложить внутренний канон в десять ПУБЛИЧНЫХ реп.
+    Раздатчик такое отвергает предохранителем (`sync_base_local` §план),
+    поэтому гейт требовал ровно того, что запрещено.
+
+    Разбор здесь дословно тот же, что у раздатчика: у одного факта —
+    один способ прочтения, иначе у проверки своя версия правды.
+    """
     meta = repo / ".repo-meta"
-    if meta.is_file():
-        try:
-            if json.loads(meta.read_text(encoding="utf-8")).get("private") is False:
-                return False
-        except json.JSONDecodeError:
-            pass
-    return True
+    if not meta.is_file():
+        return None
+    for line in meta.read_text(encoding="utf-8", errors="replace").splitlines():
+        if line.startswith("private="):
+            return line.split("=", 1)[1].strip().lower() == "true"
+    return None
 
 
 def private_names() -> set[str] | None:

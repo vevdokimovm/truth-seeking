@@ -13,7 +13,7 @@
 путь не существует, все репы уже переехали в `~/repos/` (`88-local-repo-location-standard.md`,
 26.08.2026). Тот же дефект нашёлся ещё в 18 python-скриптах `scripts/` и
 `07-media-to-text-lab/tools/`/`05-infra-synthesis-lab/tools/`, плюс в `night.sh`,
-`templates/deploy.sh`, `.claude/skills/auto/SKILL.md`, `LAUNCH_BRIEF.md`, `RUNS.md`,
+`templates/deploy.sh`, `.claude/skills/auto/SKILL.md`, `LAUNCH-BRIEF.md`, `RUNS.md`,
 `.claude/agents/repo-inventory.md`, `86-entity-classes.md`. Починено — везде путь
 теперь выводится от `Path(__file__).resolve()` (тот же приём, что уже стоял в
 `sync_base_local.py`/`distribute_claude_kit.py`/`drift_versions.py`), а не от константы.
@@ -84,5 +84,5 @@ portrait-of-taste, science, self-map, truth-seeking, character-a-analysis) да�
 ## Что дальше по содержательной ревизии
 
 Документы (pdf/docx/pptx/xlsx) закрыты на 99.9% — следующий содержательный разрыв: **изображения**
-(`METHOD_IMAGES.md`, очередь 173 серии/1495 кадров) и **OCR** для 34+40=74 сканов без
+(`METHOD-IMAGES.md`, очередь 173 серии/1495 кадров) и **OCR** для 34+40=74 сканов без
 текстового слоя.

@@ -62,7 +62,7 @@
 - для правки готовой картинки — отдельным сообщением в том же чате Gemini:
   «keep everything, change only <что>».
 
-**Образец** — [`examples/fjord.prompt.md`](examples/fjord.prompt.md) и
+**Образец** — [`examples/fjord-prompt.md`](examples/fjord-prompt.md) и
 набросок [`examples/fjord-sketch.svg`](examples/fjord-sketch.svg).
 
 ### §0в. 🟢 Локально на этом маке — РАБОТАЕТ, замер 15.09.2026

@@ -118,4 +118,4 @@ URL», заменив `webcal://` на `https://`. Один раз настро�
 - Наблюдаемые MCP-тулы сессии: Gmail, Google Calendar, Google Drive, Notion, Exa, Microsoft Learn, Slack
   (+ `SearchMcpRegistry`/`ListConnectors`/`SuggestConnectors`).
 - Практика границ (Telegram egress-403, GitHub без коннектора):
-  `../reports/situations/2026-07-18-cowork-avtomatizatsiya-i-metodichki.md`.
+  `../reports/situations/2026-07-18-cowork-automation-and-guides.md`.

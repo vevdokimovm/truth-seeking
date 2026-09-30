@@ -28,6 +28,7 @@ except Exception: print(False)
 
 root="${CLAUDE_PROJECT_DIR:-.}"
 cd "$root" 2>/dev/null || exit 0
+root="$(pwd -P)"   # абсолютный путь — иначе basename "." даёт "." вместо имени репы
 command -v python3 >/dev/null 2>&1 || exit 0
 [ -f VERSION ] || exit 0
 
@@ -74,9 +75,19 @@ fi
 #
 # Источник один и тот же у shell и Python — `BASE_ARTIFACTS`, иначе способов
 # переопределить путь стало бы три (`PIT-178`).
+#
+# 🔴 ХУК ГЛОБАЛЬНЫЙ (30.09.2026) — живёт в ~/.claude/hooks/, срабатывает в
+# сессии ЛЮБОЙ из 66 реп, не только base-repo. Имя репы и её GitHub-remote
+# ниже поэтому берутся из текущего $root, а не зашиты строкой: зашитое имя
+# «base-repo» сверяло бы архив/тег чужой репы с чужим GitHub-репозиторием
+# ровно в 65 случаях из 66.
+repo_name="$(basename "$root")"
+remote_url="$(git -C "$root" remote get-url origin 2>/dev/null)"
+[ -z "$remote_url" ] && remote_url="https://github.com/vevdokimovm/${repo_name}.git"
+
 ARTIFACTS="${BASE_ARTIFACTS:-$HOME/Developer}"
 version="$(tr -d ' \t\r\n' < VERSION 2>/dev/null)"
-if [ -n "$version" ] && [ ! -f "$ARTIFACTS/base-repo-v${version}.zip" ]; then
+if [ -n "$version" ] && [ ! -f "$ARTIFACTS/${repo_name}-v${version}.zip" ]; then
   # Архив мог быть уже опубликован и удалён деплойером — тогда есть тег на GitHub.
   #
   # 🔴 Сетевой вызов внутри хука обязан иметь таймаут. Без него недоступная сеть
@@ -85,13 +96,12 @@ if [ -n "$version" ] && [ ! -f "$ARTIFACTS/base-repo-v${version}.zip" ]; then
   # Класс тот же, что в `personal-finance-dss/.claude/hooks/tests-gate.sh`:
   # тяжёлая проверка в хуке деградирует в fail-open (`71` §7в).
   # `timeout(1)` не используем — его нет на голом macOS; таймаут даёт python3.
-  tag_found=$(python3 - "$version" <<'PY' 2>/dev/null
+  tag_found=$(python3 - "$version" "$remote_url" <<'PY' 2>/dev/null
 import subprocess, sys
-ver = sys.argv[1]
+ver, remote = sys.argv[1], sys.argv[2]
 try:
     r = subprocess.run(
-        ["git", "ls-remote", "--tags",
-         "https://github.com/vevdokimovm/base-repo.git", f"v{ver}"],
+        ["git", "ls-remote", "--tags", remote, f"v{ver}"],
         capture_output=True, text=True, timeout=8,
     )
     print("yes" if f"v{ver}" in r.stdout else "no")
@@ -103,8 +113,8 @@ PY
   # лишний блок дешевле, чем пропущенный незакрытый батч.
   if [ "$tag_found" != "yes" ]; then
     problems="${problems}
-▸ VERSION=${version}, но архива ${ARTIFACTS}/base-repo-v${version}.zip нет
-  и тега v${version} на GitHub тоже нет.
+▸ VERSION=${version}, но архива ${ARTIFACTS}/${repo_name}-v${version}.zip нет
+  и тега v${version} на ${remote_url} тоже нет.
 
   Собрать:  python3 scripts/pack_release.py"
   fi

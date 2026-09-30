@@ -12,10 +12,10 @@
 
 | Поле | Значение |
 |---|---|
-| **Версия карты** | 3.6.0 |
-| **Актуальность** | 2026-09-04 |
-| **Проверена целиком** | 2026-08-16 |
-| **Репозиториев** | 66 заведено · 0 запланировано |
+| **Версия карты** | 3.7.0 |
+| **Актуальность** | 2026-09-30 |
+| **Проверена целиком** | 2026-09-30 (сверка с `gh repo list`) |
+| **Репозиториев** | 70 на GitHub · 70 с локальной копией в `~/repos/` (69 с `.repo-class`, `finpilot` — допущенное исключение) — последние три с локальной копией, `driftguard`/`iac-evdokimov`/`service-monitor`, курсовые IaC, до 30.09.2026 лежали в `~`, перенесены · 0 запланировано |
 | **Сопровождение** | полуавтоматическое — `deploy.sh` регистрирует новые репы заглушкой |
 | **История изменений** | [`repos-map-CHANGELOG.md`](./repos-map-CHANGELOG.md) |
 
@@ -34,10 +34,18 @@
 | Класс | Что это | Судьба | Сколько |
 |---|---|---|---|
 | **infra** | инфраструктура системы, тематики нет | вечно | 2 |
-| **core** | зона жизни, на века | вечно, не мерджится никуда | 14 |
-| **satellite** | самостоятельный домен, вынесен ради удобства | отдельно неопределённо долго | 26 |
-| **temp** | часть core-репы, вынесенная из-за объёма | **вернётся** в родителя | 6 |
-| **product** | работающий продукт | своя жизнь, релизы | 11 |
+| **core** | зона жизни, на века | вечно, не мерджится никуда | 15 |
+| **satellite** | самостоятельный домен, вынесен ради удобства | отдельно неопределённо долго | 38 |
+| **temp** | часть core-репы, вынесенная из-за объёма | **вернётся** в родителя | 0 (все переведены в satellite 28.08.2026) |
+| **product** | работающий продукт | своя жизнь, релизы | 13 (+1 `finpilot` без `.repo-class` — допущенное исключение, см. код `check_repos_map_sync`) |
+| **profile** | публичная витрина аккаунта, не рабочая репа | вечно, не пишется контентом | 1 |
+
+> 🟢 **Разошедшийся счёт (флаг от 30.09.2026) закрыт решением владельца, дословно:
+> «все три важные репы а философия второстепенная пет проект».** `legal-knowledge-base`,
+> `misc-vault`, `truth-seeking` — `.repo-class` возвращён на `core` (карта их так и
+> держала, разошёлся был только файл). `philosophy` — `.repo-class` переведён на
+> `satellite` (карта тоже была права). Файл и карта снова совпадают, раскладка
+> «Оглавления» не менялась — она и до этого была верной.
 
 **Главное различие — satellite против temp.** Оба вынесены «ради удобства», но будущее разное: спутник это свой домен (шахматы не часть чего-то большего), а временная репа — раздел чужой репы, и родитель у неё указан с первого дня. Иначе через год никто не вспомнит, что куда вливать, и все временные станут вечными.
 
@@ -47,16 +55,16 @@
 
 **🧩 Инфраструктура** (2) — [`base-repo`](#base-repo) · [`mission-control`](#mission-control)
 
-**🏛️ Ядро — зоны жизни** (14) — [`it-base`](#it-base) · [`edu-base`](#edu-base) · [`academic-portfolio`](#academic-portfolio) · [`health-vault`](#health-vault) · [`legal-knowledge-base`](#legal-knowledge-base) · [`christ-walk`](#christ-walk) · [`self-map`](#self-map) · [`truth-seeking`](#truth-seeking) · [`family`](#family) · [`misc-vault`](#misc-vault) · [`research-craft`](#research-craft) · [`money`](#money) · [`productivity`](#productivity) · [`career`](#career)
+**🏛️ Ядро — зоны жизни** (15) — [`it-base`](#it-base) · [`edu-base`](#edu-base) · [`academic-portfolio`](#academic-portfolio) · [`health-vault`](#health-vault) · [`legal-knowledge-base`](#legal-knowledge-base) · [`christ-walk`](#christ-walk) · [`self-map`](#self-map) · [`truth-seeking`](#truth-seeking) · [`family`](#family) · [`misc-vault`](#misc-vault) · [`research-craft`](#research-craft) · [`money`](#money) · [`productivity`](#productivity) · [`migration`](#migration) · [`career`](#career)
 
-**🛰️ Спутники — самостоятельные домены** (32) — [`dota-dossier`](#dota-dossier) · [`chess`](#chess) · [`csgo`](#csgo) · [`sport`](#sport) · [`nutrition`](#nutrition) · [`style`](#style) · [`acting`](#acting) · [`rhetoric`](#rhetoric) · [`linguistics`](#linguistics) · [`sales`](#sales) · [`spycraft`](#spycraft) · [`politics`](#politics) · [`war`](#war) · [`security-forces`](#security-forces) · [`cybersecurity`](#cybersecurity) · [`science`](#science) · [`art`](#art) · [`philosophy`](#philosophy) · [`history`](#history) · [`nationality`](#nationality) · [`speed-reading`](#speed-reading) · [`visual-style`](#visual-style) · [`ai-relay`](#ai-relay) · [`business`](#business) · [`quick-answers`](#quick-answers) · [`independent-expert`](#independent-expert) · [`algorithms`](#algorithms) · [`ml-base`](#ml-base) · [`mathematics`](#mathematics) · [`physics`](#physics) · [`chemistry`](#chemistry) · [`biology`](#biology)
+**🛰️ Спутники — самостоятельные домены** (35) — [`dota-dossier`](#dota-dossier) · [`chess`](#chess) · [`csgo`](#csgo) · [`sport`](#sport) · [`nutrition`](#nutrition) · [`style`](#style) · [`acting`](#acting) · [`rhetoric`](#rhetoric) · [`linguistics`](#linguistics) · [`sales`](#sales) · [`spycraft`](#spycraft) · [`politics`](#politics) · [`war`](#war) · [`security-forces`](#security-forces) · [`cybersecurity`](#cybersecurity) · [`science`](#science) · [`art`](#art) · [`philosophy`](#philosophy) · [`history`](#history) · [`nationality`](#nationality) · [`speed-reading`](#speed-reading) · [`visual-style`](#visual-style) · [`ai-relay`](#ai-relay) · [`business`](#business) · [`quick-answers`](#quick-answers) · [`independent-expert`](#independent-expert) · [`algorithms`](#algorithms) · [`ml-base`](#ml-base) · [`mathematics`](#mathematics) · [`physics`](#physics) · [`chemistry`](#chemistry) · [`biology`](#biology) · [`education-paths`](#education-paths) · [`master-admission`](#master-admission) · [`photo-archive`](#photo-archive)
 
 🔴 **«Временные — вернутся в родителя» закрыто 28.08.2026** — все шесть репов набрали
 реальный контент MVP-волной 27.08.2026 (v1.0.0, кроме `ml-base` v0.6.3) и переведены
 в `.repo-class = satellite`; решение открытого вопроса `mission-control/WATCHLOG.md`
 §2 «algorithms: активировать или расформировать» — **активировать**, факт уже наступил.
 
-**🚀 Продукты** (9) — [`personal-finance-dss`](#personal-finance-dss) · [`finpilot`](#finpilot) · [`portrait-of-taste`](#portrait-of-taste) · [`exam-kit`](#exam-kit) · [`character-a-analysis`](#character-a-analysis) · [`salvation`](#salvation) · [`vk-graph`](#vk-graph) · [`control-panel`](#control-panel) · [`vevdokimovm.github.io`](#vevdokimovmgithubio) · [`vevdokimovm`](#vevdokimovm)
+**🚀 Продукты** (18) — [`personal-finance-dss`](#personal-finance-dss) · [`finpilot`](#finpilot) · [`portrait-of-taste`](#portrait-of-taste) · [`exam-kit`](#exam-kit) · [`character-a-analysis`](#character-a-analysis) · [`salvation`](#salvation) · [`vk-graph`](#vk-graph) · [`control-panel`](#control-panel) · [`vevdokimovm.github.io`](#vevdokimovmgithubio) · [`vevdokimovm`](#vevdokimovm) · [`algorithms-site`](#algorithms-site) · [`audiobook-forge`](#audiobook-forge) · [`claude-usage`](#claude-usage) · [`game-analytics-engine`](#game-analytics-engine) · [`research-engine`](#research-engine) · [`driftguard`](#driftguard) · [`iac-evdokimov`](#iac-evdokimov) · [`service-monitor`](#service-monitor)
 
 ---
 
@@ -501,28 +509,52 @@ README читается только из репы с логином в имен
 
 ---
 
-## Как пользоваться картой
+## 🌐 `algorithms-site`  ·  🌐 публичная
 
-1. **Ищешь, куда положить материал** — смотри по классу: зона жизни это `core`, отдельный домен `satellite`, кусок чужой репы `temp`. Не нашёл дома — `misc-vault`, но это временное состояние, а не окончательное.
-2. **Сомневаешься между двумя репами** — читай описания обеих: границы прописаны прямо в них, потому что именно на границах всё и расползается.
-3. **Завёл новую репу** — допиши её сюда сразу, вместе с классом и границами с соседями. Заглушка «НЕ ОПИСАНА» допустима максимум до конца сессии.
-4. **Меняешь класс репы** — правь `.repo-class`, GitHub topics и эту карту. Три места, все машиночитаемые, расхождение между ними означает, что правде верить нельзя нигде.
+**Обучающий сайт по алгоритмам.** Теория → интерактивная визуализация → типичные
+ошибки → задача с автопроверкой. Один HTML-файл, без сборки и сервера. MVP —
+урок «Бинарный поиск» (GitHub, сверка 30.09.2026).
 
-> **Одной строкой:** пятьдесят четыре репы в пяти классах; класс отвечает на вопрос «это навсегда или вернётся к родителю», описание — на вопрос «что здесь и где граница с соседом».
+**Граница:** `algorithms` — личная подготовка к интервью (LeetCode/Codeforces,
+для себя) · здесь — публичный обучающий продукт для чужих.
 
+## 🎧 `audiobook-forge`  ·  🔒 приватная
 
+**iOS-приложение: EPUB и PDF в аудиокнигу с человеческим голосом**
 
-## 🆕 `master-admission`
-**⚠️ НЕ ОПИСАНА.** Репа заведена автоматически деплойером 2026-08-19. Опиши зону ответственности и убери этот маркер.
+Заведена 04.09.2026 по заказу владельца: *«приложение на айфон для перевода
+книг epub, pdf в аудиокнигу с норм звуком»*. iOS первый, macOS второй.
 
-## 🆕 `algorithms-site`  ·  🌐 публичная
-**⚠️ НЕ ОПИСАНА.** Репа заведена автоматически деплойером 2026-08-21. Опиши зону ответственности и убери этот маркер.
+🔴 **Скелет `0.1.0`, кода нет.** Первая задача — **разбор рынка**, и честный
+её исход может быть «закрыть репу»: если Speechify, Voice Dream или
+ElevenLabs Reader решают задачу, писать своё не нужно.
 
-## 🆕 `game-analytics-engine`  ·  🌐 публичная
-**⚠️ НЕ ОПИСАНА.** Репа заведена автоматически деплойером 2026-08-21. Опиши зону ответственности и убери этот маркер.
+**Суть задачи — не разбор файлов, а звук.** EPUB это zip с XHTML (структура
+известна), а «норм звук» — то, чего системный `AVSpeechSynthesizer` не даёт.
+Граница с соседями: `speed-reading` — чтение глазами, здесь — слушание.
 
-## 🆕 `claude-usage`  ·  🌐 публичная
-**⚠️ НЕ ОПИСАНА.** Репа заведена автоматически деплойером 2026-08-21. Опиши зону ответственности и убери этот маркер.
+## 🌐 `claude-usage`  ·  🌐 публичная
+
+**Where your Claude Code budget actually goes.** Разбор реального журнала
+сессий: рост контекста, цена хода, доля cache-write, машиночитаемые сбросы
+лимита. Только локальные логи сессий — без сети, без зависимостей
+(GitHub, сверка 30.09.2026).
+
+**Граница:** `06-autonomous-mode-kit`/`scripts/token-probe`-агент базы — замеряют
+эту же систему репозиториев изнутри и приватно; здесь — отдельный публичный
+инструмент общего назначения, без привязки к этой системе.
+
+## 🌐 `game-analytics-engine`  ·  🌐 публичная
+
+**Domain-pluggable engine для анализа игры на состязательном уровне**: игры
+подключаются шеститочечным контрактом — перцентили, интервалы Уилсона,
+дрейф меты. Адаптеры уже есть для Dota 2 и шахмат (GitHub, сверка 30.09.2026).
+
+**Граница:** `research-engine` — научный метод как продукт, ещё скелет;
+`game-analytics-engine` — первый живой экземпляр той же идеи, граница между
+ними («слой над научным методом» или отдельный продукт) не решена, открытый
+вопрос владельца · `dota-dossier`/`chess` — личный трекинг игры самого
+владельца, не движок.
 
 ## 🧪 `research-engine`
 Научный метод как продукт: гипотеза → план опыта → контроль → предрегистрация →
@@ -532,6 +564,44 @@ README читается только из репы с логином в имен
 выразить контракт без особых случаев, иначе продукт отменяется. Первый живой экземпляр
 идеи — `game-analytics-engine`, граница с ним ещё не решена (слой над ним или отдельный
 продукт — открытый вопрос владельца).
+
+## 🏗️ `driftguard`  ·  🌐 публичная
+
+**Контроль дрейфа конфигурации серверов**: агент, сервер FastAPI + PostgreSQL,
+клиент Tkinter (GitHub, сверка 30.09.2026).
+
+🔴 **Курсовой проект, важная репа, не своя зона жизни.** Родилась из
+`academic-portfolio` (магистратура, семестр 1, осень 2026, курс Infrastructure
+as Code, `08-masters/semester-01-fall-2026/infrastructure-as-code/`) —
+опубликована отдельной репой, потому что задание требовало реального деплоя
+с CI, а не только текста. Локальный клон — `~/repos/driftguard` (до 30.09.2026
+лежал в `~`, перенесён в канон-место по `88-local-repo-location-standard.md`).
+
+## 🏗️ `iac-evdokimov`  ·  🌐 публичная
+
+**Infrastructure as Code, MISIS, fall 2026 — Evdokimov V.M., MIVT-26-5-2.**
+Репа для сдачи ДЗ и ПР курса (GitHub, сверка 30.09.2026) — та же граница и то
+же происхождение, что у `driftguard`: курсовая работа из `academic-portfolio`,
+опубликована отдельно требованием курса, важная репа. Локальный клон —
+`~/repos/iac-evdokimov`.
+
+## 🏗️ `service-monitor`  ·  🌐 публичная
+
+**Uptime monitoring — HTTP-сервисы**: сервер FastAPI + PostgreSQL, клиент
+Tkinter, Docker Compose, CI (GitHub, сверка 30.09.2026). Третий курсовой
+проект того же курса IaC, то же происхождение и та же граница, что у
+`driftguard`/`iac-evdokimov`, тоже важная репа. Локальный клон —
+`~/repos/service-monitor`.
+
+## 🆕 `master-admission`
+**Поступление в магистратуру**: сравнение программ, вступительные испытания,
+документы приёмной комиссии, разбор приёмной кампании МИСИС 2026/2027
+(GitHub, сверка 30.09.2026).
+
+🔴 **Прикладная, не про выбор пути.** Граница с `education-paths`: та репа —
+про выбор ступени образования вообще, не закрывается никогда; эта — про
+конкретную кампанию 2026/2027, и достигнув цели (поступление), закроется
+фактом, не будет вестись вечно.
 
 ## `education-paths`
 
@@ -559,21 +629,6 @@ README читается только из репы с логином в имен
 «сколько дипломов», а сколько раз получен диплом **данного уровня**, поэтому
 «две маги на бюджете» со слов друзей требует проверки. Пять законных гипотез
 разобраны в `04-pravila/`.
-
-## 🎧 `audiobook-forge`  ·  🔒 приватная
-
-**iOS-приложение: EPUB и PDF в аудиокнигу с человеческим голосом**
-
-Заведена 04.09.2026 по заказу владельца: *«приложение на айфон для перевода
-книг epub, pdf в аудиокнигу с норм звуком»*. iOS первый, macOS второй.
-
-🔴 **Скелет `0.1.0`, кода нет.** Первая задача — **разбор рынка**, и честный
-её исход может быть «закрыть репу»: если Speechify, Voice Dream или
-ElevenLabs Reader решают задачу, писать своё не нужно.
-
-**Суть задачи — не разбор файлов, а звук.** EPUB это zip с XHTML (структура
-известна), а «норм звук» — то, чего системный `AVSpeechSynthesizer` не даёт.
-Граница с соседями: `speed-reading` — чтение глазами, здесь — слушание.
 
 ---
 
@@ -603,3 +658,16 @@ ElevenLabs Reader решают задачу, писать своё не нужн
 каталогом. Сейчас **152 МБ на 20 файлов** — жёлтая зона порогов; остальные
 2.3 ГБ фотоматериала в эту модель не поместятся, и вопрос не «зайдёт ли»,
 а **какая часть архива достойна места в git**.
+
+---
+
+## Как пользоваться картой
+
+1. **Ищешь, куда положить материал** — смотри по классу: зона жизни это `core`, отдельный домен `satellite`, кусок чужой репы `temp`. Не нашёл дома — `misc-vault`, но это временное состояние, а не окончательное.
+2. **Сомневаешься между двумя репами** — читай описания обеих: границы прописаны прямо в них, потому что именно на границах всё и расползается.
+3. **Завёл новую репу** — допиши её сюда сразу, вместе с классом и границами с соседями. Заглушка «НЕ ОПИСАНА» допустима максимум до конца сессии.
+4. **Меняешь класс репы** — правь `.repo-class`, GitHub topics и эту карту. Три места, все машиночитаемые, расхождение между ними означает, что правде верить нельзя нигде.
+
+> **Одной строкой:** 70 реп на GitHub, у всех есть локальная копия в `~/repos/`,
+> в шести классах; класс отвечает на вопрос «это навсегда или вернётся к
+> родителю», описание — на вопрос «что здесь и где граница с соседом».

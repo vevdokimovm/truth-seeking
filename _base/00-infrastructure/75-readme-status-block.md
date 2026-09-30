@@ -89,7 +89,7 @@ python3 scripts/readme_status_gate.py --staged # режим pre-commit
 | `.githooks/pre-commit` → `check_readme_status()` | пятый класс проверок, срабатывает сам |
 | `scripts/readme_status_gate.py` | сам гейт, запускается и вручную |
 | `tests/test_readme_status.sh` | 28 проверок, 6 зон: разбор · версия · дата · описание · `--staged` · `--fix` |
-| `templates/REPO_README_TEMPLATE.md` | блок в шаблоне — новые репы получают его сразу |
+| `templates/REPO-README-TEMPLATE.md` | блок в шаблоне — новые репы получают его сразу |
 
 Включение хука в репе — одной командой, как и всё остальное
 (`32-git-hooks-and-secret-scanning.md`):

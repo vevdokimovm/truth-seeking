@@ -151,7 +151,7 @@ Usage & Cost · Rate Limits API · Compliance API.
 ## 2б. 🔴 Артефакт видит только тот аккаунт, из-под которого работает CLI
 
 Замерено 20.08.2026, восстановлено из 14 снимков экрана 23.08 (кадры удалены,
-`_base/07-media-to-text-lab/METHOD_IMAGES.md` §9).
+`_base/07-media-to-text-lab/METHOD-IMAGES.md` §9).
 
 **Что происходило.** Вахта опубликовала артефакт «Context Load Report» и отдала ссылку
 `claude.ai/code/artifact/bfd417bf-2ac9-4f05-be25-7076b05b666e`. Владелец открыл её

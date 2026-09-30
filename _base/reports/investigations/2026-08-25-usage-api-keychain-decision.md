@@ -77,7 +77,7 @@ Bash(security find-generic-password -s "Claude Code-credentials" -w)
 **другой** механизм: не про keychain, а про универсальное правило платформы
 «агент не может выдать права сам себе» (уже задокументировано —
 `00-infrastructure/51-autonomous-agent-loop.md`, инцидент
-`auto_mode_setup_global_pollution_incident.md` §2.3, где тот же блок
+`auto-mode-setup-global-pollution-incident.md` §2.3, где тот же блок
 подтверждён во всех режимах — bg/plan/auto/manual). Правка `settings.json`
 передана владельцу текстом для выполнения через `!`.
 

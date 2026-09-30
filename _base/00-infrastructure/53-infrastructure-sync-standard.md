@@ -45,7 +45,7 @@
 ### Что считать служебкой
 
 Директории: `00-infrastructure/`, `reports/`, `templates/`, `scripts/`, `docs/`, `tests/`,
-`.githooks/`, `00-manifest-aot/`, `01-claude-context/`, `02-methodology-library/`, `03-role-kit/`,
+`.githooks/`, `17-manifest-aot/`, `01-claude-context/`, `02-methodology-library/`, `03-role-kit/`,
 `04-product-dev-kit/`, плюс проектные (`decisions/`, `plans/`, `profile/`, `daily/`).
 
 Корневые файлы: `README`, `START-HERE`, `CHANGELOG`, `WATCHLOG`, `ROADMAP`, `TASKS`, `VERSION`,
@@ -144,7 +144,7 @@
 
 `/auto-mode-setup`, прогнанный в двух репах, дописал обе конфигурации в один глобальный
 `settings.json`. Контекст finpilot («персданные под 152-ФЗ») стал резать файловые операции во
-всех сессиях. Полный разбор — `reports/incidents/auto_mode_setup_global_pollution_incident.md`,
+всех сессиях. Полный разбор — `reports/incidents/auto-mode-setup-global-pollution-incident.md`,
 урок процесса — **PIT-015**.
 
 **Правило:** перед прогоном инструментов, пишущих в конфиг, — бэкап; после — проверка на дубли
@@ -166,5 +166,5 @@
 
 | Дата | Кампания | Реп | Итог | Разбор |
 |---|---|---|---|---|
-| 2026-08-20 | Синк 57 реп в локальную копию | 57 | 57/57 верифицировано байт-в-байт | `situations/2026-08-20-sinkhronizatsiya-vsekh-repozitoriev.md` |
+| 2026-08-20 | Синк 57 реп в локальную копию | 57 | 57/57 верифицировано байт-в-байт | `situations/2026-08-20-syncing-all-repos.md` |
 | 2026-08-20 | Большой синтез инфраструктуры | 57 | в работе | `situations/2026-08-20-bolshoy-sintez-infrastruktury.md` |

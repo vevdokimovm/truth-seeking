@@ -2,7 +2,7 @@
 
 > Повод: в Claude Code есть команда `/context`, показывающая расход прямо в интерфейсе.
 > В веб-чате такого индикатора нет — значит бюджет надо оценивать самому.
-> Парное: `33-token-budget-and-modes.md`, `reports/investigations/vision-channel_investigation.md`.
+> Парное: `33-token-budget-and-modes.md`, `reports/investigations/vision-channel-investigation.md`.
 
 > **Происхождение.** Методичка написана в `character-a-analysis` и повышена в базу
 > синтезом 2026-08-20 (была там под номером 41). Номер сменился: 41 в базе занят

@@ -38,8 +38,8 @@ REPOS = Path(__file__).resolve().parent.parent.parent
 
 # рабочий файл → приёмник
 PAIRS = {
-    "ROADMAP.md": "ROADMAP_HISTORY.md",
-    "TASKS.md": "TASKS_HISTORY.md",
+    "ROADMAP.md": "ROADMAP-HISTORY.md",
+    "TASKS.md": "TASKS-HISTORY.md",
 }
 
 DONE_RE = re.compile(r"^\s*[-*]\s*\[x\]", re.IGNORECASE)
@@ -151,7 +151,7 @@ def selftest() -> int:
         (repo / "TASKS.md").write_text(sample, encoding="utf-8")
         process(repo, apply=True)
         after = (repo / "TASKS.md").read_text(encoding="utf-8")
-        hist = (repo / "TASKS_HISTORY.md").read_text(encoding="utf-8")
+        hist = (repo / "TASKS-HISTORY.md").read_text(encoding="utf-8")
 
         if "открытая задача" not in after or "вторая открытая" not in after:
             bad.append("открытая задача пропала из рабочего файла")

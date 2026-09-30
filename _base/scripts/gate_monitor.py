@@ -149,23 +149,38 @@ def check_hooks_executable(root: Path) -> list[str]:
 
 
 def check_hooks_registered(root: Path) -> list[str]:
-    """Хук лежит в каталоге, но не объявлен в `settings.json` — он мёртв.
+    """Хук лежит в каталоге, но не объявлен ни в одном `settings.json` — он мёртв.
 
     Обратное тоже дефект: объявлен, а файла нет — тогда Claude Code при каждом
     событии зовёт несуществующее.
+
+    🔴 Объявление ищется в ДВУХ местах, и это не перестраховка. Канон хуков
+    живёт в базе (`.claude/hooks/`), а объявляются они глобально, в
+    `~/.claude/settings.json`, — иначе действовали бы только в сессиях базы
+    (`sync_global_claude.py`). Проверка, знавшая только локальный файл,
+    объявляла мёртвыми все шесть живых хуков: формально она была права —
+    в локальном файле их нет, — и по сути отстала от переезда. Ложная
+    тревога опаснее пропуска: шумный гейт выключают.
     """
-    settings = root / ".claude" / "settings.json"
     folder = root / ".claude" / "hooks"
-    if not settings.is_file() or not folder.is_dir():
+    if not folder.is_dir():
         return []
-    text = settings.read_text(encoding="utf-8", errors="replace")
+    настройки = [root / ".claude" / "settings.json",
+                 Path.home() / ".claude" / "settings.json"]
+    объявления = ""
+    for файл in настройки:
+        if файл.is_file():
+            объявления += файл.read_text(encoding="utf-8", errors="replace")
+    if not объявления:
+        return []
+    каталоги = [folder, Path.home() / ".claude" / "hooks"]
     problems = []
     for path in sorted(folder.glob("*.sh")):
-        if path.name not in text:
-            problems.append(f"хук не объявлен в settings.json: "
-                            f"{path.relative_to(root)}")
-    for name in re.findall(r"hooks/([A-Za-z0-9_.-]+\.sh)", text):
-        if not (folder / name).is_file():
+        if path.name not in объявления:
+            problems.append(f"хук не объявлен ни в локальном, ни в глобальном "
+                            f"settings.json: {path.relative_to(root)}")
+    for name in re.findall(r"hooks/([A-Za-z0-9_.-]+\.sh)", объявления):
+        if not any((к / name).is_file() for к in каталоги):
             problems.append(f"в settings.json объявлен несуществующий хук: {name}")
     return problems
 

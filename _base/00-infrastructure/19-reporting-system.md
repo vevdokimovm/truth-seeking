@@ -14,11 +14,11 @@
 
 | Триггер (что произошло) | Тип отчёта | Шаблон / гайд | Папка | Реестр |
 |---|---|---|---|---|
-| Дефект в коде и/или влияние на пользователя/систему (для code-реп) | **Инцидент** (post-mortem) | `reports/incident_postmortem_guide.md` | `reports/incidents/` | `reports/incidents_summary.md` |
-| Искали причину, **дефекта/ошибки НЕ оказалось** (внешняя причина, артефакт, недопонимание) | **Расследование** | `reports/investigation_report_guide.md` | `reports/investigations/` | `reports/investigations_summary.md` |
-| Найден конкретный **баг/дефект** (нужна карточка) | **Bug card** | `reports/bug_report_template.md` | `reports/incidents/` | `reports/incidents_summary.md` |
-| Принято **архитектурное/структурное решение** | **ADR** | `reports/adr/adr_template.md` | `reports/adr/` | — (сквозная нумерация) |
-| **Слияние** разошедшихся линий/аккаунтов | **Merge-отчёт** | `reports/merges/merge_and_fork_guide.md` | `reports/merges/` | — |
+| Дефект в коде и/или влияние на пользователя/систему (для code-реп) | **Инцидент** (post-mortem) | `reports/incident-postmortem-guide.md` | `reports/incidents/` | `reports/incidents-summary.md` |
+| Искали причину, **дефекта/ошибки НЕ оказалось** (внешняя причина, артефакт, недопонимание) | **Расследование** | `reports/investigation-report-guide.md` | `reports/investigations/` | `reports/investigations-summary.md` |
+| Найден конкретный **баг/дефект** (нужна карточка) | **Bug card** | `reports/bug-report-template.md` | `reports/incidents/` | `reports/incidents-summary.md` |
+| Принято **архитектурное/структурное решение** | **ADR** | `reports/adr/adr-template.md` | `reports/adr/` | — (сквозная нумерация) |
+| **Слияние** разошедшихся линий/аккаунтов | **Merge-отчёт** | `reports/merges/merge-and-fork-guide.md` | `reports/merges/` | — |
 | Повторная **ошибка воркфлоу** (грабли) | **Pitfall** | одна строка-урок | `reports/pitfalls.md` | сам файл — реестр |
 | **Несколько дефектов одного инструмента** разом, и важны их классы | **Анатомия багов** | формат ниже | `reports/incidents/` | `reports/incidents/PITFALLS.md` (счётчик классов) |
 | Нужно **измерить неизвестную величину** (реверс-инжиниринг: лимиты, расход, скорость) | **Эксперимент** | `../00-infrastructure/28-empirical-experiment-methodology.md` | `reports/experiments/<тема>/` | README темы (гипотеза+замеры) |
@@ -91,12 +91,12 @@
 
 | Повод | Тип отчёта | Шаблон | Папка |
 |---|---|---|---|
-| Закрытие вехи / крупного этапа | **Release-отчёт** | `reports/releases/release_report_template.md` | `reports/releases/` |
+| Закрытие вехи / крупного этапа | **Release-отчёт** | `reports/releases/release-report-template.md` | `reports/releases/` |
 | Завершилась **крупная многошаговая кампания** (миграция, массовая чистка, инфраструктурный проект) | **Ситуация-репорт** | `reports/situations/README.md` (формат рубрики) | `reports/situations/` (реестр — таблица выпусков там же) |
-| Аудит безопасности | **Security-аудит** | `reports/security/security_audit_template.md` | `reports/security/` |
+| Аудит безопасности | **Security-аудит** | `reports/security/security-audit-template.md` | `reports/security/` |
 | Плановая ревизия репы | **Ревизия/аудит** | по образцу отчёта в `reports/audits/` | `reports/audits/` |
 | Существенное изменение требований (для code-реп) | **SRS** | шаблон требований проекта | `reports/requirements/` |
-| Прогон/обзор тестов (для code-реп) | **Тест-отчёт** | `reports/testing/test_report_template.md` | `reports/testing/` |
+| Прогон/обзор тестов (для code-реп) | **Тест-отчёт** | `reports/testing/test-report-template.md` | `reports/testing/` |
 
 > **Применимость по типу репы.** Инцидент/bug/тест/SRS/security — прежде всего для **code-реп**
 > (FINPILOT и подобные): там есть код, тесты, пользователи. В **knowledge-репах** те же форматы
@@ -113,7 +113,7 @@
 инцидент** с влиянием; карточка описывает **один дефект**. Анатомия берёт **пачку
 дефектов одного инструмента** и вытаскивает из каждого **класс**.
 
-Формулировка, ради которой жанр существует (`reports/incidents/deploy_bugs_anatomy.md`):
+Формулировка, ради которой жанр существует (`reports/incidents/deploy-bugs-anatomy.md`):
 
 > Ценность документа не в списке фиксов, а в **анатомии**: каждый баг относится
 > к классу, который **повторится в другом месте**. Классы важнее конкретики.
@@ -158,8 +158,8 @@
 Форматы комбинируются: инцидент → внутри ссылка на BUG-XXX и/или на новый runbook (если будет
 повторяться). Расследование → может закончиться ссылкой на BUG-XXX (если по ходу всплыл дефект).
 
-Развёрнутый роутер «когда что» с примерами — `reports/report_types.md`. Индустриальная теория
-каждого формата — `reports/documentation_methodology.md`.
+Развёрнутый роутер «когда что» с примерами — `reports/report-types.md`. Индустриальная теория
+каждого формата — `reports/documentation-methodology.md`.
 
 ---
 
@@ -295,7 +295,7 @@
 - ADR: `adr_<NNN>_<тема>.md`, номер — следующий свободный, **без пропусков и повторов**.
 - Merge: `merge_manifest_<версия>.md` или `merge_<версия>_report.md`.
 - Ревизия/аудит: `repo_revision_<период>.md` (+ `_delta` для дельта-проходов).
-- Полная конвенция всего репозитория — `01-repo-standard.md` и (для code-реп) `naming_convention.md`.
+- Полная конвенция всего репозитория — `01-repo-standard.md` и (для code-реп) `naming-convention.md`.
 
 ---
 
@@ -314,13 +314,13 @@
 ## 6. Ссылки на шаблоны и реестры
 
 - Дом всех отчётов и их структура: `reports/README.md`
-- Формат инцидента: `reports/incident_postmortem_guide.md`
-- Формат расследования: `reports/investigation_report_guide.md`
-- Карточка бага: `reports/bug_report_template.md`
-- Развёрнутый роутер типов: `reports/report_types.md`
-- Шаблон ADR: `reports/adr/adr_template.md`
-- Процедура мёржа: `reports/merges/merge_and_fork_guide.md`
-- Реестр инцидентов: `reports/incidents_summary.md`
-- Реестр расследований: `reports/investigations_summary.md`
+- Формат инцидента: `reports/incident-postmortem-guide.md`
+- Формат расследования: `reports/investigation-report-guide.md`
+- Карточка бага: `reports/bug-report-template.md`
+- Развёрнутый роутер типов: `reports/report-types.md`
+- Шаблон ADR: `reports/adr/adr-template.md`
+- Процедура мёржа: `reports/merges/merge-and-fork-guide.md`
+- Реестр инцидентов: `reports/incidents-summary.md`
+- Реестр расследований: `reports/investigations-summary.md`
 - Реестр граблей: `reports/pitfalls.md`
-- Индустриальная теория: `reports/documentation_methodology.md`
+- Индустриальная теория: `reports/documentation-methodology.md`

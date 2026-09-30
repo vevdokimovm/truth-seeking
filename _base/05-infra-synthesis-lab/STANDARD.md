@@ -147,7 +147,7 @@ grep -lin "ISO \|WCAG\|RFC 2119\|ГОСТ\|IEEE\|ISO/IEC\|EARS\|MoSCoW" <реп�
 
 **Результат аудита 24.08:** 43 кандидата, 16 подняты синтезом, 3 подняты этим заходом,
 24 оставлены с основанием, **упущен по ошибке один**. Полный разбор —
-`reports/synthesis_finpilot_coverage_audit.md`.
+`reports/synthesis-finpilot-coverage-audit.md`.
 
 ### 6. Что считать результатом прохода — и что НЕ считать
 

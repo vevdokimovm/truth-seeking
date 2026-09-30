@@ -139,7 +139,7 @@
 | Шаг | Результат | Судьба |
 |---|---|---|
 | Разбор 30 архивов старых реп + `Добавить` | 838 файлов в `ml-base`/`it-base`, 33 в `academic-portfolio/08-masters/`, `Old (before Claude)` удалена | **откатывается** — работа была закрыта 13.08, разбор шёл не по стандартам |
-| Разбор инцидента с разрешениями | `incidents/auto_mode_setup_global_pollution_incident.md`, PIT-015 | остаётся |
+| Разбор инцидента с разрешениями | `incidents/auto-mode-setup-global-pollution-incident.md`, PIT-015 | остаётся |
 | Две инвентаризации | `infra_inventory.py`, `per_repo_audit.py` | цифры остаются, `per_repo_audit` оформить инструментом |
 | Стандарт синка | `00-infrastructure/53-infrastructure-sync-standard.md`, правило в `00-CLAUDE-STOP.md` §Третье и `WATCHLOG` §5 | остаётся |
 | Этот кит | `05-infra-synthesis-lab/` | остаётся |

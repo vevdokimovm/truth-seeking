@@ -50,7 +50,7 @@
 
 3. СТОП-УСЛОВИЯ — остановиться и ждать владельца
 
-   Стоп-классы — `06-autonomous-mode-kit/STOP_CONDITIONS.md` и `STANDARD.md` §2:
+   Стоп-классы — `06-autonomous-mode-kit/STOP-CONDITIONS.md` и `STANDARD.md` §2:
    речь моим голосом · необратимое вовне · удаление пачкой · безопасность ·
    смена цели.
 

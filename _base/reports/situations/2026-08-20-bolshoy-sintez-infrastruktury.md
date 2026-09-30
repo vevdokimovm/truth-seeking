@@ -15,7 +15,7 @@
 шаблонным.
 
 Предпосылка: свежая локальная копия всех 57 реп уже была, верифицирована байт-в-байт
-(`situations/2026-08-20-sinkhronizatsiya-vsekh-repozitoriev.md`).
+(`situations/2026-08-20-syncing-all-repos.md`).
 
 ---
 
@@ -36,7 +36,7 @@
 
 Посреди кампании классификатор авто-режима начал резать обычные файловые операции.
 Корень — `/auto-mode-setup`, прогнанный дважды и дописавший обе конфигурации в один глобальный
-`settings.json`. Разбор — `incidents/auto_mode_setup_global_pollution_incident.md`, PIT-015.
+`settings.json`. Разбор — `incidents/auto-mode-setup-global-pollution-incident.md`, PIT-015.
 
 ### 2.3. Инвентаризация по факту
 
@@ -197,7 +197,7 @@
 - [ ] Дописать `SKIP_MIRRORS` в `sync-base.sh` (`vevdokimovm.github.io`)
 - [ ] Поправить `repos-map.md`: `base-repo` и `self-map` — приватные
 - [ ] Вычистить `publish.sh` из 11 реп
-- [ ] Завести `TASKS_TEMPLATE.md`, описать `.repo-meta` в `48-repo-identity.md`
+- [ ] Завести `TASKS-TEMPLATE.md`, описать `.repo-meta` в `48-repo-identity.md`
 - [ ] Проставить `.repo-class` в 18 репах
 - [ ] Прогнать `collect_to_base.py` без `--apply`, разобрать кандидатов
 - [ ] Раскатать базу в 9 приватных реп без `_base/`

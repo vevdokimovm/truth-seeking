@@ -26,7 +26,7 @@
 > Разбор, случившийся в тематической репе, но по природе системный, **повышается в базу**
 > (`53-infrastructure-sync-standard.md`). При повышении документ заморожен: чинятся только ссылки
 > на переехавшие файлы, и это отмечается врезкой «Происхождение» — образец
-> `investigations/vision-channel_investigation.md`.
+> `investigations/vision-channel-investigation.md`.
 
 ---
 
@@ -34,14 +34,15 @@
 
 | Папка/файл | Что внутри |
 |---|---|
-| `report_types.md` | Развёрнутый роутер: какой формат под какую ситуацию (+ примеры) |
-| `documentation_methodology.md` | Индустриальная теория: blameless, RCA, runbook, ADR/RFC, SLO |
-| `incidents_summary.md` | Реестр инцидентов (сводки-строки) |
-| `investigations_summary.md` | Реестр расследований (сводки-строки) |
+| `report-types.md` | Развёрнутый роутер: какой формат под какую ситуацию (+ примеры) |
+| `documentation-methodology.md` | Индустриальная теория: blameless, RCA, runbook, ADR/RFC, SLO |
+| `incidents-summary.md` | Реестр инцидентов (сводки-строки) |
+| `investigations-summary.md` | Реестр расследований (сводки-строки) |
 | `pitfalls.md` | Реестр граблей воркфлоу (строки-уроки) |
-| `incident_postmortem_guide.md` | Гайд + шаблон post-mortem |
-| `investigation_report_guide.md` | Гайд + шаблон расследования |
-| `bug_report_template.md` | Шаблон карточки дефекта |
+| [`architecture-defects.md`](architecture-defects.md) | 🆕 Реестр дефектов **архитектуры** (`ARCH-NNN`). Не то же, что `pitfalls.md`: туда идёт то, что лечится правилом или гейтом, сюда — то, где каждый участник цепочки отработал верно и отчитался успехом, а результат цепочки неверен |
+| `incident-postmortem-guide.md` | Гайд + шаблон post-mortem |
+| `investigation-report-guide.md` | Гайд + шаблон расследования |
+| `bug-report-template.md` | Шаблон карточки дефекта |
 | `adr/` | Architecture Decision Records (+ шаблон) |
 | `incidents/` | Полные post-mortem'ы (файлы-разборы) |
 | `investigations/` | Полные расследования (файлы-разборы) |
@@ -59,16 +60,16 @@
 ## Таксономия (кратко)
 
 - **Инцидент** — была реальная поломка/дефект и/или влияние. Полный post-mortem в `incidents/`,
-  строка в `incidents_summary.md`.
+  строка в `incidents-summary.md`.
 - **Расследование** — разобрались в неочевидной ситуации, но реального дефекта НЕ оказалось (внешнее
-  / артефакт / недопонимание). Полный разбор в `investigations/`, строка в `investigations_summary.md`.
-- **Bug card** — найден конкретный дефект (карточка по `bug_report_template.md`).
+  / артефакт / недопонимание). Полный разбор в `investigations/`, строка в `investigations-summary.md`.
+- **Bug card** — найден конкретный дефект (карточка по `bug-report-template.md`).
 - **ADR** — зафиксированное архитектурное/структурное решение.
 - **Pitfall** — повторяющаяся ошибка воркфлоу (одна строка в `pitfalls.md`, без файла).
 - **Ситуация-репорт** — разбор крупной кампании целиком (было→сделали→что не так→уроки); ведётся как рубрика в `situations/`.
 - **Эксперимент** — активное измерение неизвестной величины (расход токенов и т.п.): данные + декомпозиция + уточняемая модель; живёт в `experiments/` (метод — `../00-infrastructure/28`).
 
-Ключевые различающие вопросы и примеры — `report_types.md`.
+Ключевые различающие вопросы и примеры — `report-types.md`.
 
 ---
 
@@ -77,12 +78,12 @@
 Отчёты создаются **автоматически по триггеру** и коммитятся в репу (живут с ней, версионируются,
 видны в истории):
 
-- реальная поломка/дефект → инцидент в `incidents/` + строка в `incidents_summary.md`;
-- искали причину, дефекта нет → расследование в `investigations/` + строка в `investigations_summary.md`;
+- реальная поломка/дефект → инцидент в `incidents/` + строка в `incidents-summary.md`;
+- искали причину, дефекта нет → расследование в `investigations/` + строка в `investigations-summary.md`;
 - принято решение → ADR в `adr/` (следующий свободный номер, без пропусков);
 - слияние разошедшихся линий → манифест в `merges/`;
 - повторная ошибка воркфлоу → строка в `pitfalls.md`;
-- найден дефект → карточка по `bug_report_template.md`.
+- найден дефект → карточка по `bug-report-template.md`.
 
 Механика автоматизма — `00-infrastructure/20-knowledge-capture-protocol.md`. Диспетчер (полная
 таблица триггер→тип→шаблон→папка→реестр) — `00-infrastructure/19-reporting-system.md`.

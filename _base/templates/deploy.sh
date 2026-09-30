@@ -39,7 +39,7 @@
 # deploy_all_versions.sh, commit_to_main.sh, commit_all_versions.sh, push_archives.sh,
 # push_base_repo.sh, fix_releases.sh). Каждая из них умела свой кусок; здесь собран
 # объединённый рабочий процесс + починка того, что прежние версии делали не по стандарту.
-# Разбор консолидации: reports/merges/scripts_consolidation_report.md
+# Разбор консолидации: reports/merges/scripts-consolidation-report.md
 # ПЕРЕД ПРАВКОЙ ПОВЕДЕНИЯ: reports/incidents/PITFALLS.md — лидерборд повторяющихся
 #   дефектов со счётчиками. Класс с 3+ повторами лечится проверкой, не заплаткой.
 # Контракт (что гарантируется на выходе): templates/deploy-SPEC.md

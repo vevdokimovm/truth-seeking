@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сеть конвейера Epstein</title>
+<style>
+:root{color-scheme:dark;--bg:#111110;--surface:#1a1a19;--line:#2c2c2a;--grid:#262624;
+--text:#fff;--text2:#c3c2b7;--muted:#8a897f;--s1:#3987e5;--s2:#d95926;--mark:#8a897f}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){color-scheme:light;
+--bg:#f3f3f1;--surface:#fcfcfb;--line:#e2e1dc;--grid:#ecebe7;--text:#0b0b0b;--text2:#52514e;
+--muted:#7b7a74;--s1:#2a78d6;--s2:#eb6834;--mark:#9a998f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 -apple-system,system-ui,"Segoe UI",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--text2);margin:0 0 20px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.tile b{display:block;font-size:22px;font-variant-numeric:tabular-nums}.tile span{color:var(--text2);font-size:12px}
+.readout{position:sticky;top:0;z-index:2;background:var(--bg);padding:8px 0;color:var(--text2);
+font-variant-numeric:tabular-nums;min-height:38px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px 6px;margin-bottom:12px}
+.panel h2{font-size:14px;margin:0;font-weight:600}.panel p{margin:2px 0 4px;color:var(--text2);font-size:12px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--text2);margin:2px 0}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+svg{display:block;width:100%;height:auto;touch-action:none}
+svg text{fill:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:18px 0}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:13px}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right}th{color:var(--text2);font-weight:500}
+td:first-child,th:first-child{text-align:left}.scroll{overflow-x:auto}
+details summary{cursor:pointer;color:var(--text2);margin:6px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>Сеть конвейера Epstein</h1>
+<p class="sub" id="sub"></p>
+<div class="tiles" id="tiles"></div>
+<div class="readout" id="readout">Наведи на график — здесь появятся значения в этот момент.</div>
+<div id="panels"></div>
+<div class="note" id="corr"></div>
+<div class="note"><b>Серверы VPN</b> — медианы по каждому серверу и транспорту (tcp / xhttp). Сравнивать осторожно: ночью канал быстрее у всех, поэтому честное сравнение — на соседних интервалах одного времени суток и при n ≥ 15 (полчаса).<div class="scroll" id="servers"></div></div>
+<div class="note"><b>Канал интернета</b> — тип (Wi-Fi / хотспот iPhone / Android / iPhone USB) · оператор · MAC роутера (отпечаток сети; SSID macOS скрывает без геолокации).<div class="scroll" id="uplinks"></div></div>
+<details><summary>Таблица: медианы по часам</summary><div class="scroll" id="table"></div></details>
+</main>
+<script>
+const D = /*__DATA__*/null;
+const T = D.ts.map(s => new Date(s.replace(" ", "T")).getTime());
+const C = D.cols, S = D.sum, W = 900, PL = 52, PR = 12;
+const fmt = v => v == null ? "—" : Math.abs(v) >= 100 ? Math.round(v).toLocaleString("ru") : (+v.toFixed(2)).toLocaleString("ru");
+const hhmm = t => new Date(t).toTimeString().slice(0, 5);
+
+function rollMedian(a, w) {
+  return a.map((_, i) => {
+    const v = a.slice(Math.max(0, i - w + 1), i + 1).filter(x => x != null).sort((x, y) => x - y);
+    return v.length ? v[Math.floor(v.length / 2)] : null;
+  });
+}
+
+const PANELS = [
+  {title: "Скорость одного соединения, КБ/с", note: "Пробы по 2 мин: archive.org через VPN против Cloudflare. Линия — скользящая медиана за 30 мин, точки — отдельные пробы. Шкала логарифмическая.",
+   series: [["ia_ok", "archive.org", "--s1"], ["cf_kbps", "Cloudflare", "--s2"]], log: true, h: 200},
+  {title: "Весь входящий трафик через VPN-туннель, КБ/с", note: "Все 16 воркеров вместе: реальная полоса, которую получает конвейер.",
+   series: [["tun_rx_kbps", "туннель", "--s1"]], log: false, h: 150},
+  {title: "Документов в минуту", note: "Прирост готовых .md по всем DS в raw за интервал.",
+   series: [["docs_min", "док./мин", "--s1"]], log: false, h: 150},
+  {title: "Время до первого байта archive.org, с", note: "Шкала логарифмическая.",
+   series: [["ia_ttfb_s", "TTFB", "--s1"]], log: true, h: 130},
+  {title: "DNS, мс", note: "Шкала логарифмическая; 30 000 мс означает таймаут.",
+   series: [["dns_ms", "DNS", "--s1"]], log: true, h: 130},
+  {title: "Wi-Fi SNR, дБ", note: "Отношение сигнал/шум; ниже ~25 дБ канал начинает сыпаться.",
+   series: [["wifi_snr", "SNR", "--s1"]], log: false, h: 130},
+];
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const t0 = T[0], t1 = T[T.length - 1];
+const x = t => PL + (t - t0) / (t1 - t0) * (W - PL - PR);
+const reconnectT = S.reconnects.map(s => new Date(s.replace(" ", "T")).getTime());
+const cursors = [];
+
+function niceTicks(lo, hi, log) {
+  if (log) { const r = []; for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++) r.push(10 ** e); return r.filter(v => v >= lo * 0.99 && v <= hi * 1.01); }
+  const step = 10 ** Math.floor(Math.log10((hi - lo) / 4 || 1)), m = [1, 2, 5, 10].find(k => (hi - lo) / (step * k) <= 5) * step;
+  const r = []; for (let v = Math.ceil(lo / m) * m; v <= hi; v += m) r.push(+v.toFixed(6)); return r;
+}
+
+function panel(p) {
+  const H = p.h, PT = 8, PB = 22, NS = "http://www.w3.org/2000/svg";
+  const all = p.series.flatMap(([k]) => C[k]).filter(v => v != null && (!p.log || v > 0));
+  let lo = p.log ? Math.min(...all) : 0, hi = Math.max(...all);
+  if (p.log) { lo = 10 ** Math.floor(Math.log10(lo)); hi = 10 ** Math.ceil(Math.log10(hi)); } else hi = hi * 1.05 || 1;
+  const y = v => { const f = p.log ? (Math.log10(v) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo)) : (v - lo) / (hi - lo); return PT + (1 - f) * (H - PT - PB); };
+  const el = (tag, a) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); return e; };
+  const box = document.createElement("section"); box.className = "panel";
+  box.innerHTML = `<h2>${p.title}</h2><p>${p.note}</p>` + (p.series.length > 1 ? `<div class="legend">${p.series.map(([, n, c]) => `<span><i style="background:var(${c})"></i>${n}</span>`).join("")}</div>` : "");
+  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": p.title});
+  for (const v of niceTicks(lo, hi, p.log)) {
+    svg.append(el("line", {x1: PL, x2: W - PR, y1: y(v), y2: y(v), stroke: css("--grid")}));
+    const tx = el("text", {x: PL - 6, y: y(v) + 4, "text-anchor": "end"}); tx.textContent = fmt(v); svg.append(tx);
+  }
+  for (let h = Math.ceil(t0 / 7.2e6) * 7.2e6; h <= t1; h += 7.2e6) {
+    const tx = el("text", {x: x(h), y: H - 6, "text-anchor": "middle"}); tx.textContent = hhmm(h); svg.append(tx);
+  }
+  for (const t of reconnectT) svg.append(el("line", {x1: x(t), x2: x(t), y1: PT, y2: H - PB, stroke: css("--mark"), "stroke-dasharray": "3 4", "stroke-width": 1}));
+  for (const [k, , c] of p.series) {
+    const col = css(c), raw = C[k];
+    const g = el("g", {fill: col, "fill-opacity": 0.28});
+    raw.forEach((v, i) => { if (v != null && (!p.log || v > 0)) g.append(el("circle", {cx: x(T[i]), cy: y(v), r: 1.6})); });
+    svg.append(g);
+    const med = rollMedian(raw.map(v => p.log && v <= 0 ? null : v), 15);
+    let d = "", pen = false;
+    med.forEach((v, i) => { if (v == null) { pen = false; return; } d += (pen ? "L" : "M") + x(T[i]).toFixed(1) + " " + y(v).toFixed(1); pen = true; });
+    svg.append(el("path", {d, fill: "none", stroke: col, "stroke-width": 2, "stroke-linejoin": "round"}));
+  }
+  const cur = el("line", {y1: PT, y2: H - PB, stroke: css("--text2"), "stroke-width": 1, visibility: "hidden"});
+  svg.append(cur); cursors.push(cur);
+  const hit = el("rect", {x: PL, y: 0, width: W - PL - PR, height: H, fill: "transparent"});
+  svg.append(hit);
+  const move = ev => {
+    const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * W;
+    const t = t0 + (px - PL) / (W - PL - PR) * (t1 - t0);
+    let i = 0, best = Infinity; T.forEach((tt, j) => { const d = Math.abs(tt - t); if (d < best) { best = d; i = j; } });
+    for (const c of cursors) { c.setAttribute("x1", x(T[i])); c.setAttribute("x2", x(T[i])); c.setAttribute("visibility", "visible"); }
+    document.getElementById("readout").innerHTML = `<b>${D.ts[i].slice(11, 16)}</b> · маршрут ${D.route[i]} · archive.org ${fmt(C.ia_kbps[i])} КБ/с · Cloudflare ${fmt(C.cf_kbps[i])} КБ/с · туннель ${fmt(C.tun_rx_kbps[i])} КБ/с · ${fmt(C.docs_min[i])} док./мин · TTFB ${fmt(C.ia_ttfb_s[i])} с · DNS ${fmt(C.dns_ms[i])} мс · SNR ${fmt(C.wifi_snr[i])} дБ`;
+  };
+  hit.addEventListener("pointermove", move);
+  hit.addEventListener("pointerleave", () => cursors.forEach(c => c.setAttribute("visibility", "hidden")));
+  box.append(svg); return box;
+}
+
+document.getElementById("sub").textContent = `${S.span[0]} → ${S.span[1]} · ${S.n} замеров раз в 2 мин · пунктир — смена интерфейса VPN (${S.reconnects.length})`;
+document.getElementById("tiles").innerHTML = [
+  [fmt(S.ia_med) + " КБ/с", "медиана одного соединения к archive.org"],
+  [fmt(S.tun_med) + " КБ/с", "медиана всего туннеля (16 воркеров)"],
+  [fmt(S.cf_med) + " КБ/с", "медиана Cloudflare через тот же VPN"],
+  [fmt(S.docs_med), "док./мин, медиана"],
+  [S.reconnects.length, "переподключений VPN"],
+  [S.ia_fail, "проб archive.org с ошибкой"],
+].map(([b, s]) => `<div class="tile"><b>${b}</b><span>${s}</span></div>`).join("");
+const panels = document.getElementById("panels");
+PANELS.forEach(p => panels.append(panel(p)));
+document.getElementById("corr").innerHTML = "<b>Что двигает скорость конвейера</b> — ранговая корреляция Спирмена с «док./мин» по всем замерам:<br>" +
+  Object.entries(S.corr).map(([k, [r, n]]) => `${k}: <b>${fmt(r)}</b> <span style="color:var(--muted)">(n=${n})</span>`).join(" · ");
+const sh = ["Сервер · транспорт", "Интервал", "Замеров", "archive.org, КБ/с", "Cloudflare, КБ/с", "Туннель, КБ/с", "Док./мин", "TTFB, с", "Сбоев"];
+document.getElementById("servers").innerHTML = `<table><tr>${sh.map(h => `<th>${h}</th>`).join("")}</tr>` +
+  S.servers.map(r => `<tr>${r.map(v => `<td>${typeof v === "number" ? fmt(v) : v}</td>`).join("")}</tr>`).join("") + "</table>";
+document.getElementById("uplinks").innerHTML = `<table><tr>${["Канал · оператор · роутер", ...sh.slice(1)].map(h => `<th>${h}</th>`).join("")}</tr>` +
+  S.uplinks.map(r => `<tr>${r.map(v => `<td>${typeof v === "number" ? fmt(v) : v}</td>`).join("")}</tr>`).join("") + "</table>";
+const hd = ["Час", "Замеров", "archive.org, КБ/с", "Cloudflare, КБ/с", "Туннель, КБ/с", "Док./мин", "TTFB, с", "DNS, мс"];
+document.getElementById("table").innerHTML = `<table><tr>${hd.map(h => `<th>${h}</th>`).join("")}</tr>` +
+  S.hourly.map(r => `<tr>${r.map(v => `<td>${typeof v === "number" ? fmt(v) : v}</td>`).join("")}</tr>`).join("") + "</table>";
+</script>
+</body>
+</html>

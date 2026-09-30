@@ -63,7 +63,7 @@
 
 Разбор, из-за которого этот блок появился: вахта переделала готовую инвентаризацию худшим
 инструментом и выдала за находку то, что было поимённо записано в `PLAN.md` §2.7 того же прогона.
-`reports/incidents/inventory_ignored_and_redone_incident.md`, PIT-072.
+`reports/incidents/inventory-ignored-and-redone-incident.md`, PIT-072.
 
 ### [!] §0 проверяется на подлинность, а не читается на веру
 

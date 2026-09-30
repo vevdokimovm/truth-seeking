@@ -4,6 +4,7 @@
 # Поэтому они и не могут входить в отпечаток канона.
 
 observations/measurements.csv   # machine_probe.py — строка на каждый запуск
+observations/hw-series.tsv        # hw_series.py — ряд износа железа, строка на замер
 snapshots/*.json                # inventory.py — снимок приложений на дату
 observations/net-samples*.tsv   # net_sampler.sh — ряд трафика по секундам
 observations/tunnel-samples*.tsv  # tunnel_sampler.sh — счётчики туннеля во время матча

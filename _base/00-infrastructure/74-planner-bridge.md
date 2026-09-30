@@ -73,7 +73,7 @@ INBOX-FROM-<источник>.md   ← ОДИН generated-файл в корне
 Нет хотя бы одного — доставка **некуда приземляется**: пункты придётся держать в голове
 или в самом generated-файле, который перезапишется.
 
-Шаблоны — `templates/ROADMAP_TEMPLATE.md` и `templates/TASKS_TEMPLATE.md`. Заводить
+Шаблоны — `templates/ROADMAP-TEMPLATE.md` и `templates/TASKS-TEMPLATE.md`. Заводить
 **из шаблона**, а не копированием у соседа: у соседа может стоять устаревшая версия.
 
 > ### Состояние на 20.08.2026 (замер, не оценка)
@@ -235,7 +235,7 @@ cp -a "$SRC/." .
 ## 8. Связки
 
 `45-roadmap-and-tasks.md` (четыре файла, четыре вопроса) · `72-source-of-truth.md` ·
-`73-chat-handoff.md` · `templates/ROADMAP_TEMPLATE.md` · `templates/TASKS_TEMPLATE.md` ·
+`73-chat-handoff.md` · `templates/ROADMAP-TEMPLATE.md` · `templates/TASKS-TEMPLATE.md` ·
 `reports/pitfalls.md` PIT-033 (второй прогон затирает результат первого),
 PIT-052 (две копии одного = независимые деревья), PIT-080 (обнови существующее,
 не создавай новое)

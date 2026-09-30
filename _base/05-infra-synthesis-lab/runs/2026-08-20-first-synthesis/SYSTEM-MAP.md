@@ -39,7 +39,7 @@ base-repo (родитель)
    ├── шаблоны ──────────► templates/
    ├── отчётность ───────► reports/ (шаблоны, гайды, реестры, папки по типам)
    ├── карта ────────────► repos-map.md
-   └── киты ─────────────► 00-manifest-aot/ · 01-claude-context/ · 02-methodology-library/
+   └── киты ─────────────► 17-manifest-aot/ · 01-claude-context/ · 02-methodology-library/
                             03-role-kit/ · 04-product-dev-kit/ · 05-infra-synthesis-lab/
         │
         │  раздача 1-в-1
@@ -206,9 +206,9 @@ base-repo (родитель)
 | Файл | Вопрос | Содержит |
 |---|---|---|
 | `ROADMAP.md` | **что дальше** | будущее, только открытые пункты, P1/P2/P3 |
-| `ROADMAP_HISTORY.md` | **что построили и когда** | закрытое, с версией |
+| `ROADMAP-HISTORY.md` | **что построили и когда** | закрытое, с версией |
 | `TASKS.md` | **что я должен сделать сам** | действия владельца вне песочницы |
-| `TASKS_HISTORY.md` | **что я уже сделал** | закрытое, с **датой** (не версией) |
+| `TASKS-HISTORY.md` | **что я уже сделал** | закрытое, с **датой** (не версией) |
 
 Плюс два соседних: `CHANGELOG.md` — «что вошло в версию» (поставка), `WATCHLOG.md` §0 —
 «где стоим прямо сейчас» (точка остановки).
@@ -266,9 +266,9 @@ TASKS — что сделать **владельцу** вне репы (полу
 
 | Триггер | Тип | Папка | Реестр |
 |---|---|---|---|
-| Дефект с влиянием | **Инцидент** (post-mortem) | `reports/incidents/` | `incidents_summary.md` |
-| Искали причину, **дефекта НЕ оказалось** | **Расследование** | `reports/investigations/` | `investigations_summary.md` |
-| Найден конкретный баг | **Bug card** | `reports/incidents/` | `incidents_summary.md` |
+| Дефект с влиянием | **Инцидент** (post-mortem) | `reports/incidents/` | `incidents-summary.md` |
+| Искали причину, **дефекта НЕ оказалось** | **Расследование** | `reports/investigations/` | `investigations-summary.md` |
+| Найден конкретный баг | **Bug card** | `reports/incidents/` | `incidents-summary.md` |
 | Архитектурное решение | **ADR** | `reports/adr/` | сквозная нумерация |
 | Слияние линий вахт | **Merge-отчёт** | `reports/merges/` | — |
 | Повторная ошибка воркфлоу | **Pitfall** | `reports/pitfalls.md` | сам файл |

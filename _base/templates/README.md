@@ -1,8 +1,8 @@
 # `deploy.sh` — правило одного скрипта
 
 > Служебный файл рядом с инструментом. Читать **до** того, как создавать что-то новое
-> в этой папке. Полное ТЗ — `reports/requirements/deploy_script_spec.md`,
-> история консолидации — `reports/merges/scripts_consolidation_report.md`.
+> в этой папке. Полное ТЗ — `reports/requirements/deploy-script-spec.md`,
+> история консолидации — `reports/merges/scripts-consolidation-report.md`.
 
 ---
 
@@ -55,7 +55,7 @@
 Показательная история, ради которой этот файл и существует.
 
 Правило «новый скрипт не заводится» было записано в
-`reports/merges/scripts_consolidation_report.md` **сразу после** консолидации восьми скриптов
+`reports/merges/scripts-consolidation-report.md` **сразу после** консолидации восьми скриптов
 в один. Через несколько дней всплыл боевой баг: деплойер не нашёл `CHANGELOG.md` (он лежал
 в подпапке) и выпустил шесть релизов без описания. Надо было починить уже опубликованное.
 

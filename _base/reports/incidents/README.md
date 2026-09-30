@@ -1,8 +1,8 @@
 # incidents/ — полные разборы инцидентов (post-mortem)
 
 Здесь лежат **полные post-mortem'ы** — файлы-разборы инцидентов (реальная поломка/дефект и/или
-влияние). Формат — `../incident_postmortem_guide.md`. Сводки-строки по каждому — в реестре
-`../incidents_summary.md`. Карточки дефектов — по `../bug_report_template.md`.
+влияние). Формат — `../incident-postmortem-guide.md`. Сводки-строки по каждому — в реестре
+`../incidents-summary.md`. Карточки дефектов — по `../bug-report-template.md`.
 
 Имя файла: `<тема>_incident.md` или `<тема>_incident_postmortem.md` (английский snake_case).
 
@@ -21,8 +21,8 @@
 
 | Файл | Что разбиралось |
 |---|---|
-| [`finpilot_crlf_fixtures.md`](finpilot_crlf_fixtures.md) | CRLF в фикстурах парсера FINPILOT (`personal-finance-dss`) |
-| [`starship_config_warning.md`](starship_config_warning.md) | предупреждение `starship` в оболочке macOS — вне кода проектов |
+| [`finpilot-crlf-fixtures.md`](finpilot-crlf-fixtures.md) | CRLF в фикстурах парсера FINPILOT (`personal-finance-dss`) |
+| [`starship-config-warning.md`](starship-config-warning.md) | предупреждение `starship` в оболочке macOS — вне кода проектов |
 
 **Не переименованы намеренно.** Имя файла — адрес: переименование обрывает
 ссылки, которые могли остаться в чужих репах и в истории. Правило именования

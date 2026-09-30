@@ -89,7 +89,13 @@ def _цель(аргумент: str) -> Path:
     sys.exit(1)
 
 
-REPO = _цель(sys.argv[1]) if len(sys.argv) > 1 \
+# 🔴 `sys.argv` читается ТОЛЬКО при запуске файлом. Найдено 29.09.2026: строка
+# исполняется на импорте, а `github_sync.py` импортирует этот модуль ради
+# `JUNK_DIRS` — и упаковщик принимал ключ деплойера («--dry», «--archive») за
+# имя репы и убивал чужой процесс через `sys.exit(1)`. Деплой из архива был
+# невозможен вовсе, а ошибка указывала на ключ, а не на импорт. Поймать её
+# `except Exception` нельзя: `SystemExit` наследуется от `BaseException`.
+REPO = _цель(sys.argv[1]) if __name__ == "__main__" and len(sys.argv) > 1 \
     else Path(os.environ.get("BASE_REPO", Path(__file__).resolve().parent.parent)).expanduser()
 NAME = REPO.name
 

@@ -53,10 +53,12 @@ def fmt(sec: float) -> str:
 class VideoNote:
     """Сборка заметки по одному видео."""
 
-    def __init__(self, video: Path, model: str, lang: str) -> None:
+    def __init__(self, video: Path, model: str, lang: str,
+                 vad_model: Path | None = None) -> None:
         self.video = video
         self.model = model
         self.lang = lang
+        self.vad_model = vad_model
         self.work = Path(tempfile.mkdtemp(prefix="video_to_note_"))
 
     def duration(self) -> float:
@@ -87,8 +89,11 @@ class VideoNote:
         cli = shutil.which("whisper-cli") or shutil.which("whisper-cpp")
         if not cli:
             sys.exit("🔴 нет whisper-cli: brew install whisper-cpp")
-        r = run([cli, "-m", str(model_path), "-l", self.lang, "-f", str(wav),
-                 "-oj", "-of", str(base), "-np"])
+        cmd = [cli, "-m", str(model_path), "-l", self.lang, "-f", str(wav),
+               "-oj", "-of", str(base), "-np"]
+        if self.vad_model:
+            cmd += ["--vad", "-vm", str(self.vad_model)]
+        r = run(cmd)
         js = base.with_suffix(".json")
         if r.returncode != 0 or not js.is_file():
             sys.exit(f"🔴 whisper-cli упал: {r.stderr[-400:]}")
@@ -225,6 +230,7 @@ def main() -> int:
     ap.add_argument("--every", type=float, default=60.0)
     ap.add_argument("--frames-dir", type=Path)
     ap.add_argument("--no-frames", action="store_true")
+    ap.add_argument("--vad-model", type=Path)
     ap.add_argument("--download", action="store_true")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
@@ -235,7 +241,9 @@ def main() -> int:
     if not a.video.is_file():
         sys.exit(f"🔴 нет файла: {a.video}")
     start = time.time()
-    vn = VideoNote(a.video, a.model, a.lang)
+    if a.vad_model and not a.vad_model.is_file():
+        sys.exit(f"🔴 нет VAD-модели: {a.vad_model}")
+    vn = VideoNote(a.video, a.model, a.lang, a.vad_model)
     dur = vn.duration()
     if dur <= 0:
         sys.exit(f"🔴 ffprobe не прочитал длительность: {a.video}")

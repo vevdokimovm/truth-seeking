@@ -162,5 +162,5 @@ Condition          = Service Recommended
 
 ## Связки
 
-`sleep-during-heavy-run-2026-09-06.md` · `nochnoe-otklyuchenie-2026-09-06.md`
+`sleep-during-heavy-run-2026-09-06.md` · `2026-09-06-night-shutdown.md`
 · `observations/HISTORY.md` · `/machine` · `12-workstation-kit/LOAD-CLASSES.md`

@@ -128,7 +128,7 @@ create_trigger → живёт на аккаунте → срабатывает �
 ## 5. 🎯 Моя система задач (8 штук, база под мои векторы)
 
 Собрана под миграцию + магистратуру + FINPILOT + здоровье. Полный разбор настройки — ситуация-репорт
-`../reports/situations/2026-07-18-cowork-avtomatizatsiya-i-metodichki.md`; портируемый манифест —
+`../reports/situations/2026-07-18-cowork-automation-and-guides.md`; портируемый манифест —
 `../templates/scheduled-tasks-export.yaml`.
 
 | # | Задача | Расписание (МСК) | cron | Суть |
@@ -247,5 +247,5 @@ create_trigger → живёт на аккаунте → срабатывает �
 
 - MCP `claude-code-remote` — инструменты `create_trigger` / `send_later` / `list_triggers` /
   `update_trigger` / `delete_trigger` / `fire_trigger` (наблюдаемая спецификация тулов, июль 2026).
-- Практика настройки (эта сессия): `../reports/situations/2026-07-18-cowork-avtomatizatsiya-i-metodichki.md`.
+- Практика настройки (эта сессия): `../reports/situations/2026-07-18-cowork-automation-and-guides.md`.
 - Числа/лимиты механики (минимум-час, клампы) — реверс-инжиниринг `39-cowork-infrastructure-numbers.md`.

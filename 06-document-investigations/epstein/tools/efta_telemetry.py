@@ -25,7 +25,8 @@ HERE = Path(__file__).resolve().parent
 OUT = HERE.parent / "telemetry"
 RAW = Path.home() / "raw-originals/epstein-text"
 CORPUS = HERE.parent / "corpus"
-LOGS = {"B": Path.home() / "epstein/stageB.log", "E": Path.home() / "epstein/stageE.log"}
+LOGS = {s: Path.home() / f"epstein/stage{s}.log" for s in "BCDE"}
+TEXT_LOGS = ("B", "C", "D")
 PROBE = "https://archive.org/download/data-set-8_20251228/DataSet%2011.zip"
 MEDIA_RE = re.compile(r"\.(mp4|m4a|mp3|avi|mov|m4v|opus|amr|wav|3gp|vob|ts|wmv)\.md$")
 FIELDS = ["ts", "uptime_min", "b_docs", "b_rate_min", "e_notes", "e_rate_h",
@@ -46,8 +47,9 @@ class Probe:
     """Collects one telemetry sample."""
 
     def count_b(self) -> int:
-        d = RAW / "DS11"
-        return sum(1 for e in os.scandir(d) if e.name.startswith("EFTA")) if d.exists() else 0
+        """Text docs across all raw datasets (stages B, C, D share one counter)."""
+        return sum(sum(1 for e in os.scandir(d) if e.name.startswith("EFTA"))
+                   for d in RAW.glob("DS*") if d.is_dir())
 
     def count_e(self) -> int:
         n = 0
@@ -99,9 +101,9 @@ class Probe:
     def logs(self) -> dict:
         def grep(path: Path, pat: str) -> int:
             return len(re.findall(pat, path.read_text(errors="replace"))) if path.exists() else 0
-        return {"b_err": grep(LOGS["B"], r"Traceback|documents failed"),
+        return {"b_err": sum(grep(LOGS[s], r"Traceback|documents failed") for s in TEXT_LOGS),
                 "e_fail": grep(LOGS["E"], r"  FAIL "),
-                "b_retry": grep(LOGS["B"], r" try [2-5] "),
+                "b_retry": sum(grep(LOGS[s], r" try [2-5] ") for s in TEXT_LOGS),
                 "e_retry": grep(LOGS["E"], r" try [2-5]")}
 
 
@@ -162,7 +164,7 @@ class Telemetry:
             if row[k] > prev[k]:
                 self.event(f"{name}: +{row[k] - prev[k]} (всего {row[k]})")
         if row["runner_b"] and row.get("b_rate_min") == 0:
-            self.event("⚠️ этап B: ноль новых документов за интервал (возможное зависание)")
+            self.event("⚠️ текстовый этап (B/C/D): ноль новых документов за интервал (возможное зависание)")
         if row["ia_ttfb_s"] and prev["ia_ttfb_s"] and \
                 float(row["ia_ttfb_s"]) > 3 * max(float(prev["ia_ttfb_s"]), 0.5):
             self.event(f"archive.org: время ответа {prev['ia_ttfb_s']} → {row['ia_ttfb_s']} с")

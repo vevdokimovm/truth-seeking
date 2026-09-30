@@ -4,7 +4,7 @@
 > **Дата:** 20 августа 2026. **Вахта:** Claude Code V.
 > **Масштаб:** 13 минорных версий разрыва, 505 строк кода, единственный инструмент
 > публикации всей системы из 57 репозиториев.
-> **Предыстория:** `reports/incidents/deployer_downgrade_incident.md` — инцидент,
+> **Предыстория:** `reports/incidents/deployer-downgrade-incident.md` — инцидент,
 > в котором рабочий деплойер был затёрт версией трёхнедельной давности.
 
 ---
@@ -142,7 +142,7 @@
 
 ## 6. Связки
 
-`reports/incidents/deployer_downgrade_incident.md` §6 (решение владельца, вариант A) ·
+`reports/incidents/deployer-downgrade-incident.md` §6 (решение владельца, вариант A) ·
 `reports/pitfalls.md` PIT-063 · `05-infra-synthesis-lab/PITFALLS.md` SYN-001, SYN-005 ·
 `templates/deploy-SPEC.md` И14–И20 · `templates/README.md` (правило одного скрипта) ·
 `00-infrastructure/44-what-to-version.md` §4.1 · `00-CLAUDE-STOP.md` §«Четвёртое»

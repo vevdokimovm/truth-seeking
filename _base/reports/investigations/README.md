@@ -2,7 +2,7 @@
 
 Здесь лежат **полные investigation report'ы** — разборы подозрительных ситуаций, где реального
 дефекта НЕ оказалось (внешнее / артефакт метода / недопонимание). Формат —
-`../investigation_report_guide.md`. Сводки-строки — в реестре `../investigations_summary.md`.
+`../investigation-report-guide.md`. Сводки-строки — в реестре `../investigations-summary.md`.
 
 Имя файла: `<тема>_investigation.md` (английский snake_case).
 
@@ -21,7 +21,7 @@
 
 | Файл | Вопрос |
 |---|---|
-| [`claude-code-dlya-sistemy-iz-41-repozitoriya-bazy-znaniy-anal.md`](claude-code-dlya-sistemy-iz-41-repozitoriya-bazy-znaniy-anal.md) | как Claude Code работает с системой из 41 репы-базы знаний |
+| [`claude-code-for-41-repo-system-analysis.md`](claude-code-for-41-repo-system-analysis.md) | как Claude Code работает с системой из 41 репы-базы знаний |
 | [`diagnoz-problemy-claude-ai-pro-you-re-out-of-usage-credits-p.md`](diagnoz-problemy-claude-ai-pro-you-re-out-of-usage-credits-p.md) | Claude.ai Pro: «You're out of usage credits» — что это на деле |
 | [`kak-ubrat-claude-iz-soavtorov-git-kommitov-i-ochistit-istori.md`](kak-ubrat-claude-iz-soavtorov-git-kommitov-i-ochistit-istori.md) | как убрать Claude из соавторов коммитов и почистить историю |
 

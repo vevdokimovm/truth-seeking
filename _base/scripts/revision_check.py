@@ -285,7 +285,7 @@ def check_links(root: Path, files: list[Path], allowlist: set[str]) -> tuple[lis
         # `templates/` пропускается на ЛЮБОЙ глубине, не только в корне.
         # Найдено 29.08.2026 в `misc-vault`: старая копия базы лежит внутри
         # `01-documents/claude-instructions/…/04_ИНФРАСТРУКТУРА_base-repo/`,
-        # и её `templates/REPO_README_TEMPLATE.md` несёт намеренные
+        # и её `templates/REPO-README-TEMPLATE.md` несёт намеренные
         # плейсхолдеры `./NN-folder` — ровно то, ради чего `LINK_SKIP_DIRS`
         # и заведён. Проверка смотрела только `parts[0]` и вложенную копию
         # не покрывала. Тот же класс `_base/`-дыры, что чинился в `PIT-153`.
@@ -373,7 +373,7 @@ def check_links(root: Path, files: list[Path], allowlist: set[str]) -> tuple[lis
 # СЕМАНТИЧЕСКИМ (иероглиф с тем же смыслом вместо русского слова) и потому проходит
 # вычитку: смысл на месте, символ чужой. Найдено в живых репах трижды, и один раз —
 # в этой самой базе, в слове «Авторизация» внутри методички.
-# Разбор — reports/investigations/cjk_token_slip_investigation.md.
+# Разбор — reports/investigations/cjk-token-slip-investigation.md.
 #
 # АНТИ-САМОРЕФЕРЕНЦИЯ: репозиторий не содержит того, что запрещает. Диапазоны заданы
 # числами, в текстах системы такие символы пишутся U+-нотацией, а тестовый образец
@@ -2261,7 +2261,7 @@ def check_research_reports(root: Path) -> list[str]:
         if missing:
             rel = path.relative_to(root).as_posix()
             problems.append(f"{rel}: отчёт не содержит — {', '.join(missing)} "
-                            f"(образец: templates/RESEARCH_REPORT_TEMPLATE.md)")
+                            f"(образец: templates/RESEARCH-REPORT-TEMPLATE.md)")
     return problems
 
 
@@ -3108,7 +3108,7 @@ def check_raw_originals(root: Path) -> tuple[list[str], list[str]]:
     верный путь дословно, 67 оригиналов не нашлись на диске, 3 потеряны
     окончательно. Строку «оригинал сейчас» писали при выносе и больше никто
     не сверял — ошибка молчала до момента, когда файл понадобился
-    (`reports/situations/2026-09-15-poterya-originalov-za-sluzhebkami.md`).
+    (`reports/situations/2026-09-15-originals-lost-behind-notes.md`).
 
     Режим `--fast`: только существование пути, без хэшей — полная сверка
     хэширует гигабайты и в гейт не годится. Её запускают руками.
@@ -3409,7 +3409,7 @@ def load_overrides(root: Path) -> set[str]:
 def check_declared_overrides(root: Path) -> tuple[list[str], list[str]]:
     """Отклонение репы от канона обязано быть ОБЪЯВЛЕННЫМ, а не молчаливым.
 
-    Внедрение кандидата №8 из `08-systems-theory-lab/INDUSTRY_VS_US.md`.
+    Внедрение кандидата №8 из `08-systems-theory-lab/INDUSTRY-VS-US.md`.
     До сих пор у репы было два исхода: подчиниться канону или молча
     разойтись с ним. Третьего, законного, не было — и потому расхождение
     выглядело одинаково и когда оно ошибка, и когда осознанный выбор.
@@ -3488,7 +3488,7 @@ CONTRACT_FIELDS = ("ПРЕДУСЛОВИЯ", "ПОСТУСЛОВИЯ", "ИНВА
 def check_ritual_contracts(root: Path) -> tuple[list[str], list[str]]:
     """Скрипт-ритуал объявляет предусловия, постусловия и инвариант.
 
-    Внедрение кандидата №10 из `08-systems-theory-lab/INDUSTRY_VS_US.md`
+    Внедрение кандидата №10 из `08-systems-theory-lab/INDUSTRY-VS-US.md`
     (design by contract, Meyer). Замер 30.08.2026: из четырёх ритуалов поля
     были только у `close_batch.py` — у трёх остальных **ноль из трёх**.
 
@@ -3560,7 +3560,7 @@ BLIND_SPOT_MARKERS = (
 def check_blind_spots_declared(root: Path) -> tuple[list[str], list[str]]:
     """Каждая проверка обязана назвать класс ошибки, который принципиально не поймает.
 
-    Внедрение кандидата №2 из `08-systems-theory-lab/INDUSTRY_VS_US.md`:
+    Внедрение кандидата №2 из `08-systems-theory-lab/INDUSTRY-VS-US.md`:
     расширяет `71` §7г-бис с инструментов на отдельные проверки. До сих пор
     границы объявлял гейт ЦЕЛИКОМ (константа `UNCOVERED`, четыре строки),
     а каждая отдельная `check_*` выглядела полной в своей области.

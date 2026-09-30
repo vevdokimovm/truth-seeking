@@ -35,13 +35,13 @@
 
 1. Распакуй кит в корень репы. Появятся `00-infrastructure/` (документация-правила),
    `templates/` (шаблоны) и `reports/` (система отчётности: шаблоны, гайды, реестры, папки по типам).
-2. Возьми `templates/REPO_README_TEMPLATE.md` → заполни под конкретную репу →
+2. Возьми `templates/REPO-README-TEMPLATE.md` → заполни под конкретную репу →
    положи как корневой `README.md`. Возьми `templates/gitignore.template` → `.gitignore`.
 3. Возьми `00-infrastructure/03-watchlog-template.md` → скопируй в `WATCHLOG.md`,
    впиши текущее состояние репы (аккаунты V/J/M/S/A уже прописаны). Возьми
-   `templates/CHANGELOG_TEMPLATE.md` → `CHANGELOG.md` — подробная append-only летопись
+   `templates/CHANGELOG-TEMPLATE.md` → `CHANGELOG.md` — подробная append-only летопись
    (`24-changelog-protocol.md`). Журнал + changelog — разные инструменты (снимок «где мы» vs история).
-   Если у репы есть направление на несколько этапов — возьми `templates/ROADMAP_TEMPLATE.md` →
+   Если у репы есть направление на несколько этапов — возьми `templates/ROADMAP-TEMPLATE.md` →
    `ROADMAP.md` с указателем «СЛЕДУЮЩАЯ ЗАДАЧА» (`30-roadmap-protocol.md`).
 4. Прочитай `00-infrastructure/README.md` (карта правил, порядок чтения) и
    `00-infrastructure/18-documentation-philosophy.md` (дух: «больше = лучше», слово = триггер на
@@ -117,12 +117,12 @@
 | `.githooks/pre-commit` | Хук: не пускает в коммит секреты, тяжёлые бинарники, `.zip`/`.docx` |
 | `01-claude-context/` | **Единый кит контекста** для всех аккаунтов Claude (вход — `00-navigator.md`) |
 | `reports/README.md` | **Дом системы отчётности** — шаблоны, гайды, реестры, папки по типам (+ рубрика `situations/`, эксперименты `experiments/`) |
-| `templates/REPO_README_TEMPLATE.md` | Шаблон корневого README репы |
-| `templates/START-HERE_TEMPLATE.md` | Шаблон входа в репу (класс, состояние, порядок входа) |
+| `templates/REPO-README-TEMPLATE.md` | Шаблон корневого README репы |
+| `templates/START-HERE-TEMPLATE.md` | Шаблон входа в репу (класс, состояние, порядок входа) |
 | `templates/gitignore.template` | Базовый `.gitignore` |
-| `templates/CHANGELOG_TEMPLATE.md` | Шаблон подробного `CHANGELOG` |
-| `templates/ROADMAP_TEMPLATE.md` | Шаблон дорожной карты (P1/P2/P3 + «что НЕ делаем») |
-| `templates/TASKS_TEMPLATE.md` | Шаблон задач владельца вне песочницы |
+| `templates/CHANGELOG-TEMPLATE.md` | Шаблон подробного `CHANGELOG` |
+| `templates/ROADMAP-TEMPLATE.md` | Шаблон дорожной карты (P1/P2/P3 + «что НЕ делаем») |
+| `templates/TASKS-TEMPLATE.md` | Шаблон задач владельца вне песочницы |
 | `templates/deploy.sh` | **Единый деплойер всей системы** (второго скрипта не заводится никогда): архив из `~/Downloads` → клон → чистая замена дерева → коммит → тег → push → GitHub Release с каноническим ассетом. Режимы — `templates/deploy-MODES.md` |
 | `VERSION` | Текущая версия репы (источник правды для `deploy.sh`) |
 

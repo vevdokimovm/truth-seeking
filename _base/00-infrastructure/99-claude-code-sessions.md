@@ -398,7 +398,7 @@ Peer sessions (2):
 
 **По квоте сессии складываются, а не делятся.** Каждая фоновая сессия и каждый участник
 команды тратят из общего лимита независимо — это ровно тот механизм, что дал разбор
-инцидента с лимитом (`reports/incidents/rate_limit_after_account_switch_incident.md`):
+инцидента с лимитом (`reports/incidents/rate-limit-after-account-switch-incident.md`):
 пятичасовое окно считается от первого запроса и принадлежит **аккаунту**, а не сессии.
 
 **Две сессии в одном каталоге не конфликтуют за хранение** — у каждой свой `.jsonl`.
@@ -436,4 +436,4 @@ Peer sessions (2):
 
 **Связки:** `97-claude-code-capabilities.md` · `49-token-economy-and-prompting.md` ·
 `61-token-analytics.md` · `20-knowledge-capture-protocol.md` ·
-`reports/incidents/rate_limit_after_account_switch_incident.md`
+`reports/incidents/rate-limit-after-account-switch-incident.md`

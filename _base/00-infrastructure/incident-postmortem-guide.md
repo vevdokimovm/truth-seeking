@@ -1,9 +1,9 @@
 # Инциденты: post-mortem (шаблон и метод)
 
 > Практический гайд для разбора инцидента — когда был сбой с влиянием на пользователей/систему (или
-> near miss). Симметричен `investigation_report_guide.md` (расследования). Какой тип выбрать под
-> ситуацию — `report_types.md`. Полный разбор — отдельным файлом в `incidents/`, сводка-строка — в
-> `incidents_summary.md`. Теория (blameless, RCA, SLO) — `documentation_methodology.md`.
+> near miss). Симметричен `investigation-report-guide.md` (расследования). Какой тип выбрать под
+> ситуацию — `report-types.md`. Полный разбор — отдельным файлом в `incidents/`, сводка-строка — в
+> `incidents-summary.md`. Теория (blameless, RCA, SLO) — `documentation-methodology.md`.
 
 ---
 
@@ -179,7 +179,7 @@
 - **Timeline** — выложенная хронология часто сама показывает связь («деплой в 14:00 → ошибки в 14:02»).
 
 Глубже (Fishbone/Ishikawa, реконструкция хронологии, контрибьюторы vs корень, SLO/error budget) — в
-`documentation_methodology.md`.
+`documentation-methodology.md`.
 
 ---
 
@@ -197,6 +197,6 @@
 ## 5. Где живёт
 
 Полный post-mortem — файлом в `incidents/`, имя `<тема>_incident.md` или
-`<тема>_incident_postmortem.md`. В `incidents_summary.md` — короткая сводка строкой (суть + корень +
+`<тема>_incident_postmortem.md`. В `incidents-summary.md` — короткая сводка строкой (суть + корень +
 **решение/шаги**; если не закрыто — что опробовано / почему / что дальше). Формат расследования (без
-реального дефекта) — `investigation_report_guide.md`; карточка дефекта — `bug_report_template.md`.
+реального дефекта) — `investigation-report-guide.md`; карточка дефекта — `bug-report-template.md`.

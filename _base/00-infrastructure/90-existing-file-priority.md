@@ -84,8 +84,8 @@
 
 | Рабочий файл | Приёмник закрытого |
 |---|---|
-| `ROADMAP.md` | `ROADMAP_HISTORY.md` |
-| `TASKS.md` | `TASKS_HISTORY.md` |
+| `ROADMAP.md` | `ROADMAP-HISTORY.md` |
+| `TASKS.md` | `TASKS-HISTORY.md` |
 | `BACKLOG.md` (планировщик) | `reports/tasks-completed-log.md` |
 
 Замерено 28.08.2026 в `mission-control`: четыре рабочих файла держали **1348

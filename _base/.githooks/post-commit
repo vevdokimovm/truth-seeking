@@ -1,0 +1,4 @@
+#!/bin/sh
+# Единый журнал системы (base-repo/scripts/system_log.py). Никогда не роняет
+# коммит: журнал — след, а не предусловие (71 §7ж).
+python3 "/Users/vasyaevdokimov/repos/base-repo/scripts/system_log.py" --record "$(basename "$(git rev-parse --show-toplevel)")" >/dev/null 2>&1 || true

@@ -20,7 +20,7 @@
 | `configs/` | Копируемые стартовые конфиги: flake8, mypy, coverage, pre-commit, pytest, Makefile |
 | `ci/ci.yml.template` | Стартовый GitHub Actions workflow — preflight + fast/full/deep гейты |
 | `docs-skeleton/` | `ARCHITECTURE.md`, `SECURITY.md`, `LEGAL.md`, `adr/` — стартовый набор проектной документации |
-| `roles/` | Три готовые заготовки роли под IT-продукт: архитектор, юрист, security — `00_ROLE.md` + инструкция по дозаполнению |
+| `roles/` | Три готовые заготовки роли под IT-продукт: архитектор, юрист, security — `00-ROLE.md` + инструкция по дозаполнению |
 
 ## Как применить к новому проекту (6 шагов)
 
@@ -36,15 +36,15 @@
    §1 «Применимость по типу репы» в файле `19`). `docs/WATCHLOG.md` — по `../00-infrastructure/03-watchlog-template.md`.
 5. **Возьми нужные роли из `roles/`** (архитектор/юрист/security — по потребности проекта; для
    публичного продукта с персональными данными — юрист обязателен), дозаполни
-   `01_CONTEXT.md`/`02_WORKLOG.md`/`03_PRINCIPLES.md` под конкретный проект по
-   `../03-role-kit/STANDARD.md` (роли здесь дают только самодостаточное ядро `00_ROLE.md`).
+   `01-CONTEXT.md`/`02-WORKLOG.md`/`03-PRINCIPLES.md` под конкретный проект по
+   `../03-role-kit/STANDARD.md` (роли здесь дают только самодостаточное ядро `00-ROLE.md`).
 6. **Прогони `CHECKLIST.md`** перед первым релизом — убедись, что TDD-гейт, версии и ADR реально
    работают, а не просто скопированы.
 
 ## Откуда это взято
 
 Прямая порт-линия: `finpilot/CLAUDE.md`, `finpilot/.github/workflows/ci.yml`,
-`finpilot/docs/engineering_practices.md`, `finpilot/docs/versioning_and_releases.md`,
+`finpilot/docs/engineering-practices.md`, `finpilot/docs/versioning_and_releases.md`,
 `finpilot/docs/reports/adr/`, `finpilot/SECURITY.md`, `finpilot/LEGAL.md`,
 `finpilot/knowledge/roles/{architect,lawyer,security}-finpilot/`. Обезличено до переиспользуемого
 шаблона — проектные детали (домен, юрисдикция, конкретные ADR) остаются в исходном проекте, сюда

@@ -7,7 +7,7 @@
 > корпуса с целью найти в нём поведенческий паттерн.
 
 > **Соседние документы, и чем этот от них отличается:**
-> - `02-methodology-library/overfitting_and_self_deception.md` — о том же корне
+> - `02-methodology-library/overfitting-and-self-deception.md` — о том же корне
 >   (степени свободы исследователя, «сад расходящихся тропок»), но для **числового**
 >   подбора параметра на фиксированном датасете. Здесь — для **качественного** чтения
 >   большого текста человеком/LLM в поисках поведенческого паттерна: единица —
@@ -149,7 +149,7 @@
 
 ## 8. Связки
 
-`02-methodology-library/overfitting_and_self_deception.md` (тот же корень для чисел) ·
+`02-methodology-library/overfitting-and-self-deception.md` (тот же корень для чисел) ·
 `65-visual-source-pipeline.md` §3 (опровержимая сверка одного фрагмента) ·
 `71-fail-loud-and-sourcing.md` §7ж–§7и (ложный негатив/позитив о среде, смежный, но
 не тот же класс ошибки) · источник — `character-a-analysis/LESSONS.md` (У-1д, У-1е,

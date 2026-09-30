@@ -172,6 +172,6 @@ video.txt` стоил секунды и показал `1280x800`. Величи�
 до владельца, и за темп, который их и породил. Не снято за диагноз —
 он верен и подтверждён независимыми способами.
 
-**Связки:** `../../12-workstation-kit/reports/dota-zavisaniya-diagnoz-2026-09-05.md` ·
+**Связки:** `../../12-workstation-kit/reports/2026-09-05-dota-freezes-diagnosis.md` ·
 `../../12-workstation-kit/observations/HISTORY.md` ·
 `../pitfalls.md` (`PIT-200`…`PIT-206`) · `.claude/skills/auto/SKILL.md` §0

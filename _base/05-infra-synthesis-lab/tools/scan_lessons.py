@@ -87,9 +87,9 @@ COMPILED = {k: [re.compile(p, re.M) for p in v] for k, v in FAMILIES.items()}
 
 
 # 🔴 ПОЧТИ-КОПИЯ ДЛЯ sha256 — ЧУЖОЙ ФАЙЛ. Замер 04.09.2026:
-# `personal-finance-dss/docs/documentation_methodology.md` (score 651, третий
+# `personal-finance-dss/docs/documentation-methodology.md` (score 651, третий
 # в переписи) оказался ТЕМ ЖЕ документом, что `02-methodology-library/
-# incident_process_documentation_methodology.md` в базе: 481 строка против
+# incident-process-documentation-methodology.md` в базе: 481 строка против
 # 481, заголовки совпадают все до одного. После снятия эмодзи-маркеров
 # важности (🔥⭐💼, база проставила их себе сама) различий осталось
 # **2 строки из 351** — один путь в примере.
@@ -125,7 +125,7 @@ def base_signatures() -> dict[frozenset[str], str]:
     for f in sorted(BASE.rglob("*.md")):
         # 🔴 ФОРМЫ ИСКЛЮЧЕНЫ, И ЭТО НЕ ПРИДИРКА. Первый прогон дал 48 находок,
         # из них **16** — заполненные `MANIFEST.md` разных реп, совпавшие
-        # с `templates/MANIFEST_TEMPLATE.md`. Совпадение верное: заголовки
+        # с `templates/MANIFEST-TEMPLATE.md`. Совпадение верное: заголовки
         # шаблона копируются дословно, содержание пишется под ними.
         #
         # Но вывод из него ложный: манифест `edu-base` — не копия шаблона,

@@ -219,7 +219,7 @@
 - `00-infrastructure/README.md`
 - `00-infrastructure/WATCHLOG.md`
 - `00-infrastructure/incident-postmortem-guide.md`
-- `02-methodology-library/cybersecurity_methodology.md`
+- `02-methodology-library/cybersecurity-methodology.md`
 - `CHANGELOG.md`
 - `README.md`
 - `START-HERE.md`

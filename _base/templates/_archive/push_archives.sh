@@ -243,7 +243,7 @@ $CAT <<'BODY_101'
   `head -n -1` непереносим в BSD · пустой `$PATH` в чужом shell · не спросил про существующий
   тулчейн · формат обёртки не сверен с чужим парсером · несколько локальных копий = разошедшиеся
   git-деревья · draft-релиз остаётся невидимым · патч одного бага без регрессионного прогона.
-- **`reports/incidents_summary.md`**, **`reports/investigations_summary.md`**,
+- **`reports/incidents-summary.md`**, **`reports/investigations-summary.md`**,
   **`reports/README.md`**, **`reports/situations/README.md`** — реестры-диспетчеры, единообразные
   с остальными репозиториями автора.
 

@@ -1,7 +1,7 @@
 # Прогон 3 — свалка скриншотов в заметки
 
 **Дата:** 2026-08-23 · **источник:** `misc-vault/02-media/screenshots`
-**Метод:** `METHOD_IMAGES.md` — три слоя, серия как единица, §9 эталон/расходное
+**Метод:** `METHOD-IMAGES.md` — три слоя, серия как единица, §9 эталон/расходное
 
 ---
 
@@ -31,10 +31,10 @@
 | Сессия | Кадров | Куда ушло содержание | МБ |
 |---|---|---|---|
 | 2025-05-21 14:31–14:50 | **20** | `portrait-of-taste/lab/sora-generation/2025-05-21-perebor-tipazhey.md` | 23 |
-| 2026-08-18 18:50–19:56 | **18** | 🔴 **два адреса:** `misc-vault/00-secrets-index/README.md` (Steam) · замер «100 изображений на чат» → `METHOD_IMAGES.md` §10 | 19 |
+| 2026-08-18 18:50–19:56 | **18** | 🔴 **два адреса:** `misc-vault/00-secrets-index/README.md` (Steam) · замер «100 изображений на чат» → `METHOD-IMAGES.md` §10 | 19 |
 | 2026-08-16 10:05–10:21 | **15** | `master-admission/data/2026-08-16-gosuslugi-moya-pozitsiya.md` | 9 |
 | 2026-08-13 23:17 · 2026-08-14 12:14–12:22 | **19** | 🔴 **три адреса:** `84-claude-accounts.md` (шестая почта) · `token-consumption/hypothesis.md` (четыре замера) · `04-product-dev-kit/STANDARD.md` §2а (тесты на моках) | 9 |
-| 2026-08-20 08:04–08:14 | **14** | 🔴 **два адреса:** `00-infrastructure/50-parallel-accounts…md` §2б (404 артефакта) · `reports/incidents/auto_mode_setup_global_pollution_incident.md` §2.4 (перенумеровано 25.08 — был дубль §2.3) | 7 |
+| 2026-08-20 08:04–08:14 | **14** | 🔴 **два адреса:** `00-infrastructure/50-parallel-accounts…md` §2б (404 артефакта) · `reports/incidents/auto-mode-setup-global-pollution-incident.md` §2.4 (перенумеровано 25.08 — был дубль §2.3) | 7 |
 | 2026-08-17 09:59–10:12 | **19** | 🔴 **два адреса:** `legal-knowledge-base/10-personal-strategy/dokumenty/2026-08-17-zagranpasport-zayavlenie.md` · `master-admission/data/2026-08-17-misis-konkursnyy-spisok.md` | 10 |
 
 ## Что узнал прогон
@@ -142,7 +142,7 @@ TEAM VISION, групповой этап, раунд 4, счёт 3–0, 43 ты�
 > **Просмотр и запись — разные операции, и удаление привязано ко второй, а не к первой.**
 > «Кадр посмотрен» ощущается как «кадр обработан», хотя между ними лежит вся работа.
 
-**Правило ужесточается** (`METHOD_IMAGES.md` §9): удалять можно только после того,
+**Правило ужесточается** (`METHOD-IMAGES.md` §9): удалять можно только после того,
 как **заметка написана и лежит на диске**. Не «посмотрел — удаляй», а
 **«записал — удаляй»**. Проверка перед `find -delete`: существует ли файл заметки,
 покрывающий эти кадры.
@@ -395,7 +395,7 @@ CRUD-цикл обязательства прошёл create/edit чисто; н
 | Кадры | Предмет | Куда ушло |
 |---|---|---|
 | 14:20:15 · 17:29:02 · 17:49:52 · 18:06:10 | TI Lower Bracket: BOOMBOYS vs Team Spirit, разгром и ультра-килл Yatoro | `dota-dossier/data/2026-08-22-ti-boomboys-vs-spirit.md` |
-| 20:13:57 · 20:14:11 | 🔴 третий прогон `/auto-mode-setup`, два дня после фикса инцидента 20.08 | `reports/incidents/auto_mode_setup_global_pollution_incident.md` §7 |
+| 20:13:57 · 20:14:11 | 🔴 третий прогон `/auto-mode-setup`, два дня после фикса инцидента 20.08 | `reports/incidents/auto-mode-setup-global-pollution-incident.md` §7 |
 | 19:33:49 | размеры и возраст всех живых сессий Claude Code (picker `--resume`) | `token-consumption/hypothesis.md` |
 | 17:49:52 · 18:06:10 · 19:40:29 · 19:57:13 | геймплей-заполнение, миграция `~/Documents`→репы (кампания уже закрыта 22.08 в ROADMAP) | просмотрено, без отдельной заметки — уже документировано закрытой кампанией |
 
@@ -442,7 +442,7 @@ CRUD-цикл обязательства прошёл create/edit чисто; н
 
 | Кадры | Предмет | Куда ушло |
 |---|---|---|
-| 14:03:09…14:03:15 (5 кадров) | блок классификатора на самомодификацию `settings.json` держится во ВСЕХ пяти режимах (bg/plan/auto/manual) | `reports/incidents/auto_mode_setup_global_pollution_incident.md` §2.3 (расширено) |
+| 14:03:09…14:03:15 (5 кадров) | блок классификатора на самомодификацию `settings.json` держится во ВСЕХ пяти режимах (bg/plan/auto/manual) | `reports/incidents/auto-mode-setup-global-pollution-incident.md` §2.3 (расширено) |
 | 21:48:59 | четвёртый Steam-аккаунт `Adonai`, level 37, офлайн 887 дней | `misc-vault/00-secrets-index/README.md` |
 
 ### Что узнала сессия

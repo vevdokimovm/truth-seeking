@@ -97,7 +97,7 @@
 | **0** | не тронуто | **записать строкой, а не пропустить** |
 
 🔴 **Порог приёмки — 85**, и назначается он **ДО работы**, иначе подгоняется
-под результат (`02-methodology-library/overfitting_and_self_deception.md` §4).
+под результат (`02-methodology-library/overfitting-and-self-deception.md` §4).
 
 ### Калибровка по реальным случаям
 

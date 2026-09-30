@@ -25,18 +25,18 @@
   инструкций. Тематически продолжают Claude-кластер `13`–`16`; не дублируют его (`15`/`16` — gotchas/
   лимиты, оставлены за версией v1.2.0 как канон, мои дубли из подпапки не переносились).
 - **Подсистема `reports/`** — каноническая структура отчётности, наследуемая каждой репой: `README`,
-  роутер `report_types.md`, теория `documentation_methodology.md` (blameless/RCA/runbook/ADR/SLO),
+  роутер `report-types.md`, теория `documentation-methodology.md` (blameless/RCA/runbook/ADR/SLO),
   реестры `incidents_summary`/`investigations_summary`/`pitfalls`, гайды post-mortem и investigation,
   `bug_report_template`, папки по типам (`adr/`, `incidents/`, `investigations/`, `merges/` с гайдом,
   `releases/`, `security/`, `testing/`, `requirements/`, `audits/`), рубрика **`situations/`** «Разбор
   ситуации и уроки».
-- **`reports/situations/2026-07-08-upakovka-arkhivov-v-repozitorii.md`** — первый выпуск рубрики:
+- **`reports/situations/2026-07-08-packing-archives-into-repos.md`** — первый выпуск рубрики:
   упаковка ~4000 файлов / ~1.5 ГБ архивов в 9 чистых репо (конвейер, слимминг, честный разбор
   промахов, уроки). `PIT-003` (dotfiles не срезать) и `PIT-004` (чистка ≠ долив) вынесены из него в
   `reports/pitfalls.md`.
-- **`reports/merges/merge_manifest_v1_3_0.md`** — процесс-отчёт этого слияния (что разошлось,
+- **`reports/merges/merge-manifest-v1-3-0.md`** — процесс-отчёт этого слияния (что разошлось,
   решения по файлам, разрешение коллизии номеров, дедуп, верификация, уроки).
-- **`templates/CHANGELOG_TEMPLATE.md`** — шаблон подробного changelog.
+- **`templates/CHANGELOG-TEMPLATE.md`** — шаблон подробного changelog.
 - **`templates/publish.sh`** — универсальный автопуш версии: bump → commit → аннотированный тег →
   push → GitHub Release с описанием из `CHANGELOG.md`. Идемпотентный, с ретраями под РФ-TLS-таймауты,
   питон-парсингом секции версии в `--notes-file`, фолбэком без `gh`, опц. ассетами. Проверен прогоном.
@@ -144,4 +144,4 @@
   - `06-volume-compression.md` — протокол сжатия тяжёлых файлов в тезисные `.md`.
   - `07-writing-methodology.md` — методология письма (методички/справочники/правила).
   - `08-automation-triggers.md` — триггеры «событие → действие».
-  - `templates/REPO_README_TEMPLATE.md`, `templates/gitignore.template` — шаблоны.
+  - `templates/REPO-README-TEMPLATE.md`, `templates/gitignore.template` — шаблоны.

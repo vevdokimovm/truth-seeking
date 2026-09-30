@@ -54,12 +54,12 @@
 пачкой, не говорить моим голосом, не трогать границы безопасности.
 ```
 
-Полная форма — `LAUNCH_BRIEF.md`.
+Полная форма — `LAUNCH-BRIEF.md`.
 
 ### 2.2. Headless — когда сессии нет и владельца нет
 
 ```bash
-claude -p "$(cat 06-autonomous-mode-kit/LAUNCH_BRIEF.md)" \
+claude -p "$(cat 06-autonomous-mode-kit/LAUNCH-BRIEF.md)" \
   --permission-mode bypassPermissions \
   --output-format stream-json
 ```
@@ -161,6 +161,6 @@ claude -p "$(cat 06-autonomous-mode-kit/LAUNCH_BRIEF.md)" \
 
 ## Связки
 
-`STANDARD.md` (что можно решать самому) · `LAUNCH_BRIEF.md` (мандат) ·
+`STANDARD.md` (что можно решать самому) · `LAUNCH-BRIEF.md` (мандат) ·
 `CHECKLIST.md` (приёмка перед уходом) · `00-infrastructure/51-autonomous-agent-loop.md`
 (механика) · `50-parallel-accounts-and-admin-orchestration.md` (несколько аккаунтов)

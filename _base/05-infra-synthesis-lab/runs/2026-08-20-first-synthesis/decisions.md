@@ -100,7 +100,7 @@
 
 Это второе срабатывание SYN-004 (per-repo принят за дрейф) в одном прогоне.
 
-**Решение:** ⬆️ повысить **шаблон**, а не содержимое → `templates/START-HERE_TEMPLATE.md`.
+**Решение:** ⬆️ повысить **шаблон**, а не содержимое → `templates/START-HERE-TEMPLATE.md`.
 Заполненные файлы остаются в репах. В шаблон вынесены и правила заполнения: класс обязан
 совпадать с `.repo-class` и `repos-map.md`, для `temp` родитель указывается сразу.
 
@@ -113,10 +113,10 @@
 (`dota-dossier` 9 КБ, `portrait-of-taste` 17 КБ, `mission-control` 21 КБ,
 `character-a-analysis` 81 КБ).
 
-**Решение:** ⬆️ `templates/TASKS_TEMPLATE.md`, синтезирован из практики. В комментарий-инструкцию
+**Решение:** ⬆️ `templates/TASKS-TEMPLATE.md`, синтезирован из практики. В комментарий-инструкцию
 вынесено главное разделение из `45-roadmap-and-tasks.md`: ROADMAP — что построить в проекте
 (может ассистент), TASKS — что сделать владельцу вне песочницы. Плюс правило поля
-«Разблокирует», приём прошедшего времени, порядок закрытия через `TASKS_HISTORY.md` с датой.
+«Разблокирует», приём прошедшего времени, порядок закрытия через `TASKS-HISTORY.md` с датой.
 
 Ссылка на оба шаблона добавлена в `45-roadmap-and-tasks.md` §5.
 
@@ -207,8 +207,8 @@
 
 | Файл | Решение | Основание |
 |---|---|---|
-| `reports/investigations/vision-channel_investigation.md` | ⬆️ **повышен** → `reports/investigations/vision-channel_investigation.md` | Первое расследование в базе вообще. Предмет — **среда исполнения** (бюджет изображений на разговор), касается любой работы с визуальными источниками в любой репе |
-| `reports/incidents/release-notes-incident.md` | ⬆️ **повышен** → `reports/incidents/release_notes_three_defects_incident.md` | **Не дубль.** Сверен с `publish_stub_release_notes_incident.md`: там один дефект (CHANGELOG не найден по единственному пути), здесь четыре других. Общее — заглушка `Release {version}`, то есть **рецидив `fail-silent` через девять дней** |
+| `reports/investigations/vision-channel-investigation.md` | ⬆️ **повышен** → `reports/investigations/vision-channel-investigation.md` | Первое расследование в базе вообще. Предмет — **среда исполнения** (бюджет изображений на разговор), касается любой работы с визуальными источниками в любой репе |
+| `reports/incidents/release-notes-incident.md` | ⬆️ **повышен** → `reports/incidents/release-notes-three-defects-incident.md` | **Не дубль.** Сверен с `publish-stub-release-notes-incident.md`: там один дефект (CHANGELOG не найден по единственному пути), здесь четыре других. Общее — заглушка `Release {version}`, то есть **рецидив `fail-silent` через девять дней** |
 | `templates/fix_release_notes.sh` | 🗑 **в корзину** | Покрыт `REPAIR=1`, и не просто покрыт — **противоречит действующему стандарту** |
 
 ### Починка ссылок при повышении
@@ -222,9 +222,9 @@
 | INV-VISION | `34-pdf-reading-channels.md` | `54-pdf-reading-channels.md` | **номер 34 в базе занят** `34-cowork-scheduled-tasks.md` — ссылка вела бы в другой документ |
 | INV-VISION | `33-token-budget-and-modes.md` | без изменений | номер в базе тот же |
 | INC-RELEASE-NOTES | `PIT-013, PIT-014` | `PIT-016, PIT-017` | обе записи от 18.07.2026 — из этого самого разбора |
-| INC-RELEASE-NOTES | `../incidents-summary.md` | `../incidents_summary.md` | имя реестра в базе через подчёркивание |
+| INC-RELEASE-NOTES | `../incidents-summary.md` | `../incidents-summary.md` | имя реестра в базе через подчёркивание |
 
-Строки-сводки добавлены в `investigations_summary.md` и `incidents_summary.md`.
+Строки-сводки добавлены в `investigations-summary.md` и `incidents-summary.md`.
 
 ### Почему `fix_release_notes.sh` — корзина, а не «оставить на всякий случай»
 
@@ -253,7 +253,7 @@
 
 - [ ] `START-HERE.md` — разошёлся в 28 репах
 - [ ] `33-token-budget-and-modes.md`, `25-versioning-and-releases.md`, `08-automation-triggers.md` — по 13
-- [ ] `incidents_summary.md`, `investigations_summary.md` — реестры, та же природа что у pitfalls
+- [ ] `incidents-summary.md`, `investigations-summary.md` — реестры, та же природа что у pitfalls
 - [ ] `publish.sh` — отставлен, лежит в 11 репах
 - [ ] 119 методичек-кандидатов из шести реп (`PLAN.md` §2.7)
 
@@ -301,7 +301,7 @@
 | `tools/revision/`, `tools/publish/` | 7 | **М** | инструменты процесса |
 | `app/`, `frontend/`, `alembic/versions/` | ~250 | **С** | код продукта |
 | `tests/` | 118 | **С** | тесты продукта |
-| `knowledge/roles/` | ~85 | **С** | экземпляры базового `03-role-kit`; шаблоны уже в базе. **Но:** 16 заполненных ролей против одного `EXAMPLE_lawyer.md` в базе — кандидат в примеры |
+| `knowledge/roles/` | ~85 | **С** | экземпляры базового `03-role-kit`; шаблоны уже в базе. **Но:** 16 заполненных ролей против одного `EXAMPLE-lawyer.md` в базе — кандидат в примеры |
 | `knowledge/model_validation/` | 35 | **С** | данные (`.jsonl.gz`, `.csv.gz`) |
 | `knowledge/business/`, `knowledge/science/`, `knowledge/survey_auditory/` | ~60 | **С** | предметные материалы проекта |
 | `docs/diagrams/` | 34 | **С** | диаграммы продукта |
@@ -317,9 +317,9 @@
 ```
 
 **Дельты, требующие сверки содержимого** (имя то же, содержимое разошлось) — 128, из них
-значимые: `docs/documentation_methodology.md`, `docs/engineering_practices.md`,
-`docs/naming_convention.md`, `docs/pitfalls.md`, `docs/sandbox_runbook.md`,
-`docs/tool_call_channel_failures.md`, `docs/reports/*_guide.md`, `tools/revision/revision_check.py`,
+значимые: `docs/documentation-methodology.md`, `docs/engineering-practices.md`,
+`docs/naming-convention.md`, `docs/pitfalls.md`, `docs/sandbox-runbook.md`,
+`docs/tool-call-channel-failures.md`, `docs/reports/*_guide.md`, `tools/revision/revision_check.py`,
 `deploy/publish/deploy.sh`. Остальные 100+ — `README.md` подкаталогов и `knowledge/roles/*`
 (экземпляры шаблона, дельта ожидаема и не является дрейфом).
 
@@ -347,7 +347,7 @@
 | Класс | Сколько | Что делать |
 |---|---|---|
 | идентичны базе байт-в-байт | 17 | ничего, снимутся с копией базы |
-| дельта по содержимому | 1 (`cybersecurity_methodology.md`) | сверить |
+| дельта по содержимому | 1 (`cybersecurity-methodology.md`) | сверить |
 | **в базе нет вовсе** | **11** | разбор ниже |
 
 **Одиннадцать отсутствующих:**
@@ -417,7 +417,7 @@
 **Остаток очереди `knowledge/guides/`:** `writing_guides_methodology.md` (300),
 `overfitting_data_snooping_guide.md` (153), `engineering_reasoning_guide.md` (131),
 `counterfactual_analysis_guide.md` (112), `knowledge_capture_protocol.md` (186, сверить),
-`repo_revision_methodology.md` (91, база длиннее), `cybersecurity_methodology.md` (дельта).
+`repo_revision_methodology.md` (91, база длиннее), `cybersecurity-methodology.md` (дельта).
 
 ### `writing_guides_methodology.md` (300) ⬆️ ПОВЫШЕНА → `68-writing-guides.md`
 
@@ -507,12 +507,12 @@
 
 | Файл | Решение |
 |---|---|
-| `overfitting_data_snooping_guide.md` (153) | ⬆️ → `02-methodology-library/overfitting_and_self_deception.md`; прикладной кейс обобщён, числа сохранены. Перекрёстная ссылка добавлена в `28` §11 (типичные ошибки) |
-| `engineering_reasoning_guide.md` (131) | 🔗 **жанр зарегистрирован** в `reports/report_types.md` §5; развёрнутая методичка с шаблоном остаётся в репе |
-| `counterfactual_analysis_guide.md` (112) | 🔗 **жанр зарегистрирован** в `reports/report_types.md` §6 |
+| `overfitting_data_snooping_guide.md` (153) | ⬆️ → `02-methodology-library/overfitting-and-self-deception.md`; прикладной кейс обобщён, числа сохранены. Перекрёстная ссылка добавлена в `28` §11 (типичные ошибки) |
+| `engineering_reasoning_guide.md` (131) | 🔗 **жанр зарегистрирован** в `reports/report-types.md` §5; развёрнутая методичка с шаблоном остаётся в репе |
+| `counterfactual_analysis_guide.md` (112) | 🔗 **жанр зарегистрирован** в `reports/report-types.md` §6 |
 
 **Почему два последних не повышены целиком.** Это методички **жанра отчёта**, а у базы уже есть
-диспетчер жанров (`19-reporting-system.md` + `reports/report_types.md`). Заводить рядом две
+диспетчер жанров (`19-reporting-system.md` + `reports/report-types.md`). Заводить рядом две
 полные методички значило бы задвоить роутер. Взято главное — триггеры, отличие от соседних
 жанров, обязательные элементы; шаблоны остаются в исходной репе.
 
@@ -530,13 +530,13 @@
 
 | Расследование | Решение |
 |---|---|
-| `cjk_token_slip_investigation.md` | ⬆️ **повышено** + канарейка внедрена в `scripts/revision_check.py` + **PIT-079** |
+| `cjk-token-slip-investigation.md` | ⬆️ **повышено** + канарейка внедрена в `scripts/revision_check.py` + **PIT-079** |
 | `machine_load_gate_timeout_investigation.md` | ⬆️ **PIT-078** (таймаут гейта меряет часы, часы зависят от загрузки) |
 | остальные 11 | 🔶 очередь |
 
 **🔴 Канарейка сработала при внедрении — два попадания в самой базе:**
 
-1. `02-methodology-library/cybersecurity_methodology.md:108` — «Авториз**U+6040**ция».
+1. `02-methodology-library/cybersecurity-methodology.md:108` — «Авториз**U+6040**ция».
    **Тот же дефект уже находили и чинили в FINPILOT**, а в базе он остался: копия файла
    разошлась, и починка не доехала обратно. Ровно тот класс потери, ради которого идёт кампания.
 2. `05-infra-synthesis-lab/tools/scan_lessons.py:2` — **U+5224 в докстринге, написанном этой же
@@ -576,7 +576,7 @@
 данные после запуска, где панели уже не будет · указывает на дефект **точно**, а не оценкой.
 
 **Сходимость с уже поднятым:** «потолок = коридор разногласий» здесь и §4 в
-`02-methodology-library/overfitting_and_self_deception.md` («прирост в зоне разногласий
+`02-methodology-library/overfitting-and-self-deception.md` («прирост в зоне разногласий
 экспертов = копирование вкусов») — один и тот же принцип, пришедший из двух разных документов.
 
 ---
@@ -952,7 +952,7 @@ Apple Notes с двумя предупреждениями (пароли в вы
 и упоминает в трёх документах — но **нигде не определяет, какие значения законны
 и что они значат**. `48-repo-identity.md` описывает `.repo-id` и `VERSION`, класс не трогает.
 
-**Найдено по дороге — сильнее самого пробела.** `templates/START-HERE_TEMPLATE.md:41`
+**Найдено по дороге — сильнее самого пробела.** `templates/START-HERE-TEMPLATE.md:41`
 отсылал за определением классов в **`mission-control/00-infrastructure/07-repo-classes.md`**.
 Родительская репа делегировала базовое понятие чужой репе, и **каждая репа, заведённая
 из шаблона, наследовала указатель на файл, которого у неё нет**. Класс PIT-063: механизм
@@ -1193,7 +1193,7 @@ Apple Notes с двумя предупреждениями (пароли в вы
 и не в той, что под рукой.
 
 Не поднимал: §3 (разделение по исполнителю) — это цитата базового `45`, вернувшаяся
-из планировщика; §4 про время глагола — уже есть в шаблоне `TASKS_TEMPLATE.md`.
+из планировщика; §4 про время глагола — уже есть в шаблоне `TASKS-TEMPLATE.md`.
 
 **Прогресс:** прочитано **10 протоколов из 21**, осталось 11.
 
@@ -1583,7 +1583,7 @@ Code нет токена и сетевого выхода». Она верна �
 **Дисциплина ADR — 🗑 не поднимать, в базе уже есть целиком.**
 Сквозная неизменная нумерация · ADR не редактируются, передумал → новый со `Superseded
 by ADR-NNN` · контекст обязателен · «не на всё, иначе шум» — всё это лежит в
-`reports/adr/README.md` и `adr_template.md` базы. Сверил построчно, дублировать нечего.
+`reports/adr/README.md` и `adr-template.md` базы. Сверил построчно, дублировать нечего.
 
 **ADR-006 «указатель в исходной папке» — ⬆️ поднято в `76-repo-classes.md` §4г.**
 
@@ -2759,7 +2759,7 @@ DUP_L="$(grep -oE '^## L-[0-9]+'                 docs/LESSONS.md | sort | uniq -
 **числом версий отставания**, а не фактом существования.
 
 **Из 187 вне `./base-repo/` только 7:** шесть в `reports/infrastructure/` (тёзки файлов
-базы — `PITFALLS.md`, `mass_release_revision.md` и др.) и `scripts/deploy_all_versions.sh`.
+базы — `PITFALLS.md`, `mass-release-revision.md` и др.) и `scripts/deploy_all_versions.sh`.
 То есть **настоящее пересечение с базой — семь файлов, а не сто восемьдесят семь**,
 и разметка должна считать `./base-repo/` отдельной категорией, иначе арифметика §6 соврёт.
 
@@ -3322,7 +3322,7 @@ BAD="$(pdftotext "$OUT" - | grep -nE '≈|\\begin\{|\\dfrac|\\frac|cases\}' || t
   по структуре — сходится.
 - **`WATCHLOG.md`, `README.md`, `.gitignore`** — прочитаны прошлой вахтой, решения записаны.
 
-### ⬆️ `examples/…/incident_report.md` → `reports/incident_postmortem_guide.md` §2а — три раздела, которых нет в шаблоне
+### ⬆️ `examples/…/incident_report.md` → `reports/incident-postmortem-guide.md` §2а — три раздела, которых нет в шаблоне
 
 > **Правка адреса по ходу.** Первым заходом раздел ушёл в `00-infrastructure/incident-postmortem-guide.md` —
 > и это **мёртвая копия**: все девять живых ссылок системы ведут в `reports/`, а копия
@@ -3632,8 +3632,8 @@ legacy-копии из 12 реп) — но чистка **не делается 
 Порядок соблюдён: до каталогов и до любого замера.
 
 **Обязательный минимум — есть, в отличие от `exam-kit`:** `VERSION` (2.42.0),
-`.repo-id` (`vevdokimovm/dota-dossier`), `ROADMAP.md`, `TASKS.md`, плюс `ROADMAP_HISTORY.md`
-и `TASKS_HISTORY.md`. **Нет:** `.repo-class`, `START-HERE.md`, `00-CLAUDE-STOP.md`.
+`.repo-id` (`vevdokimovm/dota-dossier`), `ROADMAP.md`, `TASKS.md`, плюс `ROADMAP-HISTORY.md`
+и `TASKS-HISTORY.md`. **Нет:** `.repo-class`, `START-HERE.md`, `00-CLAUDE-STOP.md`.
 Вахтенный журнал лежит не в корне, а в `docs/WATCHLOG.md`.
 
 **Что репа уже знает о себе** (ради чего §4 и требует читать корень первым):
@@ -4259,7 +4259,7 @@ Cloudflare, обойти технически можно — записано *�
 **`reports/infrastructure/` — 5 из 9 совпали с базой байт-в-байт** (выбывают
 по хешу, `PROCEDURE.md` §0). Четыре различающихся дали находку.
 
-🔴 **Копии отстали, и первым не доехало предупреждение.** `deploy_script_spec.md`
+🔴 **Копии отстали, и первым не доехало предупреждение.** `deploy-script-spec.md`
 у базы несёт шапку *«⚠️ Это исторический документ; действующий контракт —
 `deploy-SPEC.md`»*, **у копии её нет**. Читатель копии примет ТЗ за действующий
 контракт. Числа тестов: копия 48 кейсов / 162 проверки, база 71 / 274.
@@ -4275,7 +4275,7 @@ Cloudflare, обойти технически можно — записано *�
 > **правильное** ограничение гейта: покрывать отчёты значило бы требовать
 > переписывания истории. Исправлено, рядом положена команда сверки.
 
-**`19` §1а — жанр «анатомия багов».** Из `deploy_bugs_anatomy.md` (байт-в-байт
+**`19` §1а — жанр «анатомия багов».** Из `deploy-bugs-anatomy.md` (байт-в-байт
 с базой, но жанр как таковой описан не был). Отличается и от post-mortem, и от
 карточки: берёт **пачку дефектов одного инструмента** и вытаскивает **класс** каждого.
 Шесть полей, из которых обычно теряют два: **«контроль»** (какой тест не даст
@@ -4349,7 +4349,7 @@ CSV поверх тысяч JSON, *«чтобы сама папка стала �
 `src/**` в основном предметный (экспорт, агрегаты, рендер тир-листов, модели TI):
 надпредметное вынуто выше по докстрингам. `scripts/` — утилиты, из них
 `deploy_all_versions.sh` **предшественник деплойера базы** и уже консолидирован
-(`reports/merges/scripts_consolidation_report.md`). `tools/collect.py` — сборщик
+(`reports/merges/scripts-consolidation-report.md`). `tools/collect.py` — сборщик
 корпуса под конкретные площадки. `bots/farm-coach-bot/` — Lua под Valve Bot API;
 ценное там — **честная рамка в шапке** («правила, не нейросеть; не замена и не
 претендует», со ссылкой на разбор, почему нереалистично), но это уже поднято
@@ -4370,8 +4370,8 @@ CSV поверх тысяч JSON, *«чтобы сама папка стала �
 
 | Файл | Решение |
 |---|---|
-| `reports/infrastructure/reactive_testing_retrospective.md` | ✅ **байт-в-байт с базой** — выбывает по хешу (`PROCEDURE.md` §0). Ретроспектива о том, что тесты писались реактивно: «56 кейсов звучат солидно, но 9 режимов из 20 не покрыты». Число там — **снимок с датой**, правке не подлежит (`18` §9е) |
-| `reports/infrastructure/unreachable_code_pattern.md` | ✅ **байт-в-байт с базой**, источник класса `PIT-A` лидерборда |
+| `reports/infrastructure/reactive-testing-retrospective.md` | ✅ **байт-в-байт с базой** — выбывает по хешу (`PROCEDURE.md` §0). Ретроспектива о том, что тесты писались реактивно: «56 кейсов звучат солидно, но 9 режимов из 20 не покрыты». Число там — **снимок с датой**, правке не подлежит (`18` §9е) |
+| `reports/infrastructure/unreachable-code-pattern.md` | ✅ **байт-в-байт с базой**, источник класса `PIT-A` лидерборда |
 | `scripts/attach_asset.sh` | 📍 локальный. Приложить архив к **уже существующему** релизу, когда дерево старше текущего состояния и в линейную историю не встаёт. У базы то же закрыто режимом `ASSETS_ONLY=1` деплойера — **функция есть, отдельный скрипт не нужен** |
 | `scripts/backup_data.sh` | 📍 локальный: `tar.gz` папки данных + ротация. Надпредметное (частота по цене потери, две копии в разных местах) поднято в `08` |
 | `scripts/show_meta.sh` | 📍 локальный: цветная сводка меты. Приём «`NO_COLOR` и не-TTY гасят цвет» уже стоит в деплойере базы |
@@ -4749,7 +4749,7 @@ for f in $(ls .../00-protocol/); do grep -q -- "$f" decisions.md || echo "НЕТ
 |---|---|---|
 | `06-history/experiment-primary-source.md` | 149 | ⬆️ **→ `28` §10а** (производное выглядит богаче оригинала). Три канала одного PDF: два побитово идентичны, третий — не PDF, а контейнер из пожатых JPEG и **61 пустого `.txt`** |
 | `06-history/35-pdf-channels-experiment.md` | 149 | 🔴 **побайтовый дубль предыдущего** (`sha256 559690a7e192…`, `diff` пуст). Решение — то же; отдельной ценности нет |
-| `06-history/vision-channel_investigation.md` | 135 | ⬆️ **→ `71` §7з** — тихий отказ неотличим от пустого содержания; перебор семи гипотез с исходом у каждой |
+| `06-history/vision-channel-investigation.md` | 135 | ⬆️ **→ `71` §7з** — тихий отказ неотличим от пустого содержания; перебор семи гипотез с исходом у каждой |
 | `06-history/view-diagnostics.md` | 33 | ⬆️ **→ `71` §7ж, подраздел об отборе причин** — **лучшая находка каталога**, см. ниже |
 | `06-history/view-experiment-stats.md` | 30 | 📍 статистика HIT/MISS. 🔴 **Вывод «`view` деградирует» опровергнут** ревизией 04.08; сам файл — образец того, как выборка 0/5 объявляется «доказано данными» |
 | `06-history/2026-07-23-chat-image-limit-and-pdf-splitting.md` | 88 | 📍 методичка нарезки. ✅ «факты и гипотезы разведены, у гипотезы записано проверяемое следствие с местом под результат» покрыто `71` §3 и `28` §9б |
@@ -4943,7 +4943,7 @@ for f in $(ls .../00-protocol/); do grep -q -- "$f" decisions.md || echo "НЕТ
 
 | Файл | Решение |
 |---|---|
-| `LESSONS.md` | ⬆️ **→ `18` §9ж, `71` §7ж, `STOP_CONDITIONS.md`** — сводный разбор ошибок за 19 чатов, уроки `У-N`. Лучший файл репы |
+| `LESSONS.md` | ⬆️ **→ `18` §9ж, `71` §7ж, `STOP-CONDITIONS.md`** — сводный разбор ошибок за 19 чатов, уроки `У-N`. Лучший файл репы |
 | `10-life-history/index.md` | ⬆️ **→ `18` §9ж** — редакция v9.0 сняла баннер, противоречивший §4 правил, и назвала цену |
 | `10-life-history/01-registry/roadmap.md` | ✅ критерий закрытия из четырёх условий (режим · дословность · паспорт · ≥85/100) покрыт `65` §6.1а — **поднято этой же вахтой** из `01-rules.md` |
 | `10-life-history/01-registry/corpus-inventory.md` | 📍 устарел, и **помечен об этом в шапке** — образец правильной отмены, см. ниже |
@@ -4993,7 +4993,7 @@ for f in $(ls .../00-protocol/); do grep -q -- "$f" decisions.md || echo "НЕТ
 Действие: не усиливать аргументацию, а поставить проверку, которую владелец поставить
 не может.
 
-### ⬆️ `STOP_CONDITIONS.md` — ложный стоп: ограничение объявлено по ощущению
+### ⬆️ `STOP-CONDITIONS.md` — ложный стоп: ограничение объявлено по ощущению
 
 Урок `У-1в`. На двенадцатой странице из тридцати исполнитель объявил, что упёрся в «лимит
 вызовов инструментов», и свернулся. **Ни один инструмент ничего подобного не вернул** —
@@ -5083,7 +5083,7 @@ for f in $(ls .../00-protocol/); do grep -q -- "$f" decisions.md || echo "НЕТ
 | Файл | Решение |
 |---|---|
 | `reports/situations/2026-07-23-fail-loud-gap-d2.md` | ⬆️ **→ `71` §1а** — пять действий при найденной дыре, и забывают **третье** |
-| `reports/incidents/2026-08-13-pdf-delivery-desync-incident.md` | ⬆️ **→ `STOP_CONDITIONS.md`** — правило против ложного стопа породило **молчание о внешней проблеме**. Лучшая находка батча |
+| `reports/incidents/2026-08-13-pdf-delivery-desync-incident.md` | ⬆️ **→ `STOP-CONDITIONS.md`** — правило против ложного стопа породило **молчание о внешней проблеме**. Лучшая находка батча |
 | `reports/situations/2026-08-14-instagram-narezka-i-chetyre-skripta.md` | ⬆️ **→ `SYN-020` (уточнение)** — область поиска сужена **границей артефакта**, а не памятью: ревизия шла по архиву, скрипты владельца в него не входили → написан четвёртый скрипт при трёх существующих |
 | `reports/situations/2026-07-22-knowledge-vs-arhiv-v-chat.md` | ✅ покрыто `56-chat-to-project-to-repo.md` (поднято в v1.53.0). Ценно как обоснование канона «один zip = полный контекст»: механизм доставки провалился **не по лимиту** (тонкий срез влезал), а на первом боевом запуске — многошаговая оркестрация «найди → прочитай 4 файла → потом читай источник» оказалась хрупкой |
 | `reports/situations/2026-07-22-spin-off-standalone-i-plan-merge.md` | ✅ парный к предыдущему, покрыт `22-merge-protocol.md` |
@@ -5297,7 +5297,7 @@ character-a-analysis: всего 337 = база(v2.1.0) 78 + С 68 + прочи�
 | `65-visual-source-pipeline.md` | §1 (сквозная лента + структура корпуса до чтения) |
 | `18-documentation-philosophy.md` | §9ж (исполняется самый заметный носитель правила) |
 | `21-revision-protocol.md` | §4д (ревизия своих утверждений до вложения в работу) |
-| `06-autonomous-mode-kit/STOP_CONDITIONS.md` | ложный стоп + противовес (молчание о внешней проблеме) |
+| `06-autonomous-mode-kit/STOP-CONDITIONS.md` | ложный стоп + противовес (молчание о внешней проблеме) |
 
 Плюс три карточки лаборатории: `SYN-023` (усыхание слагаемого приёмки), `SYN-024` (подъём
 по отменённому файлу; дата из шапки, не из `mtime`), `SYN-025` (хеши сравнили, файлы не открыли),
@@ -5428,7 +5428,7 @@ character-a-analysis: всего 337 = база(v2.1.0) 78 + С 68 + прочи�
 | `NEXT_STEPS.md` | 📍 приоритеты; явно помечен «Заменяет старый `TASKS.md` (устарел)» |
 | `repos-map-CHANGELOG.md` | 📍 унаследованная копия журнала карты реп |
 | `backlog/PROTOCOLS_BACKLOG.md` | 📍 бэклог служебок с приоритетами P0/P1/P2 по частоте поломок. **Заказан владельцем дословно:** «сделай служебки… мне надоело наступать на одни и те же грабли» |
-| `templates/REPO_README_TEMPLATE.md` | ✅ покрыто `templates/` базы |
+| `templates/REPO-README-TEMPLATE.md` | ✅ покрыто `templates/` базы |
 | `prompts/MASTER_PROMPT.md`, `prompts/PROMPT_batch1.md`, `prompts/PROMPT_batch2.md`, `prompts/PROMPT_batch3.md` | 📍 промпты обработки; форма покрыта `23` §5б |
 
 **`reports/` — 10 файлов итоговых отчётов** (`PORTRAIT_MODELS.md`, `PORTRAIT_MODELS.docx`,
@@ -5623,7 +5623,7 @@ find photos photos_original photos_report profiles men_profiles social_screensho
 | `ci_blocking_gate_red_41_days.md` | ⬆️ **→ `69` §4г** — **лучшая находка ночи**, см. ниже |
 | `a11y_dead_test_incident.md` | ⬆️ **→ `71` §7в** — тест молча скипался: «зелёный» за счёт `skip`, а не `pass` |
 | `mathmodel_falsealarm_incident.md` | ⬆️ **→ `71` §7в** — «флак» это ярлык, а не диагноз |
-| `postgres_false_debt_repeat.md`, `postgres_incident_postmortem.md` | ⬆️ **→ `STOP_CONDITIONS.md`** — ложное ограничение, превращённое в **задачу владельцу**. Второй файл — первый случай, первый — повтор через один цикл |
+| `postgres_false_debt_repeat.md`, `postgres_incident_postmortem.md` | ⬆️ **→ `STOP-CONDITIONS.md`** — ложное ограничение, превращённое в **задачу владельцу**. Второй файл — первый случай, первый — повтор через один цикл |
 | `inc_null_deadline_latent_defects.md` | ⬆️ **→ `21` §4е** — снятие ограничения взводит всё, что за ним пряталось |
 | `forward_build_wipeout_incident.md` | ⬆️ **→ `71` §7в** — «работает» означало «в множестве пока один элемент» |
 | `bug_028_calendar_fixture_bomb.md` | ✅ **`21` §4а** — календарные мины; раздел базы собран из этого класса |
@@ -5667,7 +5667,7 @@ find photos photos_original photos_report profiles men_profiles social_screensho
 
 ✅ **Жанр ADR как таковой уже в базе** (`reports/adr/`, `19` §1). Форма этих семнадцати —
 образцовая (дата · статус · контекст · варианты · решение · последствия), но добавить
-к базовому шаблону нечего: он это уже требует. **Проверено сличением с `adr_template.md`,
+к базовому шаблону нечего: он это уже требует. **Проверено сличением с `adr-template.md`,
 который сам совпал с базой байт-в-байт.**
 
 ### 🔴 Лучшая находка ночи: гейт был красным 41 день, 65 релизов
@@ -5804,7 +5804,7 @@ find photos photos_original photos_report profiles men_profiles social_screensho
 
 | Файл | Решение |
 |---|---|
-| `ui_requirements_guide.md` | ⬆️ **→ `07-writing-methodology.md`** — нормативный язык вместо оценочного + **полный набор состояний**. Прочитан целиком |
+| `ui_requirements-guide.md` | ⬆️ **→ `07-writing-methodology.md`** — нормативный язык вместо оценочного + **полный набор состояний**. Прочитан целиком |
 | `onboarding.md` | 📍 вход в проект за час, **адресован в том числе новому аккаунту Claude**. ✅ жанр покрыт `START-HERE.md` базы. Прочитан целиком |
 | `versioning_and_releases.md` | ✅ покрыто `25-versioning-and-releases.md` |
 | `archive_naming_standard.md` | ✅ покрыто `43-archive-naming-and-packaging.md` |
@@ -5876,28 +5876,28 @@ find photos photos_original photos_report profiles men_profiles social_screensho
 |---|---|
 | `recurrence_ledger.md` | ⬆️ **→ `reports/incidents/PITFALLS.md`** — **принцип за лестницей эскалации**: тип контрмеры выбирается **по числу рецидивов, а не по тяжести** ошибки |
 | `reporting_policy.md` | ✅ **`19` §1 собран из него** — диспетчер «триггер → тип → шаблон → папка → реестр». Проверено сличением таблиц |
-| `report_types.md`, `README.md` | ✅ то же, `19` §1 и §2 |
-| `incident_postmortem_guide.md`, `investigation_report_guide.md`, `bug_report_template.md` | ✅ те же файлы есть в базе (`reports/`), здесь — розданные копии |
-| `incidents_summary.md`, `investigations_summary.md` | ✅ парные реестры «был дефект» / «дефекта не оказалось» — `19` §1 |
+| `report-types.md`, `README.md` | ✅ то же, `19` §1 и §2 |
+| `incident-postmortem-guide.md`, `investigation-report-guide.md`, `bug-report-template.md` | ✅ те же файлы есть в базе (`reports/`), здесь — розданные копии |
+| `incidents-summary.md`, `investigations-summary.md` | ✅ парные реестры «был дефект» / «дефекта не оказалось» — `19` §1 |
 | `milestone_6_7_closure.md` | 📍 отчёт закрытия вехи продукта |
 | `ui_audit_e3.md` | 📍 аудит конкретного экрана |
 
 ### Размеченные М и решённые — 21
 
-**`releases/` (3):** `release_report_template.md` ✅ = шаблон базы · `milestone_4_release_report.md`
+**`releases/` (3):** `release-report-template.md` ✅ = шаблон базы · `milestone_4_release_report.md`
 📍 предметный · `archive_diet_v5_18_0.md` 📍 — **ценный частный случай**: диета архива
 как отдельная работа с числами, родня `06-volume-compression.md`.
 
-**`merges/` (6):** `merge_and_fork_guide.md` ✅ = гайд базы · `merge_manifest_v4_27_0.md`,
+**`merges/` (6):** `merge-and-fork-guide.md` ✅ = гайд базы · `merge_manifest_v4_27_0.md`,
 `merge_manifest_v4_30_2.md`, `merge_manifest_v5_18_1.md`, `merge_report_v5_18_2.md`,
 `merge_v4_17_1_report.md` ✅ покрыто `22-merge-protocol.md`; форма манифеста
 (additive-only, поимённые операции) совпадает с каноном.
 
-**`security/` (2):** `security_audit_template.md` ✅ = шаблон базы ·
+**`security/` (2):** `security-audit-template.md` ✅ = шаблон базы ·
 `finpilot_security_audit.md` 📍 предметный аудит.
 
 **`requirements/` (1):** `srs_finpilot.md` 📍 спецификация требований продукта.
-✅ Жанр покрыт `19` §1; **язык требований** поднят сегодня в `07` из `ui_requirements_guide.md`.
+✅ Жанр покрыт `19` §1; **язык требований** поднят сегодня в `07` из `ui_requirements-guide.md`.
 
 **`decisions/` (3):** `README.md` · `2026-08-02_xz_recompression.md` ·
 `2026-08-14_jinja_frontend_removal.md` — 📍 решения по продукту. Жанр «решение вне ADR»
@@ -5920,7 +5920,7 @@ find photos photos_original photos_report profiles men_profiles social_screensho
 `income_volatility_benchmark.md` · `model_outcomes_v3_3_0_on_v2.md` ·
 `explainability_review_material.md` · `cross_platform_check.md` ·
 `statement_import_coverage.md` · `statement_parser_real_data_audit.md` ·
-`test_report_template.md` (последний ✅ = шаблон базы).
+`test-report-template.md` (последний ✅ = шаблон базы).
 
 Это **результаты** прогонов конкретной модели — метод их получения поднят отдельно
 (`28` §9б, §6г-бис).
@@ -6009,7 +6009,7 @@ personal-finance-dss: всего 1501 = база(v2.13.0) 48 + С 1195 + про�
 | `49-token-economy-and-prompting.md` | §1б — effort покупает **обдумывание, а не скорость**; инструменты стоят **на каждом ходу** |
 | `23-session-continuity.md` | §5в — исполнимая форма жатвы; «пустая таблица замеров — честное состояние» |
 | `07-writing-methodology.md` | нормативный язык + **полный набор состояний**: описан только успешный путь — значит, не описано |
-| `06-autonomous-mode-kit/STOP_CONDITIONS.md` | ложное ограничение, оформленное **задачей владельцу** |
+| `06-autonomous-mode-kit/STOP-CONDITIONS.md` | ложное ограничение, оформленное **задачей владельцу** |
 | `.claude/hooks/ritual-gate.sh` | 🔴 **починен**: сетевой вызов без таймаута = молчаливый fail-open |
 
 ### Копии
@@ -7743,7 +7743,7 @@ ADR-001 той же репы («один источник `profile.json` — ч�
 
 ### 📍 Проверено на дубль и им является
 
-`docs/documentation_methodology.md` (post-mortem, RCA, runbook, дерево выбора формата,
+`docs/documentation-methodology.md` (post-mortem, RCA, runbook, дерево выбора формата,
 культура blameless) — **покрыто `19`** целиком, включая диспетчер «триггер → тип → шаблон».
 Независимое подтверждение в другой предметной области, не новый материал.
 
@@ -8069,12 +8069,12 @@ iCloud** (`st_blocks == 0`). Хеширование заглушки требу�
 > **Класс присвоен файлу целиком, а годность к подъёму определяется по разделам.**
 > Пока эти две операции не разведены, методичка с продуктовой преамбулой невидима.
 
-**Решение:** переносимая часть поднята обобщённой в `02-methodology-library/ui_ux_standard_methodology.md`,
+**Решение:** переносимая часть поднята обобщённой в `02-methodology-library/ui-ux-standard-methodology.md`,
 исходник остаётся в продукте. Класс «С» с файла **не снимается** — он верен для тела
 документа как спецификации.
 
 **Правило заведено в процедуру:** `STANDARD.md` §5а + `CHECKLIST.md` C-бис.
-Разбор целиком — `reports/synthesis_finpilot_coverage_audit.md`.
+Разбор целиком — `reports/synthesis-finpilot-coverage-audit.md`.
 
 ---
 
@@ -9589,3 +9589,7 @@ Y — число механизмов-кандидатов, найденных �
 - **2026-09-25** — кампания синтеза не двигалась. Вахта разбирала архивы в `~/Developer` (103 шт., 8.4 ГБ) и нашла ловушку на стыке упаковщика и деплоя из архива: публикация снесла бы 5970 файлов в `self-map` и была заряжена ещё в трёх репах (`PIT-J`, `CHANGELOG [4.212.0]`). Реп кампании не касались.
 
 - **2026-09-25** — кампания синтеза не двигалась. Вахта разбирала архивы, чинила ловушку деплоя из архива (`PIT-J`) и заводила правило «выпуск доводит вахта» (v4.213.0). Реп кампании не касались.
+
+- **2026-09-29** — кампания синтеза не двигалась. Вахта закрывала выпуск из архива: `pack_release.py` читал аргументы на импорте и убивал деплойер, 49 архивов в `~/Developer` доведены до нуля, механизмы вынесены одним экземпляром в `~/.claude` (v4.215.0). Реп кампании не касались.
+
+- **2026-09-30** — кампания синтеза не двигалась. Вахта заводила кит внешнего аудита (18), прогоняла гейт утечек с негативным контролем и чинила три проверки, дававшие ложную тревогу: мета-гейт искал объявления хуков только локально, `delivery_check` разбирал `.repo-meta` как JSON вместо `ключ=значение`. Реп кампании не касались.
