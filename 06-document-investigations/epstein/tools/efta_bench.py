@@ -97,7 +97,8 @@ def transcribe(wav: Path, tag: str, vad: bool) -> tuple[float, list[str]]:
     t0 = time.time()
     r = subprocess.run(cmd, capture_output=True, text=True)
     wall = time.time() - t0
-    js = out.with_suffix(".json")
+    # whisper дописывает .json к -of целиком; with_suffix бы срезал ".novad"
+    js = Path(f"{out}.json")
     if not js.is_file():
         print(f"  🔴 {tag} не дал результата: {r.stderr[-200:]}", flush=True)
         return wall, []

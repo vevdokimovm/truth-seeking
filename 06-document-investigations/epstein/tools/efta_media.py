@@ -20,6 +20,7 @@ video that yielded 238 words per hour of footage:
 from __future__ import annotations
 
 import argparse
+import re
 import shutil
 import subprocess
 import sys
@@ -27,6 +28,7 @@ import tempfile
 import time
 import urllib.parse
 import urllib.request
+from collections import Counter
 from pathlib import Path
 
 from remotezip import RemoteZip
@@ -99,6 +101,27 @@ def voiced_seconds(path: Path, total: float) -> float:
     return max(total - silent, 0.0)
 
 
+def hallucination_warning(note_text: str) -> str:
+    """Предупреждение, если расшифровка выродилась в повтор одной фразы.
+
+    На тишине whisper не молчит, а заполняет окна клише («Thank you.»,
+    «Продолжение следует…»). Первая ночь этапа E дала 9 таких нот из 25:
+    119–121 сегмент подряд, все одинаковые. VAD закрывает причину, это —
+    страховка на случай, когда он не сработал (METHOD-SPEECH §1).
+    """
+    segs = [m.strip() for m in
+            re.findall(r"^\*\*\d\d:\d\d(?::\d\d)?\*\* (.+?)\s*$", note_text, re.M)]
+    if len(segs) < 3:
+        return ""
+    top, n = Counter(segs).most_common(1)[0]
+    if n / len(segs) < 0.8:
+        return ""
+    return (f"\n---\n\n🔴 **Подозрение на галлюцинацию модели.** "
+            f"{n} из {len(segs)} сегментов — одна и та же строка «{top[:60]}». "
+            f"Так whisper заполняет тишину. Расшифровку читать как непроверенную, "
+            f"файл перепрогнать с `--vad` и сверить `ffmpeg volumedetect`.\n")
+
+
 def no_speech_note(member: str, ds: int, voiced: float, total: float) -> str:
     """Note for a track that is silent end to end — a measurement, not a refusal."""
     return (f"# {Path(member).stem}\n\n> DOJ Epstein Library · Data Set {ds} · "
@@ -155,6 +178,7 @@ def main() -> int:
         todo = todo[:a.limit]
     print(f"DS{a.ds} [{a.kind}]: media={len(members)} todo={len(todo)}", flush=True)
     skipped = 0
+    suspect = 0
     failed = 0
     with tempfile.TemporaryDirectory(prefix="efta_media_") as tmp:
         for n, member in enumerate(todo, 1):
@@ -183,18 +207,24 @@ def main() -> int:
                 else:
                     text = note.read_text(encoding="utf-8")
                     text = text.replace(str(src), member)
-                    note.write_text(text.replace(
+                    text = text.replace(
                         f"# {src.stem}",
                         f"# {src.stem}\n\n> DOJ Epstein Library · Data Set {a.ds} · "
                         f"`{member}` · кадры не извлекались (этика: видео-улики "
-                        f"могут показывать потерпевших)", 1), encoding="utf-8")
+                        f"могут показывать потерпевших)", 1)
+                    warn = hallucination_warning(text)
+                    if warn:
+                        text += warn
+                        suspect += 1
+                    note.write_text(text, encoding="utf-8")
             except Exception as e:
                 failed += 1
                 print(f"  FAIL {member}: {e!r}"[:300], flush=True)
             finally:
                 src.unlink(missing_ok=True)
             if n % 10 == 0 or n == len(todo):
-                print(f"  media {n}/{len(todo)} silent={skipped} failed={failed}",
+                print(f"  media {n}/{len(todo)} silent={skipped} "
+                      f"suspect={suspect} failed={failed}",
                       flush=True)
     return 1 if failed else 0
 

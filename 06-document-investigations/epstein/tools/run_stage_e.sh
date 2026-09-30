@@ -23,13 +23,21 @@ done
 say() { echo "$(date '+%F %T') $*" | tee -a "$LOG"; }
 
 # ── 1. свободна ли машина (METHOD-SPEECH §7а) ────────────────────────────────
-swap_used=$(sysctl -n vm.swapusage | sed 's/.*used = \([0-9.]*\)M.*/\1/')
-swap_tot=$(sysctl -n vm.swapusage | sed 's/total = \([0-9.]*\)M.*/\1/')
+# Мерим ДОСТУПНУЮ память, а не занятый своп: macOS держит своп занятым почти
+# всегда, и порог по нему заворачивал прогон на здоровой машине. Душило whisper
+# 30.09 не наличие свопа, а нехватка страниц — тогда было свободно 14 МБ.
+pagesize=$(sysctl -n hw.pagesize)
+free_mb=$(vm_stat | awk -v ps="$pagesize" '
+  /Pages free/            {gsub(/\./,"",$3); f=$3}
+  /Pages inactive/        {gsub(/\./,"",$3); i=$3}
+  /Pages speculative/     {gsub(/\./,"",$3); s=$3}
+  END {printf "%.0f", (f+i+s)*ps/1048576}')
 load=$(uptime | sed 's/.*load averages*: *\([0-9.]*\).*/\1/')
-say "проверка машины: своп ${swap_used}M из ${swap_tot}M · load ${load}"
+swap=$(sysctl -n vm.swapusage | sed 's/total/своп/')
+say "проверка машины: доступно ${free_mb}M · load ${load} · ${swap}"
 if [ "$FORCE" -eq 0 ]; then
-  if awk "BEGIN{exit !(${swap_used:-0} > ${swap_tot:-1} * 0.7)}"; then
-    say "🔴 СТОП: своп занят больше чем на 70%. Замер будет ложным, прогон — втрое"
+  if [ "${free_mb:-0}" -lt 1500 ]; then
+    say "🔴 СТОП: доступно всего ${free_mb}M памяти. Прогон уйдёт в своп и станет втрое"
     say "   закрой тяжёлое (Ollama, браузер) или запусти с --force"
     exit 2
   fi
