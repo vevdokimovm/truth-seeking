@@ -222,10 +222,12 @@ def main() -> int:
                 print(f"  FAIL {member}: {e!r}"[:300], flush=True)
             finally:
                 src.unlink(missing_ok=True)
-            if n % 10 == 0 or n == len(todo):
-                print(f"  media {n}/{len(todo)} silent={skipped} "
-                      f"suspect={suspect} failed={failed}",
-                      flush=True)
+                # печать в finally, а не после: `continue` в ветке немого файла
+                # её перескакивал, и на массиве CCTV (почти все молчат) лог
+                # молчал целиком — прогон выглядел зависшим
+                if n % 10 == 0 or n == len(todo):
+                    print(f"  media {n}/{len(todo)} silent={skipped} "
+                          f"suspect={suspect} failed={failed}", flush=True)
     return 1 if failed else 0
 
 
