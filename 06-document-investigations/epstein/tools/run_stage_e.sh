@@ -49,6 +49,24 @@ if [ "$FORCE" -eq 0 ]; then
 fi
 say "машина свободна, работаем"
 
+# ── 1а. жива ли сеть до источника (PIT-C №4) ─────────────────────────────────
+# В ночь 30.09→01.10 DNS отвалился в 04:00, и пять датасетов отработали по
+# 30 минут таймаутов, отчитавшись `finished`. Полчаса на мёртвом DNS — это
+# не отказоустойчивость, а трата ночи. Проверяем один раз, на старте.
+if ! "$PY" - <<'PYCHECK'
+import sys, urllib.request
+try:
+    urllib.request.urlopen("https://archive.org/download/data-set-8_20251228/",
+                           timeout=30).read(1)
+except Exception as e:
+    print(f"  🔴 archive.org недоступен: {e!r}"[:200]); sys.exit(1)
+print("  archive.org отвечает")
+PYCHECK
+then
+  say "🔴 СТОП: нет сети до archive.org. Прогон ничего не сделает — чини сеть/VPN"
+  exit 3
+fi
+
 # ── 2. A/B-замер VAD на реальных файлах корпуса ──────────────────────────────
 if [ "$BENCH" -eq 1 ]; then
   say "===== A/B-замер VAD (2 файла: аудио DS9 + 5 мин видео DS8) ====="

@@ -3,3 +3,4 @@
 
 local-brain/bench-results.tsv   # bench.py — строка на задачу прогона
 local-brain/tool-results.tsv    # tool_probe.py — строка на ступень вызова
+local-brain/text-protocol-results.tsv  # text_protocol_probe.py — ступень без нативных вызовов

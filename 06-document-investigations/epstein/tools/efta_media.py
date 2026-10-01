@@ -31,7 +31,7 @@ import urllib.request
 from collections import Counter
 from pathlib import Path
 
-from remotezip import RemoteZip
+from efta_zip import ZipSession, zip_url
 
 HERE = Path(__file__).resolve().parent
 LAB = HERE.parents[2] / "_base/07-media-to-text-lab/tools/video_to_note.py"
@@ -54,72 +54,8 @@ CLICHE = {
 }
 
 
-def zip_url(ds: int, tries: int = 5) -> str:
-    """Resolve the datanode URL of a dataset zip (redirects are slow to repeat).
-
-    С ретраями: archive.org отвечает на этот HEAD то 500, то таймаутом, а без
-    повтора падал весь датасет (01.10.2026 — `HTTP Error 500` на первом же DS).
-    """
-    name = "DataSet 09 - Incomplete.zip" if ds == 9 else f"DataSet {ds:02d}.zip"
-    req = urllib.request.Request(ITEM + urllib.parse.quote(name), method="HEAD")
-    for i in range(tries):
-        try:
-            with urllib.request.urlopen(req, timeout=60) as r:
-                return r.url
-        except Exception as e:
-            if i == tries - 1:
-                raise
-            print(f"  zip_url DS{ds} попытка {i + 1}: {e!r}"[:160], flush=True)
-            time.sleep(15 * (i + 1))
-    raise RuntimeError("unreachable")
 
 
-class ZipSession:
-    """Одно соединение с удалённым zip на весь прогон датасета.
-
-    🔴 Так было не всегда: до 01.10.2026 `RemoteZip` открывался НА КАЖДЫЙ файл,
-    то есть центральный каталог качался заново каждый раз. У DS10 это полмиллиона
-    записей — десятки мегабайт ради файла в сотню килобайт. Ночной прогон дал
-    12 нот за 5 часов, и узким местом был не whisper, а этот перекачиваемый
-    каталог. Тот же дефект уже исправляли в `efta_to_md.py` (релиз 1.5.0,
-    «ускорение ×4»), в медиа-раннер исправление не перенесли.
-
-    Соединение пересоздаётся при сетевом сбое: archive.org рвёт сессии, и
-    держать одну вечно нельзя.
-    """
-
-    def __init__(self, url: str) -> None:
-        self.url = url
-        self._zip: RemoteZip | None = None
-
-    def _open(self) -> RemoteZip:
-        if self._zip is None:
-            self._zip = RemoteZip(self.url, timeout=120)
-        return self._zip
-
-    def close(self) -> None:
-        if self._zip is not None:
-            try:
-                self._zip.close()
-            except Exception:
-                pass
-            self._zip = None
-
-    def names(self) -> list[tuple[str, int]]:
-        return [(i.filename, i.file_size) for i in self._open().infolist()]
-
-    def extract(self, member: str, dest: Path, tries: int = 5) -> None:
-        """Забрать один член на диск, пересоздавая сессию при сбое."""
-        for i in range(tries):
-            try:
-                with self._open().open(member) as src, open(dest, "wb") as out:
-                    shutil.copyfileobj(src, out, 1 << 20)
-                return
-            except Exception:
-                self.close()          # порванную сессию переиспользовать нельзя
-                if i == tries - 1:
-                    raise
-                time.sleep(20 * (i + 1))
 
 
 def audio_streams(path: Path) -> int:

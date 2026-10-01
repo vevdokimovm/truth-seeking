@@ -50,6 +50,13 @@ class ZipSource:
         self.zip_path, self.url = zip_path, url
 
     def open(self, tries: int = 6) -> zipfile.ZipFile:
+        # 🔴 Родня: `efta_zip.ZipSession` — общий способ доступа к тем же zip
+        # (PIT-E №4). Здесь СВОЯ реализация намеренно: этот инструмент гоняет
+        # параллельных воркеров и берёт члены по смещению, у ZipSession модель
+        # другая — одно соединение на последовательный прогон.
+        # Новый инструмент берёт `efta_zip`, а не копирует этот код: именно
+        # копирование 26.09 оставило `efta_media.py` без починки на ×4,
+        # и 01.10 её пришлось делать заново.
         if self.zip_path:
             return zipfile.ZipFile(self.zip_path)
         from remotezip import RemoteZip

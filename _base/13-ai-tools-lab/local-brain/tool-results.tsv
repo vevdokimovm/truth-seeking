@@ -1,16 +1,37 @@
-дата	модель	ступень	балл	секунд	вызовов	заметка
-2026-09-30	gemma4:e2b	один-вызов	1	578.3	1	прочитать_файл(reports/pitfalls.md)
-2026-09-30	gemma4:e2b	выбор-из-двух	1	316.5	1	запустить_проверку(revision_check.py)
-2026-09-30	gemma4:e2b	второй-ход	0	700.7	0	TimeoutError: timed out
-2026-09-30	phi4-mini	один-вызов	0	629.5	0	вызова нет: Чтобы ответить на этот вопрос, мне нужно прочитать содержимое файла `reports/pit
-2026-09-30	phi4-mini	выбор-из-двух	0	92.8	0	вызова нет: Чтобы выполнить вашу просьбу, я должен использовать инструменты, чтобы запустить
-2026-09-30	phi4-mini	второй-ход	0	156.1	0	вызова нет: Получено сообщение о проверке гейт ревизии. Результаты показывают, что все битые
-2026-09-30	base-local	один-вызов	1	122.8	1	прочитать_файл(reports/pitfalls.md)
-2026-09-30	base-local	выбор-из-двух	1	73.2	1	запустить_проверку(revision_check.py)
-2026-09-30	base-local	второй-ход	0	125.0	0	вызова нет: Проверка гейта ревизии выявила одну проблему. Роадмап отстал от журнала по одной
-2026-10-01	modelscope.cn/OpenBMB/MiniCPM5-2B-GGUF:Q4_K_M	один-вызов	0	26.7	1	запустить_проверку(check_pitfalls.py)
-2026-10-01	modelscope.cn/OpenBMB/MiniCPM5-2B-GGUF:Q4_K_M	выбор-из-двух	1	9.9	1	запустить_проверку(revision_check.py)
-2026-10-01	modelscope.cn/OpenBMB/MiniCPM5-2B-GGUF:Q4_K_M	второй-ход	0	46.4	0	вызова нет: Гейт ревизии показал, что есть **1 дрейф** (разница между ревью и текущим состоя
-2026-10-01	hf.co/unsloth/granite-4.0-h-tiny-GGUF:Q4_K_M	один-вызов	0	99.7	1	прочитать_файл(reports/pitfalls.md)
-2026-10-01	hf.co/unsloth/granite-4.0-h-tiny-GGUF:Q4_K_M	выбор-из-двух	1	51.3	1	запустить_проверку(revision_check)
-2026-10-01	hf.co/unsloth/granite-4.0-h-tiny-GGUF:Q4_K_M	второй-ход	0	116.0	0	вызова нет: **Результат проверки гейта ревизии** | Категория | Статус | Комментарий | |-----
+дата	модель	схема	ступень	балл	секунд	вызовов	заметка
+2026-09-30	gemma4:e2b	ru	один-вызов	1	578.3	1	прочитать_файл(reports/pitfalls.md)
+2026-09-30	gemma4:e2b	ru	выбор-из-двух	1	316.5	1	запустить_проверку(revision_check.py)
+2026-09-30	gemma4:e2b	ru	второй-ход	0	700.7	0	TimeoutError: timed out
+2026-09-30	phi4-mini	ru	один-вызов	0	629.5	0	вызова нет: Чтобы ответить на этот вопрос, мне нужно прочитать содержимое файла `reports/pit
+2026-09-30	phi4-mini	ru	выбор-из-двух	0	92.8	0	вызова нет: Чтобы выполнить вашу просьбу, я должен использовать инструменты, чтобы запустить
+2026-09-30	phi4-mini	ru	второй-ход	0	156.1	0	вызова нет: Получено сообщение о проверке гейт ревизии. Результаты показывают, что все битые
+2026-09-30	base-local	ru	один-вызов	1	122.8	1	прочитать_файл(reports/pitfalls.md)
+2026-09-30	base-local	ru	выбор-из-двух	1	73.2	1	запустить_проверку(revision_check.py)
+2026-09-30	base-local	ru	второй-ход	0	125.0	0	вызова нет: Проверка гейта ревизии выявила одну проблему. Роадмап отстал от журнала по одной
+2026-10-01	modelscope.cn/OpenBMB/MiniCPM5-2B-GGUF:Q4_K_M	ru	один-вызов	0	26.7	1	запустить_проверку(check_pitfalls.py)
+2026-10-01	modelscope.cn/OpenBMB/MiniCPM5-2B-GGUF:Q4_K_M	ru	выбор-из-двух	1	9.9	1	запустить_проверку(revision_check.py)
+2026-10-01	modelscope.cn/OpenBMB/MiniCPM5-2B-GGUF:Q4_K_M	ru	второй-ход	0	46.4	0	вызова нет: Гейт ревизии показал, что есть **1 дрейф** (разница между ревью и текущим состоя
+2026-10-01	hf.co/unsloth/granite-4.0-h-tiny-GGUF:Q4_K_M	ru	один-вызов	0	99.7	1	прочитать_файл(reports/pitfalls.md)
+2026-10-01	hf.co/unsloth/granite-4.0-h-tiny-GGUF:Q4_K_M	ru	выбор-из-двух	1	51.3	1	запустить_проверку(revision_check)
+2026-10-01	hf.co/unsloth/granite-4.0-h-tiny-GGUF:Q4_K_M	ru	второй-ход	0	116.0	0	вызова нет: **Результат проверки гейта ревизии** | Категория | Статус | Комментарий | |-----
+2026-10-01	hf.co/unsloth/granite-4.0-h-tiny-GGUF:Q4_K_M	en	один-вызов	1	85.8	1	read_file(path='reports/pitfalls.md')
+2026-10-01	hf.co/unsloth/granite-4.0-h-tiny-GGUF:Q4_K_M	en	выбор-из-двух	1	78.7	1	run_check(script='revision_check')
+2026-10-01	hf.co/unsloth/granite-4.0-h-tiny-GGUF:Q4_K_M	en	второй-ход	0	256.6	0	вызова нет: **Результат проверки гейт‑ревизии** | Категория | Статус | Комментарий | |------
+2026-10-01	modelscope.cn/OpenBMB/MiniCPM5-2B-GGUF:Q4_K_M	en	один-вызов	1	45.5	1	read_file(path='reports/pitfalls.md')
+2026-10-01	modelscope.cn/OpenBMB/MiniCPM5-2B-GGUF:Q4_K_M	en	выбор-из-двух	1	12.0	1	run_check(script='revision_check.py')
+2026-10-01	modelscope.cn/OpenBMB/MiniCPM5-2B-GGUF:Q4_K_M	en	второй-ход	0	25.2	1	read_file(path='scripts/revision_check.py')
+2026-10-01	modelscope.cn/OpenBMB/MiniCPM5-2B-GGUF:Q4_K_M	en	один-вызов	1	38.0	1	read_file(path='reports/pitfalls.md')
+2026-10-01	modelscope.cn/OpenBMB/MiniCPM5-2B-GGUF:Q4_K_M	en	выбор-из-двух	1	10.5	1	run_check(script='revision_check.py')
+2026-10-01	modelscope.cn/OpenBMB/MiniCPM5-2B-GGUF:Q4_K_M	en	второй-ход	0	13.8	1	read_file(path='scripts/revision_check.py')
+2026-10-01	hf.co/unsloth/granite-4.0-h-tiny-GGUF:Q4_K_M	en	один-вызов	1	51.4	1	read_file(path='reports/pitfalls.md')
+2026-10-01	hf.co/unsloth/granite-4.0-h-tiny-GGUF:Q4_K_M	en	выбор-из-двух	1	28.8	1	run_check(script='revision_check')
+2026-10-01	hf.co/unsloth/granite-4.0-h-tiny-GGUF:Q4_K_M	en	второй-ход	0	107.0	0	вызова нет: **Результат проверки гейт‑ревизии** | Категория | Статус | Комментарий | |------
+2026-10-01	base-local:latest	en	один-вызов	1	64.6	1	read_file(path='reports/pitfalls.md')
+2026-10-01	base-local:latest	en	выбор-из-двух	1	50.7	1	run_check(script='revision_check.py')
+2026-10-01	base-local:latest	en	второй-ход	0	98.7	0	вызова нет: Ревизия гейта выявила одну проблему. Роадмап отстал от журнала на **1 версию**. 
+2026-10-01	phi4-mini:latest	en	один-вызов	0	97.8	0	вызова нет: Чтобы ответить на этот вопрос, мне нужно прочитать содержимое файла `reports/pit
+2026-10-01	phi4-mini:latest	en	выбор-из-двух	0	34.2	0	вызова нет: Чтобы выполнить вашу просьбу, мне нужно использовать инструмент `run_check` с пр
+2026-10-01	phi4-mini:latest	en	второй-ход	0	62.1	0	вызова нет: Полученные результаты указывают на то, что гейт ревизия прошла с некоторыми успе
+2026-10-01	gemma4:e2b	en	один-вызов	1	72.2	1	read_file(path='reports/pitfalls.md')
+2026-10-01	gemma4:e2b	en	выбор-из-двух	1	17.3	1	run_check(script='revision_check.py')
+2026-10-01	gemma4:e2b	en	второй-ход	0	62.8	0	вызова нет: По результатам проверки гейт ревизии, были обнаружены следующие проблемы: * **[O

@@ -37,8 +37,7 @@ date,source,kind,duration_s,model,threads,wall_s,ratio,loadavg,parallel_asr,tool
 2026-09-30,epstein DS9 EFTA00221046.m4a (A/B чисто),audio,179,large-v3-turbo-q5_0,4,699,3.89,5,0,efta_bench.py,"A/B с VAD: 402 слова, ускорение x0.98 — на ПЛОТНОЙ речи VAD не даёт ничего, совпадение текста 92.2%"
 2026-09-30,epstein DS8 EFTA00033407.mp4 (5 мин CCTV),video,300,large-v3-turbo-q5_0,4,552,1.84,5,0,efta_bench.py,"A/B без VAD: 20 слов = 10 сегментов «Thank you.» — ГАЛЛЮЦИНАЦИЯ на тишине"
 2026-09-30,epstein DS8 EFTA00033407.mp4 (5 мин CCTV),video,300,large-v3-turbo-q5_0,4,11,0.04,5,0,efta_bench.py,"A/B с VAD: 0 слов, ускорение x50.8. Проверено volumedetect: mean=max=-91 dB (цифровая тишина), VAD на порогах 0.5/0.3/0.2 — 0 сегментов. VAD не потерял речь, её там нет"
-2026-10-01,EFTA01617868.m4a,audio,43,large-v3-turbo-q5_0,4,227,5.23,8.9,0,tools/video_to_note.py,сегментов 17
-2026-10-01,EFTA01688336.mp3,audio,72,large-v3-turbo-q5_0,4,475,6.60,90.0,0,tools/video_to_note.py,сегментов 2
-2026-10-01,EFTA01617928.opus,audio,12,large-v3-turbo-q5_0,4,143,12.25,55.3,0,tools/video_to_note.py,сегментов 1
-2026-10-01,EFTA01617940.opus,audio,12,large-v3-turbo-q5_0,4,96,8.13,31.3,0,tools/video_to_note.py,сегментов 2
-2026-10-01,EFTA01617942.opus,audio,14,large-v3-turbo-q5_0,4,101,7.28,15.2,0,tools/video_to_note.py,сегментов 3
+2026-09-30,epstein DS9 EFTA00221046.m4a (ночной A/B),audio,179,large-v3-turbo-q5_0,4,790,4.40,5,0,efta_bench.py,"ночной прогон, без VAD: 407 слов. Числа взяты ИЗ ЛОГА: record() отчитался «записано», а строк не осталось нигде — после этого в record добавлена проверка записи"
+2026-09-30,epstein DS9 EFTA00221046.m4a (ночной A/B),audio,179,large-v3-turbo-q5_0,4,688,3.84,5,0,efta_bench.py,"ночной прогон, с VAD: 402 слова, ускорение x1.15, совпадение 92.2%. На плотной речи VAD по-прежнему почти ничего не даёт"
+2026-09-30,epstein DS8 EFTA00033407.mp4 (5 мин CCTV, ночной A/B),video,300,large-v3-turbo-q5_0,4,983,3.28,5,0,efta_bench.py,"ночной прогон, без VAD: 20 слов = галлюцинация «Thank you.» на цифровой тишине"
+2026-09-30,epstein DS8 EFTA00033407.mp4 (5 мин CCTV, ночной A/B),video,300,large-v3-turbo-q5_0,4,9,0.03,5,0,efta_bench.py,"ночной прогон, с VAD: 0 слов, ускорение x114.1 — подтверждение дневного замера на свободной машине"
