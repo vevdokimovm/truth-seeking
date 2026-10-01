@@ -20,7 +20,6 @@ video that yielded 238 words per hour of footage:
 from __future__ import annotations
 
 import argparse
-import re
 import shutil
 import subprocess
 import sys
@@ -28,10 +27,9 @@ import tempfile
 import time
 import urllib.parse
 import urllib.request
-from collections import Counter
 from pathlib import Path
 
-from efta_zip import ZipSession, zip_url
+from remotezip import RemoteZip
 
 HERE = Path(__file__).resolve().parent
 LAB = HERE.parents[2] / "_base/07-media-to-text-lab/tools/video_to_note.py"
@@ -43,19 +41,28 @@ SILENCE_DB = -35
 SILENCE_MIN = 2.0
 VAD_MODEL = Path.home() / ("Developer/whisper-models/whisper.cpp-1.9.4/models/"
                            "ggml-silero-v5.1.2.bin")
-# Клише, которыми whisper отвечает на тишину и невнятную речь. Нормализуются
-# до букв и пробелов, поэтому пунктуация и регистр здесь не нужны.
-CLICHE = {
-    "thank you", "thank you very much", "thanks for watching",
-    "thank you for watching", "thanks", "bye", "you", "okay", "ok",
-    "please subscribe", "subscribe to my channel", "the end",
-    "продолжение следует", "спасибо", "спасибо за просмотр",
-    "субтитры сделал dimatorzok", "редактор субтитров",
-}
 
 
+def zip_url(ds: int) -> str:
+    """Resolve the datanode URL of a dataset zip (redirects are slow to repeat)."""
+    name = "DataSet 09 - Incomplete.zip" if ds == 9 else f"DataSet {ds:02d}.zip"
+    req = urllib.request.Request(ITEM + urllib.parse.quote(name), method="HEAD")
+    with urllib.request.urlopen(req, timeout=60) as r:
+        return r.url
 
 
+def extract(url: str, member: str, dest: Path, tries: int = 5) -> None:
+    """Stream one zip member to disk, retrying archive.org 5xx."""
+    for i in range(tries):
+        try:
+            with RemoteZip(url, timeout=120) as z, z.open(member) as src, \
+                    open(dest, "wb") as out:
+                shutil.copyfileobj(src, out, 1 << 20)
+            return
+        except Exception:
+            if i == tries - 1:
+                raise
+            time.sleep(20 * (i + 1))
 
 
 def audio_streams(path: Path) -> int:
@@ -90,42 +97,6 @@ def voiced_seconds(path: Path, total: float) -> float:
     silent = sum(float(line.split("silence_duration:")[1].split()[0])
                  for line in r.stderr.splitlines() if "silence_duration:" in line)
     return max(total - silent, 0.0)
-
-
-def hallucination_warning(note_text: str) -> str:
-    """Предупреждение, если расшифровка похожа на выдумку модели.
-
-    Два признака, оба сняты с живых нот 30.09.2026:
-
-    · **повтор одной строки.** На цифровой тишине whisper заполняет каждое
-      30-секундное окно клише: 9 нот из 25 в первую ночь этапа E оказались
-      119–121 сегментом «Thank you.» подряд. Причину закрывает VAD;
-    · **только клише и ничего больше.** `EFTA01614407.amr` (13 с, сигнал есть:
-      mean −39.8 dB, VAD нашёл 5 сегментов речи) дал один сегмент «Thank you.».
-      Здесь VAD не помогает — он слышит активность, но не разборчивость,
-      и на тихой невнятной речи модель выдаёт то же клише.
-
-    Второй признак ловит короткие файлы, которые первый пропускает по порогу.
-    """
-    segs = [m.strip() for m in
-            re.findall(r"^\*\*\d\d:\d\d(?::\d\d)?\*\* (.+?)\s*$", note_text, re.M)]
-    if not segs:
-        return ""
-    if len(segs) >= 3:
-        top, n = Counter(segs).most_common(1)[0]
-        if n / len(segs) >= 0.8:
-            return (f"\n---\n\n🔴 **Подозрение на галлюцинацию модели.** "
-                    f"{n} из {len(segs)} сегментов — одна и та же строка "
-                    f"«{top[:60]}». Так whisper заполняет тишину. Расшифровку "
-                    f"читать как непроверенную, файл перепрогнать с `--vad` "
-                    f"и сверить `ffmpeg volumedetect`.\n")
-    norm = {re.sub(r"[^a-zа-яё ]", "", s.lower()).strip() for s in segs}
-    if norm and norm <= CLICHE:
-        return (f"\n---\n\n🟡 **Расшифровка состоит только из типового клише "
-                f"whisper** («{segs[0][:50]}»). Так модель отвечает на тихую или "
-                f"неразборчивую речь — содержанием файла это считать нельзя. "
-                f"Проверить глазами: `efta_vad_probe.py <EFTA> --ds <N>`.\n")
-    return ""
 
 
 def no_speech_note(member: str, ds: int, voiced: float, total: float) -> str:
@@ -171,9 +142,9 @@ def main() -> int:
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     url = zip_url(a.ds)
-    session = ZipSession(url)
-    members = [(n, s) for n, s in session.names()
-               if Path(n).suffix.lower() in MEDIA]
+    with RemoteZip(url, timeout=120) as z:
+        members = [(i.filename, i.file_size) for i in z.infolist()
+                   if Path(i.filename).suffix.lower() in MEDIA]
     if a.kind != "all":
         want_audio = a.kind == "audio"
         members = [(m, s) for m, s in members
@@ -184,14 +155,13 @@ def main() -> int:
         todo = todo[:a.limit]
     print(f"DS{a.ds} [{a.kind}]: media={len(members)} todo={len(todo)}", flush=True)
     skipped = 0
-    suspect = 0
     failed = 0
     with tempfile.TemporaryDirectory(prefix="efta_media_") as tmp:
         for n, member in enumerate(todo, 1):
             src = Path(tmp) / Path(member).name
             note = out / f"{Path(member).name}.md"
             try:
-                session.extract(member, src)
+                extract(url, member, src)
                 if audio_streams(src) == 0:
                     note.write_text(silent_note(member, a.ds, src), encoding="utf-8")
                     continue
@@ -213,28 +183,19 @@ def main() -> int:
                 else:
                     text = note.read_text(encoding="utf-8")
                     text = text.replace(str(src), member)
-                    text = text.replace(
+                    note.write_text(text.replace(
                         f"# {src.stem}",
                         f"# {src.stem}\n\n> DOJ Epstein Library · Data Set {a.ds} · "
                         f"`{member}` · кадры не извлекались (этика: видео-улики "
-                        f"могут показывать потерпевших)", 1)
-                    warn = hallucination_warning(text)
-                    if warn:
-                        text += warn
-                        suspect += 1
-                    note.write_text(text, encoding="utf-8")
+                        f"могут показывать потерпевших)", 1), encoding="utf-8")
             except Exception as e:
                 failed += 1
                 print(f"  FAIL {member}: {e!r}"[:300], flush=True)
             finally:
                 src.unlink(missing_ok=True)
-                # печать в finally, а не после: `continue` в ветке немого файла
-                # её перескакивал, и на массиве CCTV (почти все молчат) лог
-                # молчал целиком — прогон выглядел зависшим
-                if n % 10 == 0 or n == len(todo):
-                    print(f"  media {n}/{len(todo)} silent={skipped} "
-                          f"suspect={suspect} failed={failed}", flush=True)
-    session.close()
+            if n % 10 == 0 or n == len(todo):
+                print(f"  media {n}/{len(todo)} silent={skipped} failed={failed}",
+                      flush=True)
     return 1 if failed else 0
 
 
